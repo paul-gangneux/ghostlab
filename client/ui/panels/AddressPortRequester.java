@@ -45,7 +45,12 @@ public class AddressPortRequester extends JPanel {
                 setForeground(Color.GREEN);
             }
             else {
-                setForeground(Color.RED);
+                if (text.matches("\\d?\\d?(\\d?|\\d\\.(\\d?\\d?(\\d?|\\d\\.(\\d?\\d?(\\d?|\\d\\.(\\d?\\d?(\\d?|\\d)))))))")) { // IP being written
+                    setForeground(Color.BLACK);
+                }
+                else {
+                    setForeground(Color.RED);
+                }
             }
             return answer;
         }

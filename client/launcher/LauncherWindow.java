@@ -6,8 +6,8 @@ import ui.panels.AddressPortRequester;
 
 public class LauncherWindow extends JFrame {
 
-    private static final int DEFAULT_LAUNCHER_WINDOW_WIDTH = 800;
-    private static final int DEFAULT_LAUNCHER_WINDOW_HEIGHT = 640;
+    private static final int DEFAULT_LAUNCHER_WINDOW_WIDTH = 600;
+    private static final int DEFAULT_LAUNCHER_WINDOW_HEIGHT = 500;
     
     public LauncherWindow() {
         this(DEFAULT_LAUNCHER_WINDOW_WIDTH, DEFAULT_LAUNCHER_WINDOW_HEIGHT);
