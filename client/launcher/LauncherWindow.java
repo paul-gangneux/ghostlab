@@ -2,7 +2,7 @@ package launcher;
 
 import javax.swing.JFrame;
 
-import ui.panels.AddressPortRequester;
+import ui.panels.launcher.AddressPortRequester;
 
 public class LauncherWindow extends JFrame {
 
