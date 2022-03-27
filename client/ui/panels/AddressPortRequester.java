@@ -2,6 +2,8 @@ package ui.panels;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -22,17 +24,17 @@ public class AddressPortRequester extends JPanel {
 
                 @Override
                 public void changedUpdate(DocumentEvent e) {
-                    checkIPFormat();
+                    updateConnectionValidity();
                 }
 
                 @Override
                 public void insertUpdate(DocumentEvent e) {
-                    checkIPFormat();
+                    updateConnectionValidity();
                 }
 
                 @Override
                 public void removeUpdate(DocumentEvent e) {
-                    checkIPFormat();
+                    updateConnectionValidity();
                 }
                 
             });
@@ -67,17 +69,17 @@ public class AddressPortRequester extends JPanel {
 
                 @Override
                 public void changedUpdate(DocumentEvent e) {
-                    checkPortFormat();
+                    updateConnectionValidity();
                 }
 
                 @Override
                 public void insertUpdate(DocumentEvent e) {
-                    checkPortFormat();
+                    updateConnectionValidity();
                 }
 
                 @Override
                 public void removeUpdate(DocumentEvent e) {
-                    checkPortFormat();
+                    updateConnectionValidity();
                 }
                 
             });
@@ -110,14 +112,39 @@ public class AddressPortRequester extends JPanel {
         private ConnectionButton() {
             super();
             setText("Connect");
+            setEnabled(false);
+            addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // Connection routine : TODO
+                }
+                
+            });
         }
+
     }
+
+    private IPInputBox inputBox;
+    private PortInputBox portInputBox;
+    private ConnectionButton connectionButton;
     
     public AddressPortRequester() {
         super();
         // default layout : flow layout
-        add(new IPInputBox());
-        add(new PortInputBox());
-        add(new ConnectionButton());
+        inputBox = new IPInputBox();
+        portInputBox = new PortInputBox();
+        connectionButton = new ConnectionButton();
+        add(inputBox);
+        add(portInputBox);
+        add(connectionButton);
+    }
+
+    private void updateConnectionValidity() {
+        boolean canConnect = inputBox.checkIPFormat() && portInputBox.checkPortFormat();
+        // Due to java being a lazy language, the second test is only run when the first one is passed,
+        // leading to the port changing color only when the address is valid. This is not a bug.
+        // However, it is possible to change this behavior if wanted.
+        connectionButton.setEnabled(canConnect);
     }
 }
