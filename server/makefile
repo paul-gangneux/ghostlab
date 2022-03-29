@@ -1,8 +1,9 @@
-CFLAGS = -Wall -pedantic -O2
+CFLAGS := -Wall -pedantic -O2
+LIBS := -pthread
 OBJECTS := obj/server.o obj/game.o
 
 server: $(OBJECTS)
-	gcc $(CFLAGS) -pthread $< -o $@
+	gcc $(CFLAGS) $(LIBS) $< -o $@
 
 obj/%.o: src/%.c include/%.h
 	gcc $(CFLAGS) -c $< -o $@
