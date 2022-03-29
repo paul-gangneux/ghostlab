@@ -1,14 +1,6 @@
-#include <sys/socket.h>
-#include <sys/types.h> 
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <string.h>
+#include "server.h"
 
 #define MAX_NAME 8
-
 #define send_string(sock, str) send(sock, str, strlen(str), 0)
 
 struct client_infos {
@@ -19,18 +11,13 @@ struct client_infos {
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
-// renvoie le FD du socket TCP créé
-int init_server_socket(int port);
-void* interact_with_client(void* arg);
-
 int main(int argc, char* argv[]) {
 
   int port;
   if (argc > 1)
     port = atoi(argv[1]);
   else {
-    printf("veuillez entrer un numéro de port\n");
-    exit(1);
+    port = 4242;
   }
 
   int sock = init_server_socket(port);
@@ -45,7 +32,7 @@ int main(int argc, char* argv[]) {
 
   while (1) {
     struct sockaddr_in caller;
-    int cli_fd = accept(sock, (struct sockaddr *) &caller, &caller);
+    int cli_fd = accept(sock, (struct sockaddr *) &caller, &socklen);
     if (cli_fd == -1) {
       // pas besoin de d'arrêter le serveur sur cette erreur
       perror("accept error");
@@ -87,6 +74,8 @@ int init_server_socket(int port) {
 
 void* interact_with_client(void* arg) {
   uint32_t cli_fd = *(uint32_t*) arg;
+
+  // TODO
   
   goto end;
   end:

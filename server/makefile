@@ -6,7 +6,7 @@ server: $(OBJECTS)
 	gcc $(CFLAGS) $(LIBS) $< -o $@
 
 obj/%.o: src/%.c include/%.h
-	gcc $(CFLAGS) -c $< -o $@
+	gcc $(CFLAGS) -I ./include -c $< -o $@
 
 clean:
 	rm -f obj/* server
