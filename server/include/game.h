@@ -5,5 +5,25 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdio.h>
+#include <sys/socket.h>
+
+// #define GAME_DESC_SIZE 12
+
+typedef struct game game_t;
+typedef struct gameList gameList_t;
+
+// send the [GAMES n***] and [OGAME id_game nb_players***] messages to client.
+// don't forget to lock the mutex before using.
+// returns 0 on success, -1 on error.
+int sendGameList(gameList_t* gameList, int cli_fd);
+
+// allocate memory for a game. free with freeGame()
+// does not set id and port to their correct values
+game_t* newGame();
+// allocate memory for a game list. free with freeGameList()
+gameList_t* newGameList();
+void freeGame(game_t* game);
+void freeGameList(gameList_t* gameList);
 
 #endif

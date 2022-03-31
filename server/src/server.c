@@ -1,15 +1,18 @@
 #include "server.h"
+#include "game.h"
 
 #define MAX_NAME 8
 #define send_string(sock, str) send(sock, str, strlen(str), 0)
 
+//todo : move this to it's own file ?
 struct client_infos {
   char pseudo[MAX_NAME];
   uint32_t ip;
   uint32_t x,y;
 };
 
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t gameList_mutex = PTHREAD_MUTEX_INITIALIZER;
+gameList_t* gameList;
 
 int main(int argc, char* argv[]) {
 
@@ -28,6 +31,8 @@ int main(int argc, char* argv[]) {
 
   printf("serveur créé sur le port %d\n", port);
 
+  gameList = newGameList();
+
   socklen_t socklen = sizeof(struct sockaddr_in);
 
   while (1) {
@@ -38,7 +43,7 @@ int main(int argc, char* argv[]) {
       perror("accept error");
     }
     else {
-      uint32_t* cli_infos = malloc(sizeof(uint32_t));
+      int* cli_infos = malloc(sizeof(int));
       *cli_infos = cli_fd;
 
       pthread_t thread;
@@ -73,15 +78,28 @@ int init_server_socket(int port) {
 }
 
 void* interact_with_client(void* arg) {
-  uint32_t cli_fd = *(uint32_t*) arg;
+  int cli_fd = *(int*) arg;
+  int n;
 
-  // TODO
+  pthread_mutex_lock(&gameList_mutex);
+  n = sendGameList(gameList, cli_fd);
+  pthread_mutex_unlock(&gameList_mutex);
+  if (n == -1) {
+    goto end;
+  }
+
+  char buf[64];
+  n = recv(cli_fd, buf, 64, 0);
+
+  buf[n] = 0;
+  buf[63] = 0;
+  printf("%s\n", buf);
   
   goto end;
   end:
 
   close(cli_fd);
-  free((uint32_t*)arg); // pas sûr de l'utilité du cast
+  free((int*)arg); // pas sûr de l'utilité du cast
 
   return NULL;
 }
