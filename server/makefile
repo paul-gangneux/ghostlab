@@ -1,6 +1,8 @@
-CFLAGS := -Wall -pedantic -O2
+OBJECTS := server game
+OBJECTS := $(addprefix obj/, $(OBJECTS))
+OBJECTS := $(addsuffix .o, $(OBJECTS))
+CFLAGS := -Wall -Wextra -pedantic -O2
 LIBS := -pthread
-OBJECTS := obj/server.o obj/game.o
 
 server: $(OBJECTS)
 	gcc $(CFLAGS) $(LIBS) $< -o $@
