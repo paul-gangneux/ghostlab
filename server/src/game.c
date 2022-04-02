@@ -132,7 +132,7 @@ int addToGameList(gameList_t* gl, game_t* g) {
 int sendGameList(gameList_t* gameList, int cli_fd) {
   int n;
   char buf[12];
-  memmove("GAMES 0***", buf, 10);
+  memmove(buf,"GAMES 0***", 10);
   buf[6] = gameList->nb_games;
   n = send(cli_fd, buf, 10, 0);
   if (n<0) {
@@ -140,7 +140,7 @@ int sendGameList(gameList_t* gameList, int cli_fd) {
     return -1;
   }
   gameCell_t* gc = gameList->first;
-  memmove("OGAME 0 0***", buf, 12);
+  memmove(buf, "OGAME 0 0***", 12);
   while(gc != NULL) {
     // todo : check that the game hasn't started yet
     buf[6] = gc->game->id;
