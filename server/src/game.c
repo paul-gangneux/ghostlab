@@ -117,10 +117,11 @@ int addToGameList(gameList_t* gl, game_t* g) {
   gameCell_t* gc = newGameCell(g);
 
   if (gl->first == NULL || gl->first->game->id > 1) {
-    gl->nb_games += 1;
-    gl->first = gc;
+    gc->next = gl->first;
     gc->game->id = 1;
     gc->game->multicast_port[3] = '1';
+    gl->nb_games += 1;
+    gl->first = gc;
     return 1;
   }
   return insertIntoList(gl->first, gc, 2);
@@ -150,6 +151,7 @@ int sendGameList(gameList_t* gameList, int cli_fd) {
       perror("sendGameList");
       return -1;
     }
+    gc = gc->next;
   }
   return 0;
 }

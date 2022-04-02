@@ -26,4 +26,9 @@ gameList_t* newGameList();
 void freeGame(game_t* game);
 void freeGameList(gameList_t* gameList);
 
+// add game to the game list, returns game id on success, -1 on failure.
+// sets game->id and game->multicast_port appropriately.
+// remember to lock mutex before using
+int addToGameList(gameList_t* gl, game_t* g);
+
 #endif
