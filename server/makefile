@@ -1,4 +1,4 @@
-OBJECTS := server game
+OBJECTS := server game player
 OBJECTS := $(addprefix obj/, $(OBJECTS))
 OBJECTS := $(addsuffix .o, $(OBJECTS))
 CFLAGS := -Wall -Wextra -pedantic -O2

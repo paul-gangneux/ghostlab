@@ -77,6 +77,7 @@ gameCell_t* newGameCell(game_t* g) {
 void freeGame(game_t* game) {
   free(game->labyrinth);
   free(game);
+  game = NULL;
 }
 
 void freeGameCell(gameCell_t* gameCell) {
@@ -85,6 +86,7 @@ void freeGameCell(gameCell_t* gameCell) {
   }
   freeGame(gameCell->game);
   free(gameCell);
+  gameCell = NULL;
 }
 
 void freeGameList(gameList_t* gameList) {
@@ -92,6 +94,7 @@ void freeGameList(gameList_t* gameList) {
     freeGameCell(gameList->first);
   }
   free(gameList);
+  gameList = NULL;
 }
 
 int insertIntoList(gameCell_t* curr, gameCell_t* gc, u_int8_t n) {
