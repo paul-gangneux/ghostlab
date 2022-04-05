@@ -11,9 +11,11 @@
 
 #define MAX_NAME 8
 
-typedef struct player_t player_t;
+typedef struct player player_t;
+typedef struct playerList playerList_t;
 
-struct player_t {
+// TODO : hide this ?
+struct player {
   int fd;
   char name[MAX_NAME];
   struct sockaddr_in addr;
@@ -23,8 +25,13 @@ struct player_t {
 // allocate memory for player. free with freePlayer()
 // needs infos recieved from accept() as parameter
 player_t* newPlayer(int fd, struct sockaddr_in addrinfo);
+playerList_t* newPlayerList();
 
 // close descriptors and free memory
 void freePlayer(player_t* player);
+// yeets all
+void freePlayerList(playerList_t* pl);
+// lock mutex before using
+void player_addToList(playerList_t* playerList, player_t* player);
 
 #endif

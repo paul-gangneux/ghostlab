@@ -7,6 +7,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <pthread.h>
+
+#include "player.h"
 
 // #define GAME_DESC_SIZE 12
 
@@ -30,5 +33,13 @@ void freeGameList(gameList_t* gameList);
 // sets game->id and game->multicast_port appropriately.
 // remember to lock mutex before using
 int addToGameList(gameList_t* gl, game_t* g);
+
+// returns -1 on failure, 0 on success
+int game_addPlayer(game_t* game, player_t* player);
+
+void game_removePlayer(game_t* game, player_t* player);
+
+// returns NULL on failure
+game_t* game_get(gameList_t* gameList, u_int8_t id);
 
 #endif

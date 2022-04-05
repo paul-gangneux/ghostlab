@@ -7,15 +7,32 @@
 // checks that tcp message has been properly recieved 
 // and that the message ends with ***
 #define check_tcp_message(cli_fd, buf, n)\
-if (n == -1) {\
-  perror("recv");\
-  goto end;\
-}\
-if (n < 3 || buf[n] != '*' || buf[n-1] != '*' || buf[n-2] != '*') {\
-  send_string(cli_fd, "DUNNO***");\
-  printf("bad client input, aborting\n");\
-  goto end;\
-}
+  if (n == -1) {\
+    perror("recv");\
+    goto end;\
+  }\
+  if (n < 3 || buf[n] != '*' || buf[n-1] != '*' || buf[n-2] != '*') {\
+    send_string(cli_fd, "DUNNO***");\
+    printf("bad client input, aborting\n");\
+    goto end;\
+  }
+
+#define read_keyword(cli_fd, keyword, n)\
+  n = recv(cli_fd, keyword, 5, 0);\
+  if (n == -1) {\
+    perror("recv");\
+    goto end;\
+  }\
+  keyword[n] = '\0';
+
+// TODO: check is username is alphanum
+#define updatePlayerInfos(player, buf)\
+  memmove(player->name, buf+1, MAX_NAME);\
+  char portstr[5];\
+  portstr[4] = 0;\
+  memmove(portstr, buf+10, 4);\
+  int port = atoi(portstr);\
+  player->addr.sin_port = htons(port);
 
 pthread_mutex_t gameList_mutex = PTHREAD_MUTEX_INITIALIZER;
 gameList_t* gameList;
@@ -90,7 +107,9 @@ int init_server_socket(int port) {
 }
 
 void* interact_with_client(void* arg) {
+  int isHost = 0;
   player_t* player = (player_t*) arg;
+  game_t* game = NULL;
   int cli_fd = player->fd;
   int n;
   int b = 0; // boolean
@@ -109,51 +128,76 @@ void* interact_with_client(void* arg) {
 
   // client creates or joins game
   do {
-    n = recv(cli_fd, keyword, 5, 0);
-    if (n == -1) {
-      perror("recv");
-      goto end;
-    }
-    keyword[n] = '\0';
+    read_keyword(cli_fd, keyword, n);
 
     // new game creation
     if (strcmp(keyword, "NEWPL") == 0) {
       // expecting [ username port***]
       n = recv(cli_fd, buf, 17, 0);
       check_tcp_message(cli_fd, buf, n);
+      updatePlayerInfos(player, buf)
 
-      //TODO: check is username is alphanum
-      //TODO: refactor (in player.c maybe ?)
-      memmove(player->name, buf+1, MAX_NAME);
-      char portstr[5];
-      portstr[4] = 0;
-      memmove(portstr, portstr+10, 4);
-      int port = atoi(portstr);
-      player->addr.sin_port = htons(port);
+      game = newGame();
+      isHost = 1;
+      
+      
+      pthread_mutex_lock(&gameList_mutex);
+      int id = addToGameList(gameList, game);
+      pthread_mutex_unlock(&gameList_mutex);
 
-      // TODO: create game
+      if (id == -1) {
+        // shouldn't happen, ever
+        printf("error at addToGameList");
+        goto end;
+      }
+
+      // todo: refactor
+      memmove(buf, "REGOK 0***", 10);
+      buf[6] = (u_int8_t) id;
+      n = send(cli_fd, buf, 10, 0);
+      if (n<0) {
+        perror("send");
+        goto end;
+      }
 
       b = 0; // exits loops
-
     }
     // joining game
     else if (strcmp(keyword, "REGIS") == 0) {
       // expecting [ username port m***]
       n = recv(cli_fd, buf, 18, 0);
       check_tcp_message(cli_fd, buf, n);
+      updatePlayerInfos(player, buf);
 
-      //TODO: check is username is alphanum
-      //TODO: refactor (in player.c maybe ?)
-      memmove(player->name, buf+1, MAX_NAME);
-      char portstr[5];
-      portstr[4] = 0;
-      memmove(portstr, portstr+10, 4);
-      int port = atoi(portstr);
-      player->addr.sin_port = htons(port);
+      u_int8_t id = buf[15];
 
-      //TODO:
+      // todo, move these locks in game.c
+      pthread_mutex_lock(&gameList_mutex);
+      game = game_get(gameList, id);
+      pthread_mutex_unlock(&gameList_mutex);
+      if (game == NULL) {
+        b = 1;
+        send_string(cli_fd, "DUNNO***");
+      }
+      else {
 
-      b = 0; // exits loops
+        //todo: check for failure (if game already started)
+        n = game_addPlayer(game, player);
+        if (n == -1) {
+          b = 1;
+          send_string(cli_fd, "DUNNO***");
+        }
+        else {
+          memmove(buf, "REGOK 0***", 10);
+          buf[6] = (u_int8_t) id; // useless cast sue me 
+          n = send(cli_fd, buf, 10, 0);
+          if (n<0) {
+            perror("send");
+            goto end;
+          }
+          b = 0; // exits loops
+        } 
+      }
     }
     // wrong input
     else {
@@ -161,14 +205,21 @@ void* interact_with_client(void* arg) {
       printf("bad client input, aborting\n");
       goto end;
     }
+
   } while (b);
 
-  // todo : répondre à [NEWPL␣id␣port***] ou [REGIS␣id␣port␣m***] avec [REGOK␣m***], [REGNO***] ou [DUNNO***]
+  // TODO: wait for start*** or disconnect
+
+  recv(cli_fd, buf, 5, 0);
 
   end:
 
-  close(cli_fd);
-  free((int*)arg); // pas sûr de l'utilité du cast
+  close(cli_fd); // no need ? better be safe
+  game_removePlayer(game, player);
+  freePlayer(player);
+  if (game != NULL && isHost)
+    //TODO : remove game from gamelist
+    freeGame(game); 
 
   return NULL;
 }
