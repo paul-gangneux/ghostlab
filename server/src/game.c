@@ -1,7 +1,7 @@
 #include "game.h"
 
-#define lock(game) pthread_mutex_lock(&game->mutex)
-#define unlock(game) pthread_mutex_unlock(&game->mutex)
+#define lock(x) pthread_mutex_lock(&x->mutex)
+#define unlock(x) pthread_mutex_unlock(&x->mutex)
 
 struct game {
   pthread_mutex_t mutex;
@@ -25,6 +25,7 @@ struct gameCell {
 };
 
 struct gameList {
+  pthread_mutex_t mutex;
   u_int8_t length;
   gameCell_t* first;
 };
@@ -71,6 +72,7 @@ game_t* newGame() {
 // allocate memory for a game list. free with freeGameList()
 gameList_t* newGameList() {
   gameList_t* gl = (gameList_t*) malloc(sizeof(gameList_t));
+  pthread_mutex_init(&gl->mutex, NULL);
   gl->length = 0;
   gl->first = NULL;
   return gl;
@@ -101,6 +103,7 @@ void freeGameCell(gameCell_t* gameCell) {
 }
 
 void freeGameList(gameList_t* gameList) {
+  pthread_mutex_destroy(&gameList->mutex);
   if (gameList->first != NULL) {
     freeGameCell(gameList->first);
   }
@@ -126,25 +129,30 @@ int insertIntoList(gameCell_t* curr, gameCell_t* gc, u_int8_t n) {
 // sets game->id and game->multicast_port appropriately.
 // remember to lock mutex before using
 int addToGameList(gameList_t* gl, game_t* g) {
-  if (gl->length == 0xff) return -1;
-
+  if (gl->length == 0xff)
+    return -1;
   gameCell_t* gc = newGameCell(g);
 
+  lock(gl);
   if (gl->first == NULL || gl->first->game->id > 1) {
     gc->next = gl->first;
     gc->game->id = 1;
     gc->game->multicast_port[3] = '1';
     gl->length += 1;
     gl->first = gc;
+    unlock(gl);
     return 1;
   }
-  return insertIntoList(gl->first, gc, 2);
+  int x = insertIntoList(gl->first, gc, 2);
+  unlock(gl);
+  return x;
 }
 
 // send the [GAMES n***] and [OGAME id_game nb_players***] messages to client.
 // don't forget to lock the mutex before using.
 // returns 0 on success, -1 on error.
 int sendGameList(gameList_t* gameList, int cli_fd) {
+  lock(gameList);
   // TODO: do this in a minimal amount of send()
   int n;
   char buf[12];
@@ -153,6 +161,7 @@ int sendGameList(gameList_t* gameList, int cli_fd) {
   n = send(cli_fd, buf, 10, 0);
   if (n<0) {
     perror("sendGameList");
+    unlock(gameList);
     return -1;
   }
   gameCell_t* gc = gameList->first;
@@ -164,10 +173,12 @@ int sendGameList(gameList_t* gameList, int cli_fd) {
     n = send(cli_fd, buf, 12, 0);
     if (n<0) {
       perror("sendGameList");
+      unlock(gameList);
       return -1;
     }
     gc = gc->next;
   }
+  unlock(gameList);
   return 0;
 }
 
@@ -181,7 +192,10 @@ game_t* aux_game_get(gameCell_t* gc, u_int8_t id) {
 
 // returns NULL on failure
 game_t* game_get(gameList_t* gameList, u_int8_t id) {
-  return aux_game_get(gameList->first, id);
+  lock(gameList);
+  game_t* game = aux_game_get(gameList->first, id);
+  unlock(gameList);
+  return game;
 }
 
 // returns -1 on failure, 0 on success

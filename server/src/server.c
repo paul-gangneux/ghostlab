@@ -34,7 +34,6 @@
   int port = atoi(portstr);\
   player->addr.sin_port = htons(port);
 
-pthread_mutex_t gameList_mutex = PTHREAD_MUTEX_INITIALIZER;
 gameList_t* gameList;
 
 int main(int argc, char* argv[]) {
@@ -115,9 +114,7 @@ void* interact_with_client(void* arg) {
   int b = 0; // boolean
 
   // sends GAMES and OGAME to client
-  pthread_mutex_lock(&gameList_mutex);
   n = sendGameList(gameList, cli_fd);
-  pthread_mutex_unlock(&gameList_mutex);
   if (n == -1) {
     goto end;
   }
@@ -140,10 +137,7 @@ void* interact_with_client(void* arg) {
       game = newGame();
       isHost = 1;
       
-      
-      pthread_mutex_lock(&gameList_mutex);
       int id = addToGameList(gameList, game);
-      pthread_mutex_unlock(&gameList_mutex);
 
       if (id == -1) {
         // shouldn't happen, ever
@@ -171,17 +165,13 @@ void* interact_with_client(void* arg) {
 
       u_int8_t id = buf[15];
 
-      // todo, move these locks in game.c
-      pthread_mutex_lock(&gameList_mutex);
       game = game_get(gameList, id);
-      pthread_mutex_unlock(&gameList_mutex);
       if (game == NULL) {
         b = 1;
         send_string(cli_fd, "DUNNO***");
       }
       else {
 
-        //todo: check for failure (if game already started)
         n = game_addPlayer(game, player);
         if (n == -1) {
           b = 1;
