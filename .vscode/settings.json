@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "server.h": "c",
+        "game.h": "c",
+        "player.h": "c"
+    }
+}
