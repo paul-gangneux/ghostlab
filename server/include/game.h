@@ -17,22 +17,23 @@ typedef struct game game_t;
 typedef struct gameList gameList_t;
 
 // send the [GAMES n***] and [OGAME id_game nb_players***] messages to client.
-// don't forget to lock the mutex before using.
 // returns 0 on success, -1 on error.
 int sendGameList(gameList_t* gameList, int cli_fd);
 
 // allocate memory for a game. free with freeGame()
 // does not set id and port to their correct values
 game_t* newGame();
+
 // allocate memory for a game list. free with freeGameList()
 gameList_t* newGameList();
+
 void freeGame(game_t* game);
+
 void freeGameList(gameList_t* gameList);
 
 // add game to the game list, returns game id on success, -1 on failure.
 // sets game->id and game->multicast_port appropriately.
-// remember to lock mutex before using
-int addToGameList(gameList_t* gl, game_t* g);
+int gameList_add(gameList_t* gl, game_t* g);
 
 // returns -1 on failure, 0 on success
 int game_addPlayer(game_t* game, player_t* player);

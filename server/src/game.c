@@ -127,8 +127,7 @@ int insertIntoList(gameCell_t* curr, gameCell_t* gc, u_int8_t n) {
 
 // add game to the game list, returns game id on success, -1 on failure.
 // sets game->id and game->multicast_port appropriately.
-// remember to lock mutex before using
-int addToGameList(gameList_t* gl, game_t* g) {
+int gameList_add(gameList_t* gl, game_t* g) {
   if (gl->length == 0xff)
     return -1;
   gameCell_t* gc = newGameCell(g);
@@ -148,36 +147,73 @@ int addToGameList(gameList_t* gl, game_t* g) {
   return x;
 }
 
+u_int8_t get_nb_of_started_games_aux(gameCell_t* cell, u_int8_t i) {
+  if (cell == NULL)
+    return i;
+  if (cell->game->hasStarted) {
+    return get_nb_of_started_games_aux(cell->next, i+1);
+  }
+  return get_nb_of_started_games_aux(cell->next, i);
+}
+
+u_int8_t get_nb_of_started_games(gameList_t* gameList) {
+  if (gameList == NULL)
+    return 0;
+  return get_nb_of_started_games_aux(gameList->first, 0);
+}
+
+#define NB_MAX 10
+#define OGAME_LEN 12
+
 // send the [GAMES n***] and [OGAME id_game nb_players***] messages to client.
-// don't forget to lock the mutex before using.
+// only send games that haven't started yet
 // returns 0 on success, -1 on error.
 int sendGameList(gameList_t* gameList, int cli_fd) {
   lock(gameList);
-  // TODO: do this in a minimal amount of send()
-  int n;
-  char buf[12];
+  int n, i;
+  char buf[OGAME_LEN * NB_MAX];
+
   memmove(buf,"GAMES 0***", 10);
-  buf[6] = gameList->length;
+  buf[6] = gameList->length - get_nb_of_started_games(gameList);
   n = send(cli_fd, buf, 10, 0);
-  if (n<0) {
+  if (n < 0) {
     perror("sendGameList");
     unlock(gameList);
     return -1;
   }
+
   gameCell_t* gc = gameList->first;
-  memmove(buf, "OGAME 0 0***", 12);
+  for (i = 0; i < NB_MAX; i++)
+    memmove(buf + i, "OGAME 0 0***", OGAME_LEN);
+
+  i = 0;
   while(gc != NULL) {
-    // todo : check that the game hasn't started yet
-    buf[6] = gc->game->id;
-    buf[8] = gc->game->nb_players;
-    n = send(cli_fd, buf, 12, 0);
-    if (n<0) {
+    if (!gc->game->hasStarted) {
+      buf[i * OGAME_LEN + 6] = gc->game->id;
+      buf[i * OGAME_LEN + 8] = gc->game->nb_players;
+      i++;
+    }
+    gc = gc->next;
+    if (i == NB_MAX) {
+      n = send(cli_fd, buf, OGAME_LEN * NB_MAX, 0);
+      if (n < 0) {
+        perror("sendGameList");
+        unlock(gameList);
+        return -1;
+      }
+      i = 0;
+    }
+  }
+
+  if (i > 0) {
+    n = send(cli_fd, buf, OGAME_LEN * i, 0);
+    if (n < 0) {
       perror("sendGameList");
       unlock(gameList);
       return -1;
     }
-    gc = gc->next;
   }
+
   unlock(gameList);
   return 0;
 }
