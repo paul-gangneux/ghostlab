@@ -47,10 +47,10 @@ int main(int argc, char* argv[]) {
   gameList = newGameList();
 
   // as a test
-  // game_t* test_game = newGame();
-  // addToGameList(gameList, test_game);
-  // game_t* test_game2 = newGame();
-  // addToGameList(gameList, test_game2);
+  game_t* test_game = newGame();
+  gameList_add(gameList, test_game);
+  game_t* test_game2 = newGame();
+  gameList_add(gameList, test_game2);
 
   socklen_t socklen = sizeof(struct sockaddr_in);
 
@@ -134,7 +134,7 @@ int nextRequest(int fd, reqbuf_t* reqbuf) {
     if (n <= 3) {
       // discarding
       reqbuf->beg = reqbuf->end;
-      return 0;
+      return n;
     }
   }
 
@@ -160,12 +160,6 @@ int nextRequest(int fd, reqbuf_t* reqbuf) {
   }
 
   reqbuf->beg += n;
-
-  // printf("%d %d\n", reqbuf->beg, reqbuf->end);
-
-  // write(1, reqbuf->req, n);
-  // write(1, "\n", 1);
-
   return n;
 }
 
@@ -203,6 +197,10 @@ void* interact_with_client(void* arg) {
     n = nextRequest(cli_fd, &reqbuf);
     if (n == -1) {
       perror("nextRequest");
+      goto end;
+    }
+    if (n == 0) {
+      printf("client disconnected\n");
       goto end;
     }
     if (!(check_tcp_message(reqbuf, n))) {
@@ -284,10 +282,7 @@ void* interact_with_client(void* arg) {
 
   isInGame = 1;
 
-  printf("yay\n");
-
   // TODO: wait for start*** or disconnect
-
   nextRequest(cli_fd, &reqbuf);
 
   end:
@@ -298,8 +293,7 @@ void* interact_with_client(void* arg) {
   else
     freePlayer(player);
   if (game != NULL && isHost)
-    //TODO : remove game from gamelist
-    freeGame(game);
+    gameList_remove(gameList, game);
 
   return NULL;
 }

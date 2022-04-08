@@ -33,5 +33,8 @@ void freePlayer(player_t* player);
 void freePlayerList(playerList_t* pl);
 // lock mutex before using
 void player_addToList(playerList_t* playerList, player_t* player);
+// lock mutex before using
+// free player
+void playerList_remove(playerList_t* playerList, player_t* player);
 
 #endif

@@ -38,9 +38,13 @@ int gameList_add(gameList_t* gl, game_t* g);
 // returns -1 on failure, 0 on success
 int game_addPlayer(game_t* game, player_t* player);
 
+// doesn't free player
 void game_removePlayer(game_t* game, player_t* player);
 
 // returns NULL on failure
 game_t* game_get(gameList_t* gameList, u_int8_t id);
+
+// free game
+void gameList_remove(gameList_t *gameList, game_t* game);
 
 #endif

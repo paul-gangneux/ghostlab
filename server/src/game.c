@@ -128,11 +128,13 @@ int insertIntoList(gameCell_t* curr, gameCell_t* gc, u_int8_t n) {
 // add game to the game list, returns game id on success, -1 on failure.
 // sets game->id and game->multicast_port appropriately.
 int gameList_add(gameList_t* gl, game_t* g) {
-  if (gl->length == 0xff)
+  lock(gl);
+  if (gl->length == 0xff) {
+    unlock(gl);
     return -1;
+  }
   gameCell_t* gc = newGameCell(g);
 
-  lock(gl);
   if (gl->first == NULL || gl->first->game->id > 1) {
     gc->next = gl->first;
     gc->game->id = 1;
@@ -143,6 +145,7 @@ int gameList_add(gameList_t* gl, game_t* g) {
     return 1;
   }
   int x = insertIntoList(gl->first, gc, 2);
+  gl->length += 1;
   unlock(gl);
   return x;
 }
@@ -172,7 +175,6 @@ int sendGameList(gameList_t* gameList, int cli_fd) {
   lock(gameList);
   int n, i;
   char buf[OGAME_LEN * NB_MAX];
-
   memmove(buf,"GAMES 0***", 10);
   buf[6] = gameList->length - get_nb_of_started_games(gameList);
   n = send(cli_fd, buf, 10, 0);
@@ -184,8 +186,7 @@ int sendGameList(gameList_t* gameList, int cli_fd) {
 
   gameCell_t* gc = gameList->first;
   for (i = 0; i < NB_MAX; i++)
-    memmove(buf + i, "OGAME 0 0***", OGAME_LEN);
-
+    memmove(buf + i * OGAME_LEN, "OGAME 0 0***", OGAME_LEN);
   i = 0;
   while(gc != NULL) {
     if (!gc->game->hasStarted) {
@@ -246,8 +247,43 @@ int game_addPlayer(game_t* game, player_t* player) {
   return i;
 }
 
+// doesn't free player
 void game_removePlayer(game_t* game, player_t* player) {
-  //TODO
+  lock(game);
+  playerList_remove(game->playerList, player);
+  unlock(game);
+}
+
+void gameList_remove_aux(gameCell_t* gc, game_t* game) {
+  if (gc->next == NULL)
+    return;
+  if (gc->next->game == game) {
+    gameCell_t* temp = gc->next;
+    gc->next = gc->next->next;
+    temp->next = NULL;
+    freeGameCell(temp);
+    return;
+  }
+  gameList_remove_aux(gc->next, game);
+}
+
+// free game
+void gameList_remove(gameList_t *gameList, game_t* game) {
+  lock(gameList);
+  if (gameList->first == NULL) {
+    unlock(gameList);
+    return;
+  }
+  if (gameList->first->game == game) {
+    gameCell_t* gc = gameList->first;
+    gameList->first = gameList->first->next;
+    gc->next = NULL;
+    freeGameCell(gc);
+    unlock(gameList);
+    return;
+  }
+  gameList_remove_aux(gameList->first, game);
+  unlock(gameList);
 }
 
 // will likely remain the same

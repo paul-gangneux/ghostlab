@@ -66,3 +66,31 @@ void player_addToList(playerList_t* playerList, player_t* player) {
   pc->next = playerList->first;
   playerList->first = pc;
 }
+
+void playerList_remove_aux(playerCell_t* pc, player_t* player) {
+  if (pc->next == NULL)
+    return;
+  if (pc->next->player == player) {
+    playerCell_t* temp = pc->next;
+    pc->next = pc->next->next;
+    temp->next = NULL;
+    freePlayerCell(temp);
+    return;
+  }
+  playerList_remove_aux(pc->next, player);
+}
+
+// lock mutex before using
+// free player
+void playerList_remove(playerList_t* playerList, player_t* player) {
+  if (playerList->first == NULL)
+    return;
+  if (playerList->first->player == player) {
+    playerCell_t* pc = playerList->first;
+    playerList->first = playerList->first->next;
+    pc->next = NULL;
+    freePlayerCell(pc);
+    return;
+  }
+  playerList_remove_aux(playerList->first, player);
+}
