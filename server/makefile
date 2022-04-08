@@ -7,10 +7,10 @@ LIBS := -pthread
 server: $(OBJECTS)
 	gcc $(CFLAGS) $(LIBS) $^ -o $@
 
-obj/%.o: src/%.c include/%.h obj
+obj/%.o: src/%.c include/%.h | obj
 	gcc $(CFLAGS) -I ./include -c $< -o $@
 
-obj: 
+obj:
 	mkdir obj
 
 clean:
