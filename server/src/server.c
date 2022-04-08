@@ -235,6 +235,10 @@ void* interact_with_client(void* arg) {
           perror("send");
           goto end;
         }
+        
+        game_addPlayer(game, player);
+        //todo: verbose only
+        printf("new game created with id %d\n", id);
         exit_loop = 1;
       }
       // joining game
@@ -277,18 +281,21 @@ void* interact_with_client(void* arg) {
     }
   }
 
+  printf("yay\n");
+
   // TODO: wait for start*** or disconnect
 
   nextRequest(cli_fd, &reqbuf);
 
   end:
 
-  close(cli_fd); // no need ? better be safe
+  // close(cli_fd); // no need ?
   game_removePlayer(game, player);
+  //TODO: fix double free
   freePlayer(player);
   if (game != NULL && isHost)
     //TODO : remove game from gamelist
-    freeGame(game); 
+    freeGame(game);
 
   return NULL;
 }
