@@ -177,6 +177,7 @@ int nextRequest(int fd, reqbuf_t* reqbuf) {
   reqbuf.req[4] == word[4]
 
 void* interact_with_client(void* arg) {
+  int isInGame = 0;
   int isHost = 0;
   player_t* player = (player_t*) arg;
   game_t* game = NULL;
@@ -281,6 +282,8 @@ void* interact_with_client(void* arg) {
     }
   }
 
+  isInGame = 1;
+
   printf("yay\n");
 
   // TODO: wait for start*** or disconnect
@@ -290,9 +293,10 @@ void* interact_with_client(void* arg) {
   end:
 
   // close(cli_fd); // no need ?
-  game_removePlayer(game, player);
-  //TODO: fix double free
-  freePlayer(player);
+  if (isInGame)
+    game_removePlayer(game, player);
+  else
+    freePlayer(player);
   if (game != NULL && isHost)
     //TODO : remove game from gamelist
     freeGame(game);
