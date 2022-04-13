@@ -1,9 +1,9 @@
-package ui_tests;
+package src.ui_tests;
 
 import java.util.ArrayList;
 
-import model.GameInfo;
-import ui.LobbyWindow;
+import src.model.GameInfo;
+import src.ui.LobbyWindow;
 
 public class LobbyTest {
     public static void main(String [] args)  {

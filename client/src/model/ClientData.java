@@ -1,4 +1,4 @@
-package model;
+package src.model;
 
 public class ClientData {
     // THIS IS A TEMPORARY CLASS AND HAS NO INTENT OF BEING DEFINITIVE

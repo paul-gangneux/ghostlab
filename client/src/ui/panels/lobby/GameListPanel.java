@@ -1,4 +1,4 @@
-package ui.panels.lobby;
+package src.ui.panels.lobby;
 
 import java.util.ArrayList;
 
@@ -10,8 +10,8 @@ import java.awt.GridLayout;
 import java.awt.Color;
 import java.awt.Component;
 
-import model.GameInfo;
-import ui.LobbyWindow;
+import src.model.GameInfo;
+import src.ui.LobbyWindow;
 
 public class GameListPanel extends JPanel {
 

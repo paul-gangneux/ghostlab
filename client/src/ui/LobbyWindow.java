@@ -1,11 +1,11 @@
-package ui;
+package src.ui;
 
 import javax.swing.JFrame;
 
 import java.awt.GridLayout;
 
-import ui.panels.lobby.GameListPanel;
-import ui.panels.lobby.LobbyButtonPanel;
+import src.ui.panels.lobby.GameListPanel;
+import src.ui.panels.lobby.LobbyButtonPanel;
 
 public class LobbyWindow extends JFrame {
     
