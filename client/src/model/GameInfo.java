@@ -5,9 +5,14 @@ public class GameInfo {
     private int gameID; // The identifiant of the game
     private int playerCount; // The number of players already within this game
 
-    public GameInfo(int gameID, int playerCount) {
+    private int labyheight;
+    private int labywidth;
+
+    public GameInfo(int gameID, int playerCount, int labyheight, int labywidth) {
         this.gameID = gameID;
         this.playerCount = playerCount;
+        this.labyheight = labyheight;
+        this.labywidth = labywidth;
     }
 
     public int getID() {
@@ -16,6 +21,14 @@ public class GameInfo {
 
     public int getPlayerCount() {
         return playerCount;
+    }
+
+    public int getLabyHeight() {
+        return labyheight;
+    }
+
+    public int getLabyWidth() {
+        return labywidth;
     }
 
     public String toString() {
