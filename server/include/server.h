@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
+#include <endian.h>
 
 // renvoie le FD du socket TCP créé
 int init_server_socket(int port);

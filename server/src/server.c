@@ -47,10 +47,10 @@ int main(int argc, char* argv[]) {
   gameList = newGameList();
 
   // as a test
-  game_t* test_game = newGame();
-  gameList_add(gameList, test_game);
-  game_t* test_game2 = newGame();
-  gameList_add(gameList, test_game2);
+  // game_t* test_game = newGame();
+  // gameList_add(gameList, test_game);
+  // game_t* test_game2 = newGame();
+  // gameList_add(gameList, test_game2);
 
   socklen_t socklen = sizeof(struct sockaddr_in);
 
@@ -138,6 +138,8 @@ int nextRequest(int fd, reqbuf_t* reqbuf) {
     }
   }
 
+  // TODO: Lire messages de taille fixe avant de faire ce qui suit (à cause de 42 là ce fdp)
+
   char* tempbuf = reqbuf->readbuf + reqbuf->beg;
   n = 1;
   while (reqbuf->beg + n < reqbuf->end) {
@@ -177,7 +179,7 @@ void* interact_with_client(void* arg) {
   game_t* game = NULL;
   int cli_fd = player->fd;
   int n;
-  int exit_loop;
+  int exit_loop = 0;
 
   reqbuf_t reqbuf;
   rw_buffers_initialize(&reqbuf);
@@ -185,12 +187,10 @@ void* interact_with_client(void* arg) {
   char ansbuf[32];
 
   // sends GAMES and OGAME to client
-  n = sendGameList(gameList, cli_fd);
+  n = gameList_sendToCli(gameList, cli_fd);
   if (n == -1) {
     goto end;
   }
-
-  exit_loop = 0;
 
   // client creates or joins game
   while(!exit_loop) {
@@ -204,41 +204,40 @@ void* interact_with_client(void* arg) {
       goto end;
     }
     if (!(check_tcp_message(reqbuf, n))) {
-      printf("wrong input, discarding\n");
-      // exit(1);
-      exit_loop = 0;
+      printf("bad client request, discarding\n");
     }
+
     else {
       // new game creation
       // expecting [NEWPL username port***]
       if (comp_keyword(reqbuf, "NEWPL") && n == 22) {
-        
-        update_player_infos(player, reqbuf)
+        if (isInGame) {
+          send_string(cli_fd, "DUNNO***");
+        } else {
+          update_player_infos(player, reqbuf)
+          game = newGame();
+          isHost = 1;
+          int id = gameList_add(gameList, game);
+          if (id == -1) {
+            // shouldn't happen, ever
+            printf("error at addToGameList");
+            goto end;
+          }
 
-        game = newGame();
-        isHost = 1;
-        
-        int id = gameList_add(gameList, game);
-
-        if (id == -1) {
-          // shouldn't happen, ever
-          printf("error at addToGameList");
-          goto end;
+          memmove(ansbuf, "REGOK 0***", 10);
+          ansbuf[6] = (u_int8_t) id;
+          n = send(cli_fd, ansbuf, 10, 0);
+          if (n < 0) {
+            perror("send");
+            goto end;
+          }
+          
+          game_addPlayer(game, player);
+          //todo: verbose only
+          printf("new game created with id %d\n", id);
+          isInGame = 1;
         }
-
-        // todo: refactor ?
-        memmove(ansbuf, "REGOK 0***", 10);
-        ansbuf[6] = (u_int8_t) id;
-        n = send(cli_fd, ansbuf, 10, 0);
-        if (n < 0) {
-          perror("send");
-          goto end;
-        }
         
-        game_addPlayer(game, player);
-        //todo: verbose only
-        printf("new game created with id %d\n", id);
-        exit_loop = 1;
       }
       // joining game
       // expecting [REGIS username port m***]
@@ -250,16 +249,15 @@ void* interact_with_client(void* arg) {
         game = game_get(gameList, id);
         if (game == NULL) {
           send_string(cli_fd, "DUNNO***");
-          exit_loop = 0;
         }
 
         else {
           n = game_addPlayer(game, player);
           if (n == -1) {
-            send_string(cli_fd, "DUNNO***");
-            exit_loop = 0;
+            send_string(cli_fd, "DUNNO***");       
           }
           else {
+            // redundant code sue me
             memmove(ansbuf, "REGOK 0***", 10);
             ansbuf[6] = (u_int8_t) id;
             n = send(cli_fd, ansbuf, 10, 0);
@@ -267,20 +265,81 @@ void* interact_with_client(void* arg) {
               perror("send");
               goto end;
             }
-            exit_loop = 1;
+            isInGame = 1;
           } 
         }
       }
+      // leaves game
+      // expecting [UNREG***]
+      else if (comp_keyword(reqbuf, "UNREG") && n == 8) {
+        if (!isInGame) {
+          send_string(cli_fd, "DUNNO***");
+        } 
+        else {
+          u_int8_t id_game = game->id;
+          game_removePlayer(game, player, PLAYER_NOFREE);
+          if (isHost) {
+            // TODO: verify there's no unfortunate player free
+            gameList_remove(gameList, game);
+            isHost = 0;
+          }
+          isInGame = 0;
+          memmove(ansbuf, "UNROK 0***", 10);
+          ansbuf[6] = id_game;
+          n = send(cli_fd, ansbuf, 10, 0);
+          if (n < 0) {
+            perror("send");
+            goto end;
+          }
+        }
+      }
+      // ready to start game
+      // expecting [START***]
+      else if (comp_keyword(reqbuf, "START") && n == 8) {
+        if (!isInGame) {
+          send_string(cli_fd, "DUNNO***");
+        } else {
+          exit_loop = 1;
+        }
+      }
+      // asking for game length and width
+      // expecting [SIZE? m***]
+      else if (comp_keyword(reqbuf, "SIZE?") && n == 10) {
+        u_int8_t id_game = reqbuf.req[6];
+        //TODO: make this thread safe
+        game_t* temp = game_get(gameList, id_game);
+        if (temp == NULL) {
+          send_string(cli_fd, "DUNNO***");
+        }
+        else {
+          u_int16_t h, w;
+          h = htole16(temp->h);
+          w = htole16(temp->w);
+          
+          memmove(ansbuf, "SIZE! m hh ww***", 16);
+          memmove(ansbuf + 6, &id_game, sizeof(id_game));
+          memmove(ansbuf + 8, &h, sizeof(h));
+          memmove(ansbuf + 11, &w, sizeof(w));
+          n = send(cli_fd, ansbuf, 16, 0);
+          if (n < 0) {
+            perror("send");
+            goto end;
+          }
+        }
+      }
+      // asking for player list
+      // expecting [LIST? m***]
+      else if (comp_keyword(reqbuf, "LIST?") && n == 10) {
+        u_int8_t id_game = reqbuf.req[6];
+        n = game_sendPlayerList(gameList, id_game, cli_fd);
+      }
       // wrong input
       else {
-        send_string(cli_fd, "DUNNO***");
-        printf("bad client input, discarding\n");
-        exit_loop = 0;
+        // send_string(cli_fd, "DUNNO***");
+        printf("unknown client request, discarding\n");
       }
     }
   }
-
-  isInGame = 1;
 
   // TODO: wait for start*** or disconnect
   nextRequest(cli_fd, &reqbuf);
@@ -289,11 +348,9 @@ void* interact_with_client(void* arg) {
 
   // close(cli_fd); // no need ?
   if (isInGame)
-    game_removePlayer(game, player);
-  else
-    freePlayer(player);
+    game_removePlayer(game, player, PLAYER_NOFREE);
+  freePlayer(player);
   if (game != NULL && isHost)
     gameList_remove(gameList, game);
-
   return NULL;
 }

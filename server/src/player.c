@@ -44,18 +44,19 @@ void freePlayer(player_t* player) {
   player = NULL;
 }
 
-void freePlayerCell(playerCell_t* pc) {
+void freePlayerCell(playerCell_t* pc, int flag) {
   if (pc == NULL) return;
   if (pc->next != NULL)
-    freePlayerCell(pc->next);
-  freePlayer(pc->player);
+    freePlayerCell(pc->next, flag);
+  if (flag == PLAYER_FREE)
+    freePlayer(pc->player);
   free(pc);
   pc = NULL;
 }
 
 void freePlayerList(playerList_t* pl) {
   if (pl == NULL) return;
-  freePlayerCell(pl->first);
+  freePlayerCell(pl->first, PLAYER_FREE);
   free(pl);
   pl = NULL;
 }
@@ -67,30 +68,55 @@ void player_addToList(playerList_t* playerList, player_t* player) {
   playerList->first = pc;
 }
 
-void playerList_remove_aux(playerCell_t* pc, player_t* player) {
+void playerList_remove_aux(playerCell_t* pc, player_t* player, int flag) {
   if (pc->next == NULL)
     return;
   if (pc->next->player == player) {
     playerCell_t* temp = pc->next;
     pc->next = pc->next->next;
     temp->next = NULL;
-    freePlayerCell(temp);
+    freePlayerCell(temp, flag);
     return;
   }
-  playerList_remove_aux(pc->next, player);
+  playerList_remove_aux(pc->next, player, flag);
 }
 
 // lock mutex before using
-// free player
-void playerList_remove(playerList_t* playerList, player_t* player) {
+// set flag to PLAYER_FREE or PLAYER_NOFREE to free or not player
+void playerList_remove(playerList_t* playerList, player_t* player, int flag) {
   if (playerList->first == NULL)
     return;
   if (playerList->first->player == player) {
     playerCell_t* pc = playerList->first;
     playerList->first = playerList->first->next;
     pc->next = NULL;
-    freePlayerCell(pc);
+    freePlayerCell(pc, flag);
     return;
   }
-  playerList_remove_aux(playerList->first, player);
+  playerList_remove_aux(playerList->first, player, flag);
+}
+
+int playerList_sendToCli(playerList_t* playerList, u_int8_t game_id, int cli_fd) {
+  char buf[17];
+  int n;
+  memmove(buf, "LIST! m s***", 12);
+  buf[6] = game_id;
+  buf[8] = playerList->length;
+  n = send(cli_fd, buf, 12, 0);
+  if (n < 0) {
+    perror("send");
+    return -1;
+  }
+  memmove(buf, "PLAYR username***", 17);
+  playerCell_t* pc = playerList->first;
+  while (pc != NULL) {
+    memmove(buf + 6, pc->player->name, 8);
+    n = send(cli_fd, buf, 17, 0);
+    if (n < 0) {
+      perror("send");
+      return -1;
+    }
+    pc = pc->next;
+  }
+  return 0;
 }

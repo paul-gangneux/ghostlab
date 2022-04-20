@@ -11,10 +11,12 @@
 
 #define MAX_NAME 8
 
+#define PLAYER_FREE 1
+#define PLAYER_NOFREE 0
+
 typedef struct player player_t;
 typedef struct playerList playerList_t;
 
-// TODO : hide this ?
 struct player {
   int fd;
   char name[MAX_NAME];
@@ -34,7 +36,9 @@ void freePlayerList(playerList_t* pl);
 // lock mutex before using
 void player_addToList(playerList_t* playerList, player_t* player);
 // lock mutex before using
-// free player
-void playerList_remove(playerList_t* playerList, player_t* player);
+// set flag to PLAYER_FREE or PLAYER_NOFREE to free or not player
+void playerList_remove(playerList_t* playerList, player_t* player, int flag);
+
+int playerList_sendToCli(playerList_t* playerList, u_int8_t game_id, int cli_fd);
 
 #endif
