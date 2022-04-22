@@ -64,6 +64,6 @@ public class ClientTcp extends Thread {
 
     public static void main(String[] args) {
         ClientTcp c = new ClientTcp("localhost", 4242);
-        c.run();
+        c.start();
     }
 }

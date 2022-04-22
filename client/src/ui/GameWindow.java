@@ -16,13 +16,13 @@ public class GameWindow extends JFrame {
     //private GridLayout gl;
     private LabyDisplayerPanel ldp;
 
-    private GameInfo gameinfo;
+    private transient GameInfo gameinfo;
 
     public GameInfo getGameInfo() {
         return gameinfo;
     }
 
-    private PlayerModel playerModel;
+    private transient PlayerModel playerModel;
 
     public PlayerModel getPlayerModel() {
         return playerModel;
@@ -38,6 +38,6 @@ public class GameWindow extends JFrame {
         setSize(DEFAULT_GAMEWINDOW_WIDTH, DEFAULT_GAMEWINDOW_HEIGHT);
         setLocationRelativeTo(null); // centers the window
         setResizable(false);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE); 
     }
 }

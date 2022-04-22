@@ -31,7 +31,7 @@ public class LobbyWindow extends JFrame {
         setSize(width, height);
         setLocationRelativeTo(null); // centers the window
         setResizable(false);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE); 
     }
 
     public void allowGameJoin() {

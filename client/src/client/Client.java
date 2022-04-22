@@ -7,7 +7,7 @@ public class Client {
         c1 = new ClientTcp("localhost", 4242);
         c2 = new ClientUdp("localhost", 5555);
 
-        c1.run();
-        c2.run();
+        c1.start();
+        c2.start();
     }
 }

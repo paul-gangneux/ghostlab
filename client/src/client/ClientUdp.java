@@ -1,5 +1,5 @@
 package client;
-import java.io.*;
+// import java.io.*;
 import java.net.*;
 public class ClientUdp extends Thread{
     int port ;
@@ -15,8 +15,9 @@ public class ClientUdp extends Thread{
 
     @Override
     public void run(){
+        DatagramSocket dso = null;
         try{
-            DatagramSocket dso=new DatagramSocket(port);
+            dso=new DatagramSocket(port);
             byte[]data=new byte[100];
             while(true){
                 DatagramPacket paquet = new DatagramPacket( data, data.length, address, port ) ;
@@ -31,6 +32,9 @@ public class ClientUdp extends Thread{
             }
         } catch(Exception e){
             e.printStackTrace();
+        } finally {
+            if (dso != null)
+                dso.close();
         }
     }
 
