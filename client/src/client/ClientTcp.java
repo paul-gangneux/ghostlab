@@ -1,6 +1,7 @@
 package client;
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class ClientTcp extends Thread {
@@ -30,21 +31,25 @@ public class ClientTcp extends Thread {
     
     @Override
     public void run(){
-        DataInputStream istream = null;
-        DataOutputStream ostream = null;
+        DataInputStream istream ;
+        PrintWriter ostream ;
         try {
+            //istream=new BufferedReader(new InputStreamReader(server.getInputStream()));
+            istream = new DataInputStream(server.getInputStream()); 
+            ostream=new PrintWriter(new OutputStreamWriter(server.getOutputStream()));
+            byte[] buf = new byte[128];
             while(true){
+                //ostream = new DataOutputStream(server.getOutputStream());
+                //String message = new String (readline(istream), StandardCharsets.UTF_8);
 
-                istream = new DataInputStream(server.getInputStream()); 
-                ostream = new DataOutputStream(server.getOutputStream());
-                String message = readline(istream).toString();
-                System.out.println(message);  // Print what the server sends
+                int size = readline(istream, buf);
+                System.out.println(new String(buf, StandardCharsets.UTF_8));  // Print what the server sends
                 key = new Scanner(System.in);
                 System.out.print(">");
                 String tosend = key.nextLine();
                 if(checkRequest(tosend)){
-                    ostream.writeUTF(tosend);   // Send whatever the user typed to the server
-                    System.out.println(istream.readUTF());  // read what the server sends before exiting.
+                    ostream.print(tosend);   // Send whatever the user typed to the server
+                    ostream.flush();
                 }
             }
         }
@@ -53,21 +58,12 @@ public class ClientTcp extends Thread {
         }
     }
 
-     byte[] readline(DataInputStream data){
-        byte[] response=new byte[50];
-        try{
-            int cpt=0;
-            while (true) {
-                if (cpt==50)return null;
-                response[cpt++]=(byte)data.read();
-            }
-        }catch (IOException e){
-            return response;
-        }
+    public int readline(DataInputStream data, byte[] buf) throws IOException{        
+        return data.read(buf,0,128);
     }
 
     public static void main(String[] args) {
-        ClientTcp c = new ClientTcp("localhost", 4999);
+        ClientTcp c = new ClientTcp("localhost", 4242);
         c.run();
     }
 }
