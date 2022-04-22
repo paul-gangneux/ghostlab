@@ -1,8 +1,8 @@
-package src.launcher;
+package launcher;
 
 import javax.swing.JFrame;
 
-import src.ui.panels.launcher.AddressPortRequester;
+import ui.panels.launcher.AddressPortRequester;
 
 public class LauncherWindow extends JFrame {
 

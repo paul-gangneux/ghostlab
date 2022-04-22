@@ -1,8 +1,8 @@
-package src.ui_tests;
+package ui_tests;
 
-import src.model.GameInfo;
-import src.model.PlayerModel;
-import src.ui.GameWindow;
+import model.GameInfo;
+import model.PlayerModel;
+import ui.GameWindow;
 
 public class GameWindowTest {
     public static void main(String [] args)  {

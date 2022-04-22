@@ -1,4 +1,4 @@
-package src.Client;
+package client;
 import java.io.*;
 import java.net.*;
 public class ClientUdp extends Thread{

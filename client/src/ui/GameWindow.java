@@ -1,10 +1,10 @@
-package src.ui;
+package ui;
 
 import javax.swing.JFrame;
 
-import src.model.GameInfo;
-import src.model.PlayerModel;
-import src.ui.panels.game.LabyDisplayerPanel;
+import model.GameInfo;
+import model.PlayerModel;
+import ui.panels.game.LabyDisplayerPanel;
 
 //import java.awt.GridLayout;
 

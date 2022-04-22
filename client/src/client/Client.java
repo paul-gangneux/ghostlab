@@ -1,6 +1,6 @@
-package src.Client;
+package client;
 
-public class Client extends Thread {
+public class Client {
     static ClientTcp c1;
     static ClientUdp c2;
     public static void main(String[] args) {

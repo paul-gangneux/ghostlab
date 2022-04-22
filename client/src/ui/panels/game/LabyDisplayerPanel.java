@@ -1,9 +1,9 @@
-package src.ui.panels.game;
+package ui.panels.game;
 
 import javax.swing.JPanel;
 
-import src.model.GameInfo;
-import src.ui.GameWindow;
+import model.GameInfo;
+import ui.GameWindow;
 
 import java.awt.GridLayout;
 import java.util.ArrayList;

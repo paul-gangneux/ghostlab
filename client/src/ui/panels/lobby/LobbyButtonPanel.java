@@ -1,4 +1,4 @@
-package src.ui.panels.lobby;
+package ui.panels.lobby;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,7 +7,7 @@ import java.awt.GridLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import src.ui.LobbyWindow;
+import ui.LobbyWindow;
 
 public class LobbyButtonPanel extends JPanel {
 

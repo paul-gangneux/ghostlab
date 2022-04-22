@@ -1,4 +1,4 @@
-package src.ui.panels.game;
+package ui.panels.game;
 
 import java.awt.Color;
 import java.awt.event.MouseEvent;

@@ -1,4 +1,4 @@
-package src.ui.panels.launcher;
+package ui.panels.launcher;
 
 import java.awt.Color;
 import java.awt.Font;
