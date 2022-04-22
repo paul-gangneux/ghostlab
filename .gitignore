@@ -2,3 +2,4 @@ server/obj/*
 server/server
 .vscode
 notes protocole.txt
+client/bld/
