@@ -1,2 +1,4 @@
 server/obj/*
 server/server
+.vscode
+notes protocole.txt

@@ -6,9 +6,10 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <unistd.h>
 #include <string.h>
+#include <pthread.h>
+#include <endian.h>
 
 // renvoie le FD du socket TCP créé
 int init_server_socket(int port);
