@@ -3,5 +3,8 @@
         "server.h": "c",
         "game.h": "c",
         "player.h": "c"
-    }
+    },
+    "java.project.sourcePaths": [
+        "client/src"
+    ]
 }
