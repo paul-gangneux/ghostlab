@@ -1,10 +1,10 @@
-package src;
+package src.Client;
 import java.io.*;
 import java.net.*;
 public class ClientUdp extends Thread{
     int port ;
     InetAddress address ;
-    public ClientUdp(int port, String ip){
+    public ClientUdp(String ip, int port){
         try {
             this.port = port ;
             this.address = InetAddress.getByName(ip);
@@ -32,11 +32,6 @@ public class ClientUdp extends Thread{
         } catch(Exception e){
             e.printStackTrace();
         }
-    }
-
-    public static void main(String argv[]) {
-        ClientUdp thr1 = new ClientUdp(4444,"127.0.0.1");
-        thr1.run();
     }
 
 }
