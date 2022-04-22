@@ -9,6 +9,7 @@ while true; do
     -s | -server ) SERVER=true; shift ;;
     -cli | -client ) CLIENT=true; shift ;;
     -d | -debug ) DEBUG=true; shift ;;
+    ?* ) echo $1 "not a valid option"; shift ;;
     * ) break;;
   esac
 done
@@ -36,9 +37,9 @@ if [ $CLIENT == true ]
     cd client;
     if [ $CLEAN == true ] 
       then
-        :
+        make clean;
       else 
-        :
+        make;
     fi
     cd ..;
 fi
