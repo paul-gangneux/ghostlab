@@ -1,22 +1,15 @@
-package src;
+package src.Client;
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 
-public class Client extends Thread {
+public class ClientTcp extends Thread {
     private Socket server ;
-    private int portUdp ;
-    //private byte[] buffer ;
-    //private DatagramSocket datagramSocket ;
-    //private InetAddress inetAddress ;
     private Scanner key; // Scanner for input
 
-    public Client(String ip, int portTcp,int portUdp){
+    public ClientTcp(String ip, int portTcp){
         try {
             server = new Socket(ip, portTcp);
-            //datagramSocket = new DatagramSocket();
-            //inetAddress = InetAddress.getByName(ip);
-            this.portUdp = portUdp;
             key = new Scanner(System.in);
         } catch (IOException e) {
             e.printStackTrace();
@@ -39,14 +32,14 @@ public class Client extends Thread {
     public void run(){
         DataInputStream istream = null;
         DataOutputStream ostream = null;
-        //DatagramPacket datagramPacket= null;
         try {
             while(true){
-                key = new Scanner(System.in);
+
                 istream = new DataInputStream(server.getInputStream()); 
                 ostream = new DataOutputStream(server.getOutputStream());
-                String rep = new Scanner(istream).useDelimiter("\\***").next();
-                System.out.println(istream.readUTF());  // Print what the server sends
+                String message = readline(istream).toString();
+                System.out.println(message);  // Print what the server sends
+                key = new Scanner(System.in);
                 System.out.print(">");
                 String tosend = key.nextLine();
                 if(checkRequest(tosend)){
@@ -54,14 +47,13 @@ public class Client extends Thread {
                     System.out.println(istream.readUTF());  // read what the server sends before exiting.
                 }
             }
-            //TODO: when receive the messages through UDP 
         }
          catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-     byte[] readFirstMessage(DataInputStream data){
+     byte[] readline(DataInputStream data){
         byte[] response=new byte[50];
         try{
             int cpt=0;
@@ -74,8 +66,8 @@ public class Client extends Thread {
         }
     }
 
-    public static void main(String argv[]) {
-        Client thr1 = new Client("localhost",4999,5555);
-        thr1.run();
+    public static void main(String[] args) {
+        ClientTcp c = new ClientTcp("localhost", 4999);
+        c.run();
     }
 }
