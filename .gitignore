@@ -3,3 +3,4 @@ server/server
 .vscode
 notes protocole.txt
 client/bld/
+client/client.jar
