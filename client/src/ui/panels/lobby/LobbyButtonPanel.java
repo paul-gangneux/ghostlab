@@ -1,7 +1,7 @@
 package ui.panels.lobby;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+// import java.awt.event.ActionEvent;
+// import java.awt.event.ActionListener;
 import java.awt.GridLayout;
 
 import javax.swing.JButton;
@@ -22,13 +22,8 @@ public class LobbyButtonPanel extends JPanel {
             super();
             setText("Create game");
             setEnabled(true);
-            addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // Game creation routine : TODO
-                }
-                
+            addActionListener( event -> {
+                // Game creation routine : TODO
             });
         }
     }
@@ -39,15 +34,10 @@ public class LobbyButtonPanel extends JPanel {
             super();
             setText("Join game");
             setEnabled(false); // A good thing would be to prevent the button from being clicked if no game is selected
-            addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // Game joining routine : TODO
-                    // Here we have to gather the selectedGameInfo from the GameListPanel of the LobbyWindow
-                    // -> parentWindow.getGameListPanel().getSelectedGameInfo()
-                }
-                
+            addActionListener( event -> {
+                // Game joining routine : TODO
+                // Here we have to gather the selectedGameInfo from the GameListPanel of the LobbyWindow
+                // -> parentWindow.getGameListPanel().getSelectedGameInfo()
             });
         }
     }

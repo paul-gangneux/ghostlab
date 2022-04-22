@@ -18,7 +18,7 @@ public class GameListPanel extends JPanel {
     private LobbyWindow parentWindow;
 
     private GridLayout gl;
-    private GameInfo selectedGameInfo; // GameInfo of the selected game. Null if none is selected.
+    private transient GameInfo selectedGameInfo; // GameInfo of the selected game. Null if none is selected.
     
     public GameListPanel(LobbyWindow parentWindow) {
         super();
