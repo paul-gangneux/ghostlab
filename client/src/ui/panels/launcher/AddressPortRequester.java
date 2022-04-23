@@ -11,8 +11,12 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import client.Client;
+
 
 public class AddressPortRequester extends JPanel {
+
+    private Client client;
 
     private class IPInputBox extends JTextField {
         private IPInputBox() {
@@ -161,6 +165,7 @@ public class AddressPortRequester extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     // Connection routine : TODO
+                    // Don't hesitate to add a client field in the button subclasses if needed.
                 }
                 
             });
@@ -173,8 +178,9 @@ public class AddressPortRequester extends JPanel {
     private PseudoInputBox pseudoInputBox;
     private ConnectionButton connectionButton;
     
-    public AddressPortRequester() {
+    public AddressPortRequester(Client client) {
         super();
+        this.client = client;
         // default layout : flow layout
         inputBox = new IPInputBox();
         portInputBox = new PortInputBox();

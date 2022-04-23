@@ -6,7 +6,11 @@ import java.awt.event.MouseEvent;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
+import client.Client;
+
 public class LabyTile extends JPanel implements MouseInputListener {
+
+    private Client client;
 
     private int gridXPos;
     private int gridYPos;
@@ -15,7 +19,8 @@ public class LabyTile extends JPanel implements MouseInputListener {
 
     private boolean hasFog = false;
 
-    public LabyTile(LabyDisplayerPanel ldp, int xpos, int ypos) {
+    public LabyTile(Client client, LabyDisplayerPanel ldp, int xpos, int ypos) {
+        this.client = client;
         parentPanel = ldp;
         gridXPos = xpos;
         gridYPos = ypos;

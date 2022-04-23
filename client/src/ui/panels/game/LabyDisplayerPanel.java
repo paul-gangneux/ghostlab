@@ -2,6 +2,7 @@ package ui.panels.game;
 
 import javax.swing.JPanel;
 
+import client.Client;
 import model.GameInfo;
 import ui.GameWindow;
 
@@ -9,6 +10,8 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 
 public class LabyDisplayerPanel extends JPanel {
+
+    private Client client;
 
     private GameWindow parentWindow;
     private GridLayout gl;
@@ -98,8 +101,9 @@ public class LabyDisplayerPanel extends JPanel {
         y_pointed = -1;
     }
     
-    public LabyDisplayerPanel(GameWindow parentWindow, GameInfo gameinfo) {
+    public LabyDisplayerPanel(Client client, GameWindow parentWindow, GameInfo gameinfo) {
         super();
+        this.client = client;
         this.parentWindow = parentWindow;
         coordPath = new ArrayList<int[]>();
         int labyHeight = gameinfo.getLabyHeight();
@@ -109,7 +113,7 @@ public class LabyDisplayerPanel extends JPanel {
         labyGrid = new LabyTile[labyHeight][labyWidth];
         for (int i = 0; i < labyHeight; i++) {
             for (int j = 0; j < labyWidth; j++) {
-                LabyTile lt = new LabyTile(this, j, i);
+                LabyTile lt = new LabyTile(client, this, j, i);
                 labyGrid[i][j] = lt;
                 lt.addMouseListener(lt);
                 add(lt);

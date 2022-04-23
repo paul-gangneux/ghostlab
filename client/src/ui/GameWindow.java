@@ -2,6 +2,7 @@ package ui;
 
 import javax.swing.JFrame;
 
+import client.Client;
 import model.GameInfo;
 import model.PlayerModel;
 import ui.panels.game.LabyDisplayerPanel;
@@ -9,6 +10,8 @@ import ui.panels.game.LabyDisplayerPanel;
 //import java.awt.GridLayout;
 
 public class GameWindow extends JFrame {
+
+    private Client client;
 
     private static final int DEFAULT_GAMEWINDOW_WIDTH = 1000;
     private static final int DEFAULT_GAMEWINDOW_HEIGHT = 1000;
@@ -28,11 +31,12 @@ public class GameWindow extends JFrame {
         return playerModel;
     }
 
-    public GameWindow(GameInfo gameinfo, PlayerModel playermodel) {
+    public GameWindow(Client client, GameInfo gameinfo, PlayerModel playermodel) {
+        this.client = client;
         this.gameinfo = gameinfo;
-        playerModel = playermodel;
+        this.playerModel = playermodel;
         // setLayout(gl);
-        ldp = new LabyDisplayerPanel(this, gameinfo);
+        ldp = new LabyDisplayerPanel(client, this, gameinfo);
         add(ldp);
         setTitle("Game window");
         setSize(DEFAULT_GAMEWINDOW_WIDTH, DEFAULT_GAMEWINDOW_HEIGHT);

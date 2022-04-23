@@ -7,9 +7,12 @@ import java.awt.GridLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import client.Client;
 import ui.LobbyWindow;
 
 public class LobbyButtonPanel extends JPanel {
+
+    private Client client;
 
     private LobbyWindow parentWindow;
     private GridLayout gl;
@@ -56,8 +59,9 @@ public class LobbyButtonPanel extends JPanel {
         gjb.setEnabled(true);
     }
 
-    public LobbyButtonPanel(LobbyWindow parentWindow) {
+    public LobbyButtonPanel(Client client, LobbyWindow parentWindow) {
         super();
+        this.client = client;
         this.parentWindow = parentWindow;
         gl = new GridLayout(1, 2, 5, 0); // 1 row, 2 columns for the two buttons, 5 px horizontal shift, no vertical shift
         setLayout(gl);

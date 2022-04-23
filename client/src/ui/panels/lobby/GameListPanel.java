@@ -6,6 +6,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
+import client.Client;
+
 import java.awt.GridLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -15,13 +17,16 @@ import ui.LobbyWindow;
 
 public class GameListPanel extends JPanel {
 
+    private Client client;
+
     private LobbyWindow parentWindow;
 
     private GridLayout gl;
     private GameInfo selectedGameInfo; // GameInfo of the selected game. Null if none is selected.
     
-    public GameListPanel(LobbyWindow parentWindow) {
+    public GameListPanel(Client client, LobbyWindow parentWindow) {
         super();
+        this.client = client;
         this.parentWindow = parentWindow;
         gl = new GridLayout(1, 1, 0, 5); // 1 row, 1 column, no horizontal shift, 5 px vertical shift
         setLayout(gl);
