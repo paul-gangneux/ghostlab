@@ -61,7 +61,7 @@ public class LabyTile extends JPanel implements MouseInputListener {
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        System.out.println(String.format("Entered tile (%d, %d)", gridXPos,  gridYPos));
+        System.out.println(String.format("Entered tile (%d, %d)", gridXPos,  gridYPos)); // TODO : Remove this for final version please
         parentPanel.makeSelection(gridXPos, gridYPos);
     }
 

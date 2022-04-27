@@ -23,8 +23,6 @@ public class AddressPortRequester extends JPanel {
             // TODO : allow "localhost" string / device address
             setText("127.0.0.1");
             setFont(new Font("arial", 1, 50)); // name, style, size. Style defines if it's bold, italic, etc.
-            setEditable(true);
-            setVisible(true);
             getDocument().addDocumentListener(new DocumentListener() {
 
                 @Override
