@@ -17,8 +17,8 @@ public class GameWindow extends JFrame {
 
     private Client client;
 
-    private static final int DEFAULT_GAMEWINDOW_WIDTH = 1000;
-    private static final int DEFAULT_GAMEWINDOW_HEIGHT = 1000;
+    private static final int DEFAULT_GAMEWINDOW_WIDTH = 1680;
+    private static final int DEFAULT_GAMEWINDOW_HEIGHT = 1050;
 
     private GridLayout gl;
     private LabyDisplayerPanel ldp;

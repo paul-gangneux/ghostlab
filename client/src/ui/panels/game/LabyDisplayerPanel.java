@@ -108,7 +108,7 @@ public class LabyDisplayerPanel extends JPanel {
         coordPath = new ArrayList<int[]>();
         int labyHeight = gameinfo.getLabyHeight();
         int labyWidth = gameinfo.getLabyWidth();
-        gl = new GridLayout(labyHeight, labyWidth, 1, 1); // 1 px horizontal shift, 1 px vertical shift
+        gl = new GridLayout(labyHeight, labyWidth, 0, 0); // 1 px horizontal shift, 1 px vertical shift
         setLayout(gl);
         labyGrid = new LabyTile[labyHeight][labyWidth];
         for (int i = 0; i < labyHeight; i++) {
