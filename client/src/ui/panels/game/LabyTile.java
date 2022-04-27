@@ -1,14 +1,29 @@
 package ui.panels.game;
 
-import java.awt.Color;
 import java.awt.event.MouseEvent;
 
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
 import client.Client;
 
 public class LabyTile extends JPanel implements MouseInputListener {
+
+    public enum TileType {
+        MAIN_PLAYER,
+        //TEAM_PLAYER,
+        VISIBLE_ENEMY_PLAYER,
+        MEMORY_ENEMY_PLAYER,
+        VISIBLE_GHOST,
+        MEMORY_GHOST,
+        VISIBLE_EMPTY,
+        MEMORY_EMPTY,
+        //BONUS,
+        WALL,
+        UNKNOWN
+    }
 
     private Client client;
 
@@ -17,41 +32,103 @@ public class LabyTile extends JPanel implements MouseInputListener {
 
     private LabyDisplayerPanel parentPanel;
 
-    private boolean hasFog = false;
+    private TileType tileType;
+
+    private JLabel icon;
 
     public LabyTile(Client client, LabyDisplayerPanel ldp, int xpos, int ypos) {
+        setSize(60, 60);
         this.client = client;
         parentPanel = ldp;
         gridXPos = xpos;
         gridYPos = ypos;
-        setBackground(Color.BLACK); // unrevealed tile
+        setTile(TileType.UNKNOWN, false);
     }
 
-    public void setToWall() {
-        setBackground(Color.GRAY);
+    private void clearTile() {
+        if (icon != null) {
+            remove(icon);
+        }
+        icon = null;
     }
 
-    public void setEmpty() {
-        setBackground(Color.WHITE);
-    }
-
-    // TODO : add a transparent mask for the selections and fog
-
-    public void setFog(boolean value) {
-        hasFog = value;
-        //setOpaque(!value); // if there is fog, we need transparence, so no opacity, and so on
-        setBackground(value ? Color.LIGHT_GRAY : null); // TODO : if null color doesn't work, find a workaround !!!
+    public void setTile(TileType type, boolean selected) {
+        clearTile();
+        tileType = type;
+        if (selected) {
+            switch (type) {
+                case VISIBLE_EMPTY:
+                    icon = new JLabel(new ImageIcon("client/resources/empty_tile_selected.png"));
+                    break;
+                case MEMORY_EMPTY:
+                    icon = new JLabel(new ImageIcon("client/resources/empty_tile_selected.png"));
+                    break;
+                case MAIN_PLAYER:
+                    // main character shouldn't be selected, wtf ?
+                    icon = new JLabel(new ImageIcon("client/resources/main_character_facing_left_selected.png"));
+                    break;
+                case MEMORY_ENEMY_PLAYER:
+                    icon = new JLabel(new ImageIcon("client/resources/enemy_character_facing_left_selected.png"));   
+                    break;
+                case MEMORY_GHOST:
+                    icon = new JLabel(new ImageIcon("client/resources/memory_ghost_selected.png"));
+                    break;
+                case UNKNOWN:
+                    icon = new JLabel(new ImageIcon("client/resources/unknown_tile_selected.png"));
+                    break;
+                case VISIBLE_ENEMY_PLAYER:
+                    icon = new JLabel(new ImageIcon("client/resources/enemy_character_facing_left_selected.png"));
+                    break;
+                case VISIBLE_GHOST:
+                    icon = new JLabel(new ImageIcon("client/resources/spotted_ghost_selected.png"));
+                    break;
+                case WALL:
+                    icon = new JLabel(new ImageIcon("client/resources/wall_selected.png"));
+                    break;
+            }
+        }
+        else {
+            switch (type) {
+                case VISIBLE_EMPTY:
+                    icon = new JLabel(new ImageIcon("client/resources/empty_tile.png"));
+                    break;
+                case MEMORY_EMPTY:
+                    icon = new JLabel(new ImageIcon("client/resources/empty_tile_memory.png"));
+                    break;
+                case MAIN_PLAYER:
+                    icon = new JLabel(new ImageIcon("client/resources/main_character_facing_left.png"));
+                    break;
+                case MEMORY_ENEMY_PLAYER:
+                    icon = new JLabel(new ImageIcon("client/resources/enemy_character_facing_left_memory.png"));   
+                    break;
+                case MEMORY_GHOST:
+                    icon = new JLabel(new ImageIcon("client/resources/memory_ghost.png"));
+                    break;
+                case UNKNOWN:
+                    icon = new JLabel(new ImageIcon("client/resources/unknown_tile.png"));
+                    break;
+                case VISIBLE_ENEMY_PLAYER:
+                    icon = new JLabel(new ImageIcon("client/resources/enemy_character_facing_left.png"));
+                    break;
+                case VISIBLE_GHOST:
+                    icon = new JLabel(new ImageIcon("client/resources/spotted_ghost.png"));
+                    break;
+                case WALL:
+                    icon = new JLabel(new ImageIcon("client/resources/wall.png"));
+                    break;
+            }
+        }
+        icon.setSize(60, 60);
+        add(icon);
+        revalidate();
     }
 
     public void setSelected() {
-        //setOpaque(false);
-        setBackground(hasFog ? Color.ORANGE : Color.GREEN);
+        setTile(tileType, true);
     }
 
     public void setUnselected() {
-        //setOpaque(!hasFog); // if fog, then keep the translucidity, else remove it
-        //setBackground(hasFog ? Color.LIGHT_GRAY : null); // TODO : if null color doesn't work, find a workaround !!!
-        setBackground(Color.BLACK);
+        setTile(tileType, false);
     }
 
     @Override
@@ -61,7 +138,7 @@ public class LabyTile extends JPanel implements MouseInputListener {
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        System.out.println(String.format("Entered tile (%d, %d)", gridXPos,  gridYPos)); // TODO : Remove this for final version please
+        System.out.println(String.format("Entered tile (%d, %d) of type " + tileType.name(), gridXPos,  gridYPos)); // TODO : Remove this for final version please
         parentPanel.makeSelection(gridXPos, gridYPos);
     }
 

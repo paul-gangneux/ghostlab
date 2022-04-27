@@ -1,11 +1,14 @@
 package ui_tests;
 
+import java.util.Random;
+
 import client.Client;
 import model.ChatScope;
 import model.GameInfo;
 import model.MessageInfo;
 import model.PlayerModel;
 import ui.GameWindow;
+import ui.panels.game.LabyTile.TileType;
 
 public class GameWindowTest {
     public static void main(String [] args)  {
@@ -18,6 +21,15 @@ public class GameWindowTest {
                 c.setGameWindow(gw);
                 gw.setVisible(true);
                 gw.addMessage(new MessageInfo(ChatScope.SERVER_MSG, null, "---- HEAD OF CHAT ----"));
+                Random rd = new Random();
+                TileType[] types = TileType.values();
+                for (int i = 0; i < 20; i++) {
+                    for (int j = 0; j < 20; j++) {
+                        int k = rd.nextInt(9);
+                        TileType type = types[k];
+                        gw.getLabyDisplayerPanel().getGrid()[i][j].setTile(type, false);
+                    }
+                }
             }
         });
     }
