@@ -334,8 +334,8 @@ void* interact_with_client(void* arg) {
         n = game_sendPlayerList(gameList, id_game, cli_fd);
       }
       // asking for game list
-      // expecting [GAME? m***]
-      else if (comp_keyword(reqbuf, "GAME?") && n == 10) {
+      // expecting [GAME?***]
+      else if (comp_keyword(reqbuf, "GAME?") && n == 8) {
         // sends GAMES and OGAME to client
         n = gameList_sendToCli(gameList, cli_fd);
         if (n == -1) {
