@@ -333,6 +333,15 @@ void* interact_with_client(void* arg) {
         u_int8_t id_game = reqbuf.req[6];
         n = game_sendPlayerList(gameList, id_game, cli_fd);
       }
+      // asking for game list
+      // expecting [GAME? m***]
+      else if (comp_keyword(reqbuf, "GAME?") && n == 10) {
+        // sends GAMES and OGAME to client
+        n = gameList_sendToCli(gameList, cli_fd);
+        if (n == -1) {
+          goto end;
+        }
+      }
       // wrong input
       else {
         // send_string(cli_fd, "DUNNO***");
@@ -341,7 +350,7 @@ void* interact_with_client(void* arg) {
     }
   }
 
-  // TODO: wait for start*** or disconnect
+  // TODO: game has might have started, do stuff
   nextRequest(cli_fd, &reqbuf);
 
   end:
