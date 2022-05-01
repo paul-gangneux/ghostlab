@@ -240,17 +240,18 @@ void game_removePlayer(game_t* game, player_t* player, int flag) {
   unlock(game);
 }
 
-void gameList_remove_aux(gameCell_t* gc, game_t* game) {
+// returns 0 on failure, 1 on success
+int gameList_remove_aux(gameCell_t* gc, game_t* game) {
   if (gc->next == NULL)
-    return;
+    return 0;
   if (gc->next->game == game) {
     gameCell_t* temp = gc->next;
     gc->next = gc->next->next;
     temp->next = NULL;
     freeGameCell(temp);
-    return;
+    return 1;
   }
-  gameList_remove_aux(gc->next, game);
+  return gameList_remove_aux(gc->next, game);
 }
 
 // free game
@@ -265,10 +266,12 @@ void gameList_remove(gameList_t *gameList, game_t* game) {
     gameList->first = gameList->first->next;
     gc->next = NULL;
     freeGameCell(gc);
+    gameList->length -= 1;
     unlock(gameList);
     return;
   }
-  gameList_remove_aux(gameList->first, game);
+  if(gameList_remove_aux(gameList->first, game))
+    gameList->length -= 1;
   unlock(gameList);
 }
 
