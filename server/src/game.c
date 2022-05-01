@@ -73,8 +73,10 @@ gameCell_t* newGameCell(game_t* g) {
 }
 
 void freeGame(game_t* game) {
-  pthread_mutex_destroy(&game->mutex);
+  lock(game);
   freePlayerList(game->playerList);
+  unlock(game);
+  pthread_mutex_destroy(&game->mutex);
   free(game->labyrinth);
   free(game);
   game = NULL;
@@ -234,9 +236,9 @@ int game_addPlayer(game_t* game, player_t* player) {
 }
 
 // free player or not with flag set to PLAYER_FREE or PLAYER_NOFREE
-void game_removePlayer(game_t* game, player_t* player, int flag) {
+void game_removePlayer(game_t* game, player_t* player) {
   lock(game);
-  playerList_remove(game->playerList, player, flag);
+  playerList_remove(game->playerList, player);
   unlock(game);
 }
 

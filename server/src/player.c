@@ -17,6 +17,12 @@ player_t* newPlayer(int fd, struct sockaddr_in addrinfo) {
   player_t* p = malloc(sizeof(player_t));
   memset(p, 0, sizeof(player_t));
   p->fd = fd;
+  int n = pipe(p->pipe);
+  if (n < 0) {
+    perror("pipe");
+    free(p);
+    return NULL;
+  }
   p->name[0] = 0;
   p->addr.sin_family = AF_INET;
   p->addr.sin_addr.s_addr = addrinfo.sin_addr.s_addr;
@@ -40,23 +46,31 @@ playerList_t* newPlayerList() {
 void freePlayer(player_t* player) {
   if (player == NULL) return;
   close(player->fd);
+  close(player->pipe[0]);
+  close(player->pipe[1]);
   free(player);
   player = NULL;
 }
 
-void freePlayerCell(playerCell_t* pc, int flag) {
+void player_endThread(player_t* player) {
+  int n = write(player->pipe[1], "end", 3);
+  if (n < 0) {
+    perror("write");
+  }
+}
+
+void freePlayerCell(playerCell_t* pc) {
   if (pc == NULL) return;
   if (pc->next != NULL)
-    freePlayerCell(pc->next, flag);
-  if (flag == PLAYER_FREE)
-    freePlayer(pc->player);
+    freePlayerCell(pc->next);
+  player_endThread(pc->player);
   free(pc);
   pc = NULL;
 }
 
 void freePlayerList(playerList_t* pl) {
   if (pl == NULL) return;
-  freePlayerCell(pl->first, PLAYER_FREE);
+  freePlayerCell(pl->first);
   free(pl);
   pl = NULL;
 }
@@ -69,32 +83,31 @@ void player_addToList(playerList_t* playerList, player_t* player) {
 }
 
 // returns 0 on failure, 1 on success
-int playerList_remove_aux(playerCell_t* pc, player_t* player, int flag) {
+int playerList_remove_aux(playerCell_t* pc, player_t* player) {
   if (pc->next == NULL)
     return 0;
   if (pc->next->player == player) {
     playerCell_t* temp = pc->next;
     pc->next = pc->next->next;
     temp->next = NULL;
-    freePlayerCell(temp, flag);
+    freePlayerCell(temp);
     return 1;
   }
-  return playerList_remove_aux(pc->next, player, flag);
+  return playerList_remove_aux(pc->next, player);
 }
 
 // lock mutex before using
-// set flag to PLAYER_FREE or PLAYER_NOFREE to free or not player
-void playerList_remove(playerList_t* playerList, player_t* player, int flag) {
+void playerList_remove(playerList_t* playerList, player_t* player) {
   if (playerList->first == NULL)
     return;
   if (playerList->first->player == player) {
     playerCell_t* pc = playerList->first;
     playerList->first = playerList->first->next;
     pc->next = NULL;
-    freePlayerCell(pc, flag);
+    freePlayerCell(pc);
     return;
   }
-  if (playerList_remove_aux(playerList->first, player, flag))
+  if (playerList_remove_aux(playerList->first, player))
     playerList->length -= 1;
 }
 
