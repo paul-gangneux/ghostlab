@@ -50,8 +50,7 @@ int gameList_add(gameList_t* gl, game_t* g);
 // returns -1 on failure, 0 on success
 int game_addPlayer(game_t* game, player_t* player);
 
-// free player or not with flag set to PLAYER_FREE or PLAYER_NOFREE
-void game_removePlayer(game_t* game, player_t* player, int flag);
+void game_removePlayer(game_t* game, player_t* player);
 
 // returns NULL on failure
 game_t* game_get(gameList_t* gameList, u_int8_t id);

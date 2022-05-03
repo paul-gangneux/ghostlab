@@ -1,6 +1,7 @@
 #include "server.h"
 #include "game.h"
 #include "player.h"
+#include <poll.h>
 
 #define MIN(a, b) (a<b?a:b)
 #define MAX(a, b) (a>b?a:b)
@@ -115,7 +116,7 @@ void rw_buffers_initialize(reqbuf_t *buf) {
 // puts nect tcp request in buf->reqbuf
 // returns length of request if sucessful,
 // -1 on error (client disconnexion)
-int nextRequest(int fd, reqbuf_t* reqbuf) {
+int nextRequest(player_t* player, reqbuf_t* reqbuf) {
   //TODO: bien tester tout ça
   int n = 0;
   if (reqbuf->beg >= READBUF_SIZE - REQ_SIZE) {
@@ -127,7 +128,21 @@ int nextRequest(int fd, reqbuf_t* reqbuf) {
   if (reqbuf->beg == reqbuf->end) {
     reqbuf->beg = 0;
     reqbuf->end = 0;
-    n = recv(fd, reqbuf->readbuf, READBUF_SIZE, 0);
+
+    struct pollfd pollfd[2] = {
+      {.fd = player->fd, .events = POLLIN},
+      {.fd = player->pipe[0], .events = POLLIN}
+    };
+    poll(pollfd, 2, -1);
+
+    if (pollfd[1].revents & POLLIN) {
+      char buf[3];
+      n = read(player->pipe[0], buf, 3);
+      if (n == 3 && buf[0] == 'e' && buf[1] == 'n' && buf[2] == 'd')
+        return -2;
+    }
+
+    n = recv(player->fd, reqbuf->readbuf, READBUF_SIZE, 0);
     if (n == -1) 
       return -1;
     reqbuf->end += n;
@@ -194,13 +209,17 @@ void* interact_with_client(void* arg) {
 
   // client creates or joins game
   while(!exit_loop) {
-    n = nextRequest(cli_fd, &reqbuf);
+    n = nextRequest(player, &reqbuf);
     if (n == -1) {
       perror("nextRequest");
       goto end;
     }
     if (n == 0) {
       printf("client disconnected\n");
+      goto end;
+    }
+    if (n == -2) {
+      printf("client disconnected by server\n");
       goto end;
     }
     if (!(check_tcp_message(reqbuf, n))) {
@@ -277,7 +296,7 @@ void* interact_with_client(void* arg) {
         } 
         else {
           u_int8_t id_game = game->id;
-          game_removePlayer(game, player, PLAYER_NOFREE);
+          game_removePlayer(game, player);
           if (isHost) {
             // TODO: verify there's no unfortunate player free
             gameList_remove(gameList, game);
@@ -351,13 +370,13 @@ void* interact_with_client(void* arg) {
   }
 
   // TODO: game has might have started, do stuff
-  nextRequest(cli_fd, &reqbuf);
+  nextRequest(player, &reqbuf);
 
   end:
 
   // close(cli_fd); // no need ?
   if (isInGame)
-    game_removePlayer(game, player, PLAYER_NOFREE);
+    game_removePlayer(game, player);
   freePlayer(player);
   if (game != NULL && isHost)
     gameList_remove(gameList, game);
