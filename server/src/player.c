@@ -26,6 +26,8 @@ player_t* newPlayer(int fd, struct sockaddr_in addrinfo) {
   p->name[0] = 0;
   p->addr.sin_family = AF_INET;
   p->addr.sin_addr.s_addr = addrinfo.sin_addr.s_addr;
+  p->is_ready = 0;
+  p->score = 0;
   return p;
 }
 
@@ -80,6 +82,7 @@ void player_addToList(playerList_t* playerList, player_t* player) {
   playerCell_t* pc = newPlayerCell(player);
   pc->next = playerList->first;
   playerList->first = pc;
+  playerList->length += 1;
 }
 
 // returns 0 on failure, 1 on success
@@ -105,6 +108,7 @@ void playerList_remove(playerList_t* playerList, player_t* player) {
     playerList->first = playerList->first->next;
     pc->next = NULL;
     freePlayerCell(pc);
+    playerList->length -= 1;
     return;
   }
   if (playerList_remove_aux(playerList->first, player))
@@ -134,4 +138,20 @@ int playerList_sendToCli(playerList_t* playerList, u_int8_t game_id, int cli_fd)
     pc = pc->next;
   }
   return 0;
+}
+
+int playerList_allReady_aux(playerCell_t* pc) {
+  if (pc == NULL)
+    return 1;
+  if (pc->player->is_ready == 0)
+    return 0;
+  return playerList_allReady_aux(pc->next);
+}
+
+// returns 1 if all players are ready
+// returns 0 if not all player are, or if list is empty
+int playerList_allReady(playerList_t* playerList) {
+  if (playerList->first == NULL)
+    return 0;
+  return playerList_allReady_aux(playerList->first);
 }

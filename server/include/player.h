@@ -19,7 +19,9 @@ struct player {
   int pipe[2]; // sert à envoyer des "signaux" au joueur
   char name[MAX_NAME];
   struct sockaddr_in addr;
-  u_int32_t x,y;
+  int is_ready;
+  int x,y;
+  int score;
 };
 
 // allocate memory for player. free with freePlayer()
@@ -37,5 +39,9 @@ void player_addToList(playerList_t* playerList, player_t* player);
 void playerList_remove(playerList_t* playerList, player_t* player);
 
 int playerList_sendToCli(playerList_t* playerList, u_int8_t game_id, int cli_fd);
+
+// returns 1 if all players are ready
+// returns 0 if not all player are, or if list is empty
+int playerList_allReady(playerList_t* playerList);
 
 #endif
