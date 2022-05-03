@@ -3,6 +3,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class ClientTcp extends Thread {
@@ -10,12 +11,8 @@ public class ClientTcp extends Thread {
     private Scanner key; // Scanner for input
     DataInputStream istream ;
     PrintWriter ostream ;
-    String gameList ; // we initialize the list of the games available with a string so we can parse it later
+    String ogameList ; // we initialize the list of the games available with a string so we can parse it later
     int numberOfGames ;
-
-    public static int x = 0 ;
-    public static int taille = 0;
-    
     public ClientTcp(String ip, int portTcp){
         try {
             server = new Socket(ip, portTcp);
@@ -69,19 +66,22 @@ public class ClientTcp extends Thread {
     }
     @Override
     public void run(){
+        boolean end = false ;
         try {
             //istream=new BufferedReader(new InputStreamReader(server.getInputStream()));
             istream = new DataInputStream(server.getInputStream()); 
             ostream=new PrintWriter(new OutputStreamWriter(server.getOutputStream()));
             byte[] buf = new byte[128];
             key = new Scanner(System.in);
+            
+
             while(true){
                 //ostream = new DataOutputStream(server.getOutputStream());
                 //String message = new String (readline(istream), StandardCharsets.UTF_8);
-
-                    int rep = readline(istream, buf);
-                
                 //getNumberOfGames(reply);
+                while(istream.available()>0){
+                    int rep = readline(istream, buf);
+                }
                 System.out.print(">");
                 String tosend = key.nextLine();
                 if(checkRequest(tosend)){
@@ -97,31 +97,102 @@ public class ClientTcp extends Thread {
 
     //Our readline method
     public int readline(DataInputStream data, byte[] buf) throws IOException{        
+        int id = 0;
+        int lu = 0 ;
         String rep="";
-        int star = 0;
-        if(x==taille){
-            taille = data.read(buf,0,128);
-            x = 0;
-        }
+        int ch = 0;
+        String opcode = getOpCode(data);
+        rep+=opcode;
 
-        for(int i = 0 ; i<taille ;i++){
-            int c = buf[i];
-            if(star ==3){
+        //we match each opcode and treat it to read the exact amount of bytes
+        switch (opcode) {
+            case "GAMES":
+                for (int i = 0; i < 5; i++) {
+                    ch = data.read();
+                    lu++;
+                    if((byte)ch < 31 || (byte)ch>127){
+                        int games = (int)ch ;
+                        String gamesNum = String.valueOf(games);
+                        this.numberOfGames = games;
+                        rep+=gamesNum;
+                    }
+                    else{
+                        rep+=(char)ch;
+                    }
+                }
                 System.out.println(rep);
-                return taille;
+                return lu;
+            case "OGAME":
+                for(int j = 0 ; j<7 ; j++){
+                    ch = data.read();
+                    lu++;
+                    if(((byte)ch < 31 || (byte)ch>127)){
+                        int num = (int)ch ;
+                        if(id == 0){
+                            System.out.println("game :"+num);
+
+                            String gameIdString = String.valueOf(num);
+                            this.ogameList+=gameIdString+" ";
+                            rep+=gameIdString;
+                            id=1;
+                        }
+                        else{
+                            System.out.println("players :"+num);
+                            String numplayers = String.valueOf(num);
+                            this.ogameList+=numplayers+" ";
+                            rep+=numplayers;
+                            id=1;  
+                        }
+                    }
+                    else{
+                        rep+=(char)ch;
+                    }
+                }
+                System.out.println(rep);
+                return lu;
+
+            case "REGOK":
+                for(int j = 0 ; j<5 ; j++){
+                    ch = data.read();
+                    lu++;
+                    if((byte)ch < 31 || (byte)ch>127){
+                        int games = (int)ch ;
+                        String gamesNum = String.valueOf(games);
+                        this.numberOfGames = games;
+                        rep+=gamesNum;
+                    }
+                    else{
+                        rep+=(char)ch;
+                    }
+                }
+                System.out.println(rep);
+                return lu;
+
+            case "REGNO":
+            for(int j = 0 ; j<4 ; j++){
+                ch = data.read();
+                lu++;
+                rep+=(char)ch;
+                
             }
-            if(c=='*'){
-                star++;
-            }
-            if (c < 31 || c > 127) {
-                int games = (int) buf[6];
-                String gamesNum = String.valueOf(games);
-                rep+=gamesNum;
-            }
-            rep+=(char)buf[i];
+            System.out.println(rep);
+            return lu;
+
+            default:
+            break;
         }
-        System.out.println(rep);
-        return taille;
+        return lu;
+    }
+
+    //return the first five characters read from the inputstream in string format
+    public String getOpCode(DataInputStream data) throws IOException{
+        String opcode = "";
+        int ch ;
+        for (int i = 0; i < 5; i++) {
+            ch = data.read();
+            opcode+=(char)ch;
+        }
+        return opcode;
     }
 
     public void count_to_go_to_line(byte[] buf,DataInputStream dis) throws IOException{
