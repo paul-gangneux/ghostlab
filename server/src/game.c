@@ -16,6 +16,10 @@ struct gameList {
   gameCell_t* first;
 };
 
+struct ghost {
+  int x,y;
+};
+
 // generate and return the labyrinth
 // sets w and h appropriately
 char* newLabyrinth(u_int16_t* w, u_int16_t* h) {
@@ -44,7 +48,7 @@ game_t* newGame() {
   pthread_mutex_init(&g->mutex, NULL);
   g->id = 0;
   g->nb_players = 0;
-  g->nb_ghosts = 0; // todo?
+  g->nb_ghosts = 3; // TODO: randomise
   g->multicast_port[0] = '4';
   g->multicast_port[1] = '0';
   g->multicast_port[2] = '0';
@@ -52,6 +56,15 @@ game_t* newGame() {
   g->hasStarted = 0;
   g->labyrinth = newLabyrinth(&g->w, &g->h);
   g->playerList = newPlayerList();
+  g->ghosts = (ghost_t *) malloc(sizeof(ghost_t) * g->nb_ghosts);
+  // for (int i = 0; i < g->nb_ghosts; i++) // do stuff
+  //TODO : randomise initial position
+  g->ghosts[0].x = 2;
+  g->ghosts[0].y = 1;
+  g->ghosts[1].x = 4;
+  g->ghosts[1].y = 2;
+  g->ghosts[2].x = 5;
+  g->ghosts[2].y = 4;
   return g;
 }
 
@@ -73,9 +86,12 @@ gameCell_t* newGameCell(game_t* g) {
 }
 
 void freeGame(game_t* game) {
-  pthread_mutex_destroy(&game->mutex);
+  lock(game);
   freePlayerList(game->playerList);
+  unlock(game);
+  pthread_mutex_destroy(&game->mutex);
   free(game->labyrinth);
+  free(game->ghosts);
   free(game);
   game = NULL;
 }
@@ -234,23 +250,24 @@ int game_addPlayer(game_t* game, player_t* player) {
 }
 
 // free player or not with flag set to PLAYER_FREE or PLAYER_NOFREE
-void game_removePlayer(game_t* game, player_t* player, int flag) {
+void game_removePlayer(game_t* game, player_t* player) {
   lock(game);
-  playerList_remove(game->playerList, player, flag);
+  playerList_remove(game->playerList, player);
   unlock(game);
 }
 
-void gameList_remove_aux(gameCell_t* gc, game_t* game) {
+// returns 0 on failure, 1 on success
+int gameList_remove_aux(gameCell_t* gc, game_t* game) {
   if (gc->next == NULL)
-    return;
+    return 0;
   if (gc->next->game == game) {
     gameCell_t* temp = gc->next;
     gc->next = gc->next->next;
     temp->next = NULL;
     freeGameCell(temp);
-    return;
+    return 1;
   }
-  gameList_remove_aux(gc->next, game);
+  return gameList_remove_aux(gc->next, game);
 }
 
 // free game
@@ -265,10 +282,12 @@ void gameList_remove(gameList_t *gameList, game_t* game) {
     gameList->first = gameList->first->next;
     gc->next = NULL;
     freeGameCell(gc);
+    gameList->length -= 1;
     unlock(gameList);
     return;
   }
-  gameList_remove_aux(gameList->first, game);
+  if(gameList_remove_aux(gameList->first, game))
+    gameList->length -= 1;
   unlock(gameList);
 }
 
@@ -282,6 +301,80 @@ int game_sendPlayerList(gameList_t* gameList, u_int8_t game_id, int cli_fd) {
   int n = playerList_sendToCli(game->playerList, game_id, cli_fd);
   unlock(game);
   return n;
+}
+
+// starts game in a new thread if all players are ready.
+// demands that at least one player is registered
+void game_startIfAllReady(game_t* game) {
+  lock(game);
+  int ready = playerList_allReady(game->playerList);
+  if (game->hasStarted)
+    ready = 0; // to avoid launching a game twice
+  game->hasStarted = 1;
+  unlock(game);
+
+  if(ready)
+    printf("all players ready\n");
+  // TODO: launch game thread
+}
+
+// out of bounds
+#define out_of_bounds(game, thing)\
+  thing->x < 0 || thing->x >= game->w ||\
+  thing->y < 0 || thing->y >= game->h
+
+#define in_a_wall(game, thing)\
+  game->labyrinth[thing->x + thing->y * game->w] == '1'
+
+// returns 1 if the player captured at least one ghost, else returns 0
+int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
+  int capturedAGhost = 0;
+  int delta = 0;
+  int* axis = NULL;
+
+  switch (direction) {
+    case MV_UP:
+      delta = -1;
+      axis = &player->y;
+      break;
+    case MV_DOWN:
+      delta = 1;
+      axis = &player->y;
+      break;
+    case MV_LEFT:
+      delta = -1;
+      axis = &player->x;
+      break;
+    case MV_RIGHT:
+      delta = 1;
+      axis = &player->x;
+      break;
+    default:
+      return 0;
+  }
+
+  while(amount > 0) {
+    *axis += delta;
+    if (out_of_bounds(game, player) || in_a_wall(game, player)) {
+      *axis -= delta;
+      break;
+    }
+
+    lock(game);
+    for (int i = 0; i < game->nb_ghosts; i++) {
+      if (game->ghosts[i].x == player->x && game->ghosts[i].y == player->y) {
+        game->nb_ghosts--;
+        game->ghosts[i] = game->ghosts[game->nb_ghosts];
+        capturedAGhost = 1;
+        player->score++;
+        //TODO: multicast ghost capture
+      }
+    }
+    unlock(game);
+    amount--;
+  }
+  
+  return capturedAGhost;
 }
 
 // will likely remain the same

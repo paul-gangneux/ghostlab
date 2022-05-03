@@ -1,6 +1,7 @@
 #include "server.h"
 #include "game.h"
 #include "player.h"
+#include <poll.h>
 
 #define MIN(a, b) (a<b?a:b)
 #define MAX(a, b) (a>b?a:b)
@@ -115,7 +116,7 @@ void rw_buffers_initialize(reqbuf_t *buf) {
 // puts nect tcp request in buf->reqbuf
 // returns length of request if sucessful,
 // -1 on error (client disconnexion)
-int nextRequest(int fd, reqbuf_t* reqbuf) {
+int nextRequest(player_t* player, reqbuf_t* reqbuf) {
   //TODO: bien tester tout ça
   int n = 0;
   if (reqbuf->beg >= READBUF_SIZE - REQ_SIZE) {
@@ -127,7 +128,21 @@ int nextRequest(int fd, reqbuf_t* reqbuf) {
   if (reqbuf->beg == reqbuf->end) {
     reqbuf->beg = 0;
     reqbuf->end = 0;
-    n = recv(fd, reqbuf->readbuf, READBUF_SIZE, 0);
+
+    struct pollfd pollfd[2] = {
+      {.fd = player->fd, .events = POLLIN},
+      {.fd = player->pipe[0], .events = POLLIN}
+    };
+    poll(pollfd, 2, -1);
+
+    if (pollfd[1].revents & POLLIN) {
+      char buf[3];
+      n = read(player->pipe[0], buf, 3);
+      if (n == 3 && buf[0] == 'e' && buf[1] == 'n' && buf[2] == 'd')
+        return -2;
+    }
+
+    n = recv(player->fd, reqbuf->readbuf, READBUF_SIZE, 0);
     if (n == -1) 
       return -1;
     reqbuf->end += n;
@@ -138,18 +153,17 @@ int nextRequest(int fd, reqbuf_t* reqbuf) {
     }
   }
 
-  // TODO: Lire messages de taille fixe avant de faire ce qui suit (à cause de 42 là ce fdp)
-
   char* tempbuf = reqbuf->readbuf + reqbuf->beg;
   n = 1;
   while (reqbuf->beg + n < reqbuf->end) {
     if (tempbuf[n-1] == '*' && tempbuf[n-2] == '*' && tempbuf[n-3] == '*') {
+      if(n < reqbuf->end && tempbuf[n] == '*') n++; // au cas ou un byte = 42
       break;
     }
     n++;
   }
 
-  // n = MIN(n, REQ_SIZE); // just to be safe // test this
+  // n = MIN(n, REQ_SIZE); // just to be safe // test this // nah
   
   if (n > 0)
     memmove(reqbuf->req, tempbuf, n);
@@ -172,6 +186,12 @@ int nextRequest(int fd, reqbuf_t* reqbuf) {
   reqbuf.req[3] == word[3] &&\
   reqbuf.req[4] == word[4]
 
+#define get_move_amount(reqbuf)\
+  (reqbuf.req[6] - '0') * 100 +\
+  (reqbuf.req[7] - '0') * 10 +\
+  (reqbuf.req[8] - '0')
+
+// very big function
 void* interact_with_client(void* arg) {
   int isInGame = 0;
   int isHost = 0;
@@ -192,9 +212,10 @@ void* interact_with_client(void* arg) {
     goto end;
   }
 
+  // FIRST LOOP - BEFORE GAME
   // client creates or joins game
   while(!exit_loop) {
-    n = nextRequest(cli_fd, &reqbuf);
+    n = nextRequest(player, &reqbuf);
     if (n == -1) {
       perror("nextRequest");
       goto end;
@@ -203,27 +224,63 @@ void* interact_with_client(void* arg) {
       printf("client disconnected\n");
       goto end;
     }
+    if (n == -2) {
+      printf("client disconnected by server\n");
+      goto end;
+    }
     if (!(check_tcp_message(reqbuf, n))) {
       printf("bad client request, discarding\n");
     }
+    // new game creation
+    // expecting [NEWPL username port***]
+    else if (comp_keyword(reqbuf, "NEWPL") && n == 22) {
+      if (isInGame) {
+        send_string(cli_fd, "DUNNO***");
+      } else {
+        update_player_infos(player, reqbuf)
+        game = newGame();
+        isHost = 1;
+        int id = gameList_add(gameList, game);
+        if (id == -1) {
+          // shouldn't happen, ever
+          printf("error at addToGameList");
+          goto end;
+        }
 
-    else {
-      // new game creation
-      // expecting [NEWPL username port***]
-      if (comp_keyword(reqbuf, "NEWPL") && n == 22) {
-        if (isInGame) {
-          send_string(cli_fd, "DUNNO***");
-        } else {
-          update_player_infos(player, reqbuf)
-          game = newGame();
-          isHost = 1;
-          int id = gameList_add(gameList, game);
-          if (id == -1) {
-            // shouldn't happen, ever
-            printf("error at addToGameList");
-            goto end;
-          }
+        memmove(ansbuf, "REGOK 0***", 10);
+        ansbuf[6] = (u_int8_t) id;
+        n = send(cli_fd, ansbuf, 10, 0);
+        if (n < 0) {
+          perror("send");
+          goto end;
+        }
+        
+        game_addPlayer(game, player);
+        //todo: verbose only
+        printf("new game created with id %d\n", id);
+        isInGame = 1;
+      }
+      
+    }
+    // joining game
+    // expecting [REGIS username port m***]
+    else if (comp_keyword(reqbuf, "REGIS") && n == 24) {
+      
+      update_player_infos(player, reqbuf)
+      u_int8_t id = reqbuf.req[20];
 
+      game = game_get(gameList, id);
+      if (game == NULL) {
+        send_string(cli_fd, "DUNNO***");
+      }
+
+      else {
+        n = game_addPlayer(game, player);
+        if (n == -1) {
+          send_string(cli_fd, "DUNNO***");       
+        }
+        else {
+          // redundant code sue me
           memmove(ansbuf, "REGOK 0***", 10);
           ansbuf[6] = (u_int8_t) id;
           n = send(cli_fd, ansbuf, 10, 0);
@@ -231,126 +288,186 @@ void* interact_with_client(void* arg) {
             perror("send");
             goto end;
           }
-          
-          game_addPlayer(game, player);
-          //todo: verbose only
-          printf("new game created with id %d\n", id);
           isInGame = 1;
-        }
-        
-      }
-      // joining game
-      // expecting [REGIS username port m***]
-      else if (comp_keyword(reqbuf, "REGIS") && n == 24) {
-        
-        update_player_infos(player, reqbuf)
-        u_int8_t id = reqbuf.req[20];
-
-        game = game_get(gameList, id);
-        if (game == NULL) {
-          send_string(cli_fd, "DUNNO***");
-        }
-
-        else {
-          n = game_addPlayer(game, player);
-          if (n == -1) {
-            send_string(cli_fd, "DUNNO***");       
-          }
-          else {
-            // redundant code sue me
-            memmove(ansbuf, "REGOK 0***", 10);
-            ansbuf[6] = (u_int8_t) id;
-            n = send(cli_fd, ansbuf, 10, 0);
-            if (n < 0) {
-              perror("send");
-              goto end;
-            }
-            isInGame = 1;
-          } 
-        }
-      }
-      // leaves game
-      // expecting [UNREG***]
-      else if (comp_keyword(reqbuf, "UNREG") && n == 8) {
-        if (!isInGame) {
-          send_string(cli_fd, "DUNNO***");
         } 
-        else {
-          u_int8_t id_game = game->id;
-          game_removePlayer(game, player, PLAYER_NOFREE);
-          if (isHost) {
-            // TODO: verify there's no unfortunate player free
-            gameList_remove(gameList, game);
-            isHost = 0;
-          }
-          isInGame = 0;
-          memmove(ansbuf, "UNROK 0***", 10);
-          ansbuf[6] = id_game;
-          n = send(cli_fd, ansbuf, 10, 0);
-          if (n < 0) {
-            perror("send");
-            goto end;
-          }
-        }
       }
-      // ready to start game
-      // expecting [START***]
-      else if (comp_keyword(reqbuf, "START") && n == 8) {
-        if (!isInGame) {
-          send_string(cli_fd, "DUNNO***");
-        } else {
-          exit_loop = 1;
-        }
-      }
-      // asking for game length and width
-      // expecting [SIZE? m***]
-      else if (comp_keyword(reqbuf, "SIZE?") && n == 10) {
-        u_int8_t id_game = reqbuf.req[6];
-        //TODO: make this thread safe
-        game_t* temp = game_get(gameList, id_game);
-        if (temp == NULL) {
-          send_string(cli_fd, "DUNNO***");
-        }
-        else {
-          u_int16_t h, w;
-          h = htole16(temp->h);
-          w = htole16(temp->w);
-          
-          memmove(ansbuf, "SIZE! m hh ww***", 16);
-          memmove(ansbuf + 6, &id_game, sizeof(id_game));
-          memmove(ansbuf + 8, &h, sizeof(h));
-          memmove(ansbuf + 11, &w, sizeof(w));
-          n = send(cli_fd, ansbuf, 16, 0);
-          if (n < 0) {
-            perror("send");
-            goto end;
-          }
-        }
-      }
-      // asking for player list
-      // expecting [LIST? m***]
-      else if (comp_keyword(reqbuf, "LIST?") && n == 10) {
-        u_int8_t id_game = reqbuf.req[6];
-        n = game_sendPlayerList(gameList, id_game, cli_fd);
-      }
-      // wrong input
+    }
+    // leaves game
+    // expecting [UNREG***]
+    else if (comp_keyword(reqbuf, "UNREG") && n == 8) {
+      if (!isInGame) {
+        send_string(cli_fd, "DUNNO***");
+      } 
       else {
-        // send_string(cli_fd, "DUNNO***");
-        printf("unknown client request, discarding\n");
+        u_int8_t id_game = game->id;
+        game_removePlayer(game, player);
+        if (isHost) {
+          gameList_remove(gameList, game);
+          isHost = 0;
+        }
+        isInGame = 0;
+        memmove(ansbuf, "UNROK 0***", 10);
+        ansbuf[6] = id_game;
+        n = send(cli_fd, ansbuf, 10, 0);
+        if (n < 0) {
+          perror("send");
+          goto end;
+        }
       }
+    }
+    // ready to start game
+    // expecting [START***]
+    else if (comp_keyword(reqbuf, "START") && n == 8) {
+      if (!isInGame) {
+        send_string(cli_fd, "DUNNO***");
+      } else {
+        exit_loop = 1;
+      }
+    }
+    // asking for game length and width
+    // expecting [SIZE? m***]
+    else if (comp_keyword(reqbuf, "SIZE?") && n == 10) {
+      u_int8_t id_game = reqbuf.req[6];
+      //TODO: make this thread safe
+      game_t* temp = game_get(gameList, id_game);
+      if (temp == NULL) {
+        send_string(cli_fd, "DUNNO***");
+      }
+      else {
+        u_int16_t h, w;
+        h = htole16(temp->h);
+        w = htole16(temp->w);
+        
+        memmove(ansbuf, "SIZE! m hh ww***", 16);
+        memmove(ansbuf + 6, &id_game, sizeof(id_game));
+        memmove(ansbuf + 8, &h, sizeof(h));
+        memmove(ansbuf + 11, &w, sizeof(w));
+        n = send(cli_fd, ansbuf, 16, 0);
+        if (n < 0) {
+          perror("send");
+          goto end;
+        }
+      }
+    }
+    // asking for player list
+    // expecting [LIST? m***]
+    else if (comp_keyword(reqbuf, "LIST?") && n == 10) {
+      u_int8_t id_game = reqbuf.req[6];
+      n = game_sendPlayerList(gameList, id_game, cli_fd);
+    }
+    // asking for game list
+    // expecting [GAME?***]
+    else if (comp_keyword(reqbuf, "GAME?") && n == 8) {
+      // sends GAMES and OGAME to client
+      n = gameList_sendToCli(gameList, cli_fd);
+      if (n == -1) {
+        goto end;
+      }
+    }
+    // wrong input
+    else {
+      // send_string(cli_fd, "DUNNO***");
+      printf("unknown client request, discarding\n");
     }
   }
 
-  // TODO: wait for start*** or disconnect
-  nextRequest(cli_fd, &reqbuf);
+  player->is_ready = 1;
+  game_startIfAllReady(game);
+  exit_loop = 0;
+
+  int direction;
+  int amount;
+  // SECOND LOOP - IN GAME
+  while(!exit_loop) {
+    direction = MV_NONE;
+    amount = 0;
+    n = nextRequest(player, &reqbuf);
+    if (n == -1) {
+      perror("nextRequest");
+      goto end;
+    }
+    if (n == 0) {
+      printf("client disconnected\n");
+      goto end;
+    }
+    if (n == -2) {
+      printf("client disconnected by server\n");
+      goto end;
+    }
+    if (!(check_tcp_message(reqbuf, n))) {
+      printf("bad client request, discarding\n");
+    }
+    else if (!game->hasStarted) {
+      send_string(cli_fd, "DUNNO***");
+    }
+    // expecting [UPMOV ddd***]
+    else if (comp_keyword(reqbuf, "UPMOV") && n == 12) {
+      direction = MV_UP;
+    }
+    // expecting [DOMOV ddd***]
+    else if (comp_keyword(reqbuf, "DOMOV") && n == 12) {
+      direction = MV_DOWN;
+    }
+    // expecting [LEMOV ddd***]
+    else if (comp_keyword(reqbuf, "LEMOV") && n == 12) {
+      direction = MV_LEFT;
+    }
+    // expecting [RIMOV ddd***]
+    else if (comp_keyword(reqbuf, "RIMOV") && n == 12) {
+      direction = MV_RIGHT;
+    }
+    // expecting [IQUIT***]
+    else if (comp_keyword(reqbuf, "IQUIT") && n == 8) {
+      send_string(cli_fd, "GOBYE***");
+      goto end;
+    }
+    else {
+      // send_string(cli_fd, "DUNNO***");
+      printf("unknown client request, discarding\n");
+    }
+    if (direction != MV_NONE) {
+      amount = get_move_amount(reqbuf);
+      n = game_movePlayer(game, player, amount, direction);
+      int size;
+      if (n == 0) {
+        memmove(ansbuf, "MOVE! xxx yyy***", 16);
+        size = 16;
+      }
+      else {
+        memmove(ansbuf, "MOVEF xxx yyy pppp***", 21);
+        size = 21;
+        ansbuf[14] = (player->score / 1000) % 10;
+        ansbuf[15] = (player->score / 100) % 10;
+        ansbuf[16] = (player->score / 10) % 10;
+        ansbuf[17] = player->score % 10;
+      }
+      ansbuf[6] = (player->x / 100) % 10;
+      ansbuf[7] = (player->x / 10) % 10;
+      ansbuf[8] = player->x % 10;
+
+      ansbuf[10] = (player->x / 100) % 10;
+      ansbuf[11] = (player->x / 10) % 10;
+      ansbuf[12] = player->x % 10;
+
+      n = send(cli_fd, ansbuf, size, 0);
+      if (n < 0) {
+        perror("send");
+        goto end;
+      }
+
+      // moves
+      // send MOVE! x y*** or MOVEF x y p***
+    }
+  }
 
   end:
 
-  // close(cli_fd); // no need ?
   if (isInGame)
-    game_removePlayer(game, player, PLAYER_NOFREE);
+    game_removePlayer(game, player);
   freePlayer(player);
   if (game != NULL && isHost)
+    // TODO: faire en sorte que la partie soit supprimée quand le dernier 
+    // joueur la quitte, pas l'hôte
     gameList_remove(gameList, game);
   return NULL;
 }
