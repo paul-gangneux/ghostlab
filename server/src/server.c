@@ -24,7 +24,7 @@
   portstr[4] = 0;\
   memmove(portstr, reqbuf.req + 15, 4);\
   int port = atoi(portstr);\
-  player->addr.sin_port = htons(port);
+  player->addr.sin_port = htons(port)
 
 gameList_t* gameList;
 
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
 
   while (1) {
     struct sockaddr_in caller;
-    int cli_fd = accept(sock, (struct sockaddr *) &caller, &socklen);
+    int cli_fd = accept(sock, (struct sockaddr*) &caller, &socklen);
     if (cli_fd == -1) {
       // no need to stop the server
       perror("accept error");
@@ -106,7 +106,7 @@ typedef struct reqbuf {
   int beg, end; // cursors
 } reqbuf_t;
 
-void rw_buffers_initialize(reqbuf_t *buf) {
+void rw_buffers_initialize(reqbuf_t* buf) {
   memset(buf->readbuf, 0, READBUF_SIZE);
   memset(buf->req, 0, REQ_SIZE);
   buf->beg = 0;
@@ -143,7 +143,7 @@ int nextRequest(player_t* player, reqbuf_t* reqbuf) {
     }
 
     n = recv(player->fd, reqbuf->readbuf, READBUF_SIZE, 0);
-    if (n == -1) 
+    if (n == -1)
       return -1;
     reqbuf->end += n;
     if (n <= 3) {
@@ -156,18 +156,18 @@ int nextRequest(player_t* player, reqbuf_t* reqbuf) {
   char* tempbuf = reqbuf->readbuf + reqbuf->beg;
   n = 1;
   while (reqbuf->beg + n < reqbuf->end) {
-    if (tempbuf[n-1] == '*' && tempbuf[n-2] == '*' && tempbuf[n-3] == '*') {
-      if(n < reqbuf->end && tempbuf[n] == '*') n++; // au cas ou un byte = 42
+    if (tempbuf[n - 1] == '*' && tempbuf[n - 2] == '*' && tempbuf[n - 3] == '*') {
+      if (n < reqbuf->end && tempbuf[n] == '*') n++; // au cas ou un byte = 42
       break;
     }
     n++;
   }
 
   // n = MIN(n, REQ_SIZE); // just to be safe // test this // nah
-  
+
   if (n > 0)
     memmove(reqbuf->req, tempbuf, n);
-  
+
   if (n >= REQ_SIZE) {
     printf("request too long, truncated\n");
     reqbuf->req[REQ_SIZE - 1] = '*';
@@ -214,7 +214,7 @@ void* interact_with_client(void* arg) {
 
   // FIRST LOOP - BEFORE GAME
   // client creates or joins game
-  while(!exit_loop) {
+  while (!exit_loop) {
     n = nextRequest(player, &reqbuf);
     if (n == -1) {
       perror("nextRequest");
@@ -236,8 +236,9 @@ void* interact_with_client(void* arg) {
     else if (comp_keyword(reqbuf, "NEWPL") && n == 22) {
       if (isInGame) {
         send_string(cli_fd, "DUNNO***");
-      } else {
-        update_player_infos(player, reqbuf)
+      }
+      else {
+        update_player_infos(player, reqbuf);
         game = newGame();
         isHost = 1;
         int id = gameList_add(gameList, game);
@@ -254,19 +255,19 @@ void* interact_with_client(void* arg) {
           perror("send");
           goto end;
         }
-        
+
         game_addPlayer(game, player);
         //todo: verbose only
         printf("new game created with id %d\n", id);
         isInGame = 1;
       }
-      
+
     }
     // joining game
     // expecting [REGIS username port m***]
     else if (comp_keyword(reqbuf, "REGIS") && n == 24) {
-      
-      update_player_infos(player, reqbuf)
+
+      update_player_infos(player, reqbuf);
       u_int8_t id = reqbuf.req[20];
 
       game = game_get(gameList, id);
@@ -277,7 +278,7 @@ void* interact_with_client(void* arg) {
       else {
         n = game_addPlayer(game, player);
         if (n == -1) {
-          send_string(cli_fd, "DUNNO***");       
+          send_string(cli_fd, "DUNNO***");
         }
         else {
           // redundant code sue me
@@ -289,7 +290,7 @@ void* interact_with_client(void* arg) {
             goto end;
           }
           isInGame = 1;
-        } 
+        }
       }
     }
     // leaves game
@@ -297,7 +298,7 @@ void* interact_with_client(void* arg) {
     else if (comp_keyword(reqbuf, "UNREG") && n == 8) {
       if (!isInGame) {
         send_string(cli_fd, "DUNNO***");
-      } 
+      }
       else {
         u_int8_t id_game = game->id;
         game_removePlayer(game, player);
@@ -320,7 +321,8 @@ void* interact_with_client(void* arg) {
     else if (comp_keyword(reqbuf, "START") && n == 8) {
       if (!isInGame) {
         send_string(cli_fd, "DUNNO***");
-      } else {
+      }
+      else {
         exit_loop = 1;
       }
     }
@@ -337,7 +339,7 @@ void* interact_with_client(void* arg) {
         u_int16_t h, w;
         h = htole16(temp->h);
         w = htole16(temp->w);
-        
+
         memmove(ansbuf, "SIZE! m hh ww***", 16);
         memmove(ansbuf + 6, &id_game, sizeof(id_game));
         memmove(ansbuf + 8, &h, sizeof(h));
@@ -378,7 +380,7 @@ void* interact_with_client(void* arg) {
   int direction;
   int amount;
   // SECOND LOOP - IN GAME
-  while(!exit_loop) {
+  while (!exit_loop) {
     direction = MV_NONE;
     amount = 0;
     n = nextRequest(player, &reqbuf);
@@ -449,14 +451,12 @@ void* interact_with_client(void* arg) {
       ansbuf[11] = (player->x / 10) % 10;
       ansbuf[12] = player->x % 10;
 
+      // sends [MOVE! x y***] or [MOVEF x y p***]
       n = send(cli_fd, ansbuf, size, 0);
       if (n < 0) {
         perror("send");
         goto end;
       }
-
-      // moves
-      // send MOVE! x y*** or MOVEF x y p***
     }
   }
 

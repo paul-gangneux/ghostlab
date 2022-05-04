@@ -26,7 +26,7 @@ typedef struct ghost ghost_t;
 struct game {
   pthread_mutex_t mutex;
   u_int8_t id;
-  u_int16_t w,h;
+  u_int16_t w, h;
   u_int8_t nb_players;
   u_int8_t nb_ghosts;
   u_int8_t hasStarted;
@@ -64,7 +64,7 @@ void game_removePlayer(game_t* game, player_t* player);
 game_t* game_get(gameList_t* gameList, u_int8_t id);
 
 // free game
-void gameList_remove(gameList_t *gameList, game_t* game);
+void gameList_remove(gameList_t* gameList, game_t* game);
 
 // send the [LIST! m s***] and [PLAYR id***] messages to client.
 // returns -1 on failure, 0 on success

@@ -20,7 +20,7 @@ struct player {
   char name[MAX_NAME];
   struct sockaddr_in addr;
   int is_ready;
-  int x,y;
+  int x, y;
   int score;
 };
 

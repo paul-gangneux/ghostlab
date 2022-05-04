@@ -17,7 +17,7 @@ struct gameList {
 };
 
 struct ghost {
-  int x,y;
+  int x, y;
 };
 
 // generate and return the labyrinth
@@ -29,7 +29,7 @@ char* newLabyrinth(u_int16_t* w, u_int16_t* h) {
 
   //TODO : generate walls
   // placeholder labyrinth:
-  char temp[49] = 
+  char temp[49] =
     "01000000"
     "01010101"
     "00010001"
@@ -56,7 +56,7 @@ game_t* newGame() {
   g->hasStarted = 0;
   g->labyrinth = newLabyrinth(&g->w, &g->h);
   g->playerList = newPlayerList();
-  g->ghosts = (ghost_t *) malloc(sizeof(ghost_t) * g->nb_ghosts);
+  g->ghosts = (ghost_t*) malloc(sizeof(ghost_t) * g->nb_ghosts);
   // for (int i = 0; i < g->nb_ghosts; i++) // do stuff
   //TODO : randomise initial position
   g->ghosts[0].x = 2;
@@ -124,7 +124,7 @@ int insertIntoList(gameCell_t* curr, gameCell_t* gc, u_int8_t n) {
     gc->game->multicast_port[3] += (n % 10);
     return n;
   }
-  return insertIntoList(curr->next, gc, n+1);
+  return insertIntoList(curr->next, gc, n + 1);
 }
 
 // add game to the game list, returns game id on success, -1 on failure.
@@ -156,7 +156,7 @@ u_int8_t get_nb_of_started_games_aux(gameCell_t* cell, u_int8_t i) {
   if (cell == NULL)
     return i;
   if (cell->game->hasStarted) {
-    return get_nb_of_started_games_aux(cell->next, i+1);
+    return get_nb_of_started_games_aux(cell->next, i + 1);
   }
   return get_nb_of_started_games_aux(cell->next, i);
 }
@@ -177,7 +177,7 @@ int gameList_sendToCli(gameList_t* gameList, int cli_fd) {
   lock(gameList);
   int n, i;
   char buf[OGAME_LEN * NB_MAX];
-  memmove(buf,"GAMES 0***", 10);
+  memmove(buf, "GAMES 0***", 10);
   buf[6] = gameList->length - get_nb_of_started_games(gameList);
   n = send(cli_fd, buf, 10, 0);
   if (n < 0) {
@@ -190,7 +190,7 @@ int gameList_sendToCli(gameList_t* gameList, int cli_fd) {
   for (i = 0; i < NB_MAX; i++)
     memmove(buf + i * OGAME_LEN, "OGAME 0 0***", OGAME_LEN);
   i = 0;
-  while(gc != NULL) {
+  while (gc != NULL) {
     if (!gc->game->hasStarted) {
       buf[i * OGAME_LEN + 6] = gc->game->id;
       buf[i * OGAME_LEN + 8] = gc->game->nb_players;
@@ -271,7 +271,7 @@ int gameList_remove_aux(gameCell_t* gc, game_t* game) {
 }
 
 // free game
-void gameList_remove(gameList_t *gameList, game_t* game) {
+void gameList_remove(gameList_t* gameList, game_t* game) {
   lock(gameList);
   if (gameList->first == NULL) {
     unlock(gameList);
@@ -286,7 +286,7 @@ void gameList_remove(gameList_t *gameList, game_t* game) {
     unlock(gameList);
     return;
   }
-  if(gameList_remove_aux(gameList->first, game))
+  if (gameList_remove_aux(gameList->first, game))
     gameList->length -= 1;
   unlock(gameList);
 }
@@ -295,7 +295,7 @@ void gameList_remove(gameList_t *gameList, game_t* game) {
 // returns -1 on failure, 0 on success
 int game_sendPlayerList(gameList_t* gameList, u_int8_t game_id, int cli_fd) {
   game_t* game = game_get(gameList, game_id);
-  if(game == NULL)
+  if (game == NULL)
     return -1;
   lock(game);
   int n = playerList_sendToCli(game->playerList, game_id, cli_fd);
@@ -313,7 +313,7 @@ void game_startIfAllReady(game_t* game) {
   game->hasStarted = 1;
   unlock(game);
 
-  if(ready)
+  if (ready)
     printf("all players ready\n");
   // TODO: launch game thread
 }
@@ -353,7 +353,7 @@ int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
       return 0;
   }
 
-  while(amount > 0) {
+  while (amount > 0) {
     *axis += delta;
     if (out_of_bounds(game, player) || in_a_wall(game, player)) {
       *axis -= delta;
@@ -373,7 +373,7 @@ int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
     unlock(game);
     amount--;
   }
-  
+
   return capturedAGhost;
 }
 

@@ -6,3 +6,4 @@ client/bld/
 client/client.jar
 client.jar
 server.out
+.editorconfig
