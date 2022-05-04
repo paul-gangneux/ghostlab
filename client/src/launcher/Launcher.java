@@ -11,6 +11,9 @@ public class Launcher {
             serverIp = args[0];
             tcpPort = Integer.parseInt(args[1]);
         }
+        else if (args.length == 1) {
+            tcpPort = Integer.parseInt(args[0]);
+        }
         View.initialize();
         Client.initialize(serverIp, tcpPort);
         Client.getInstance().startInteraction();

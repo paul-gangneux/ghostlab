@@ -132,7 +132,7 @@ public class ClientTcp extends Thread {
                     // do stuff
                     break;
 
-                case "REGNO": // [REGOK***]
+                case "REGNO": // [REGNO***]
                     // do stuff
                     break;
             
