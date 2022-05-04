@@ -11,6 +11,8 @@
 #include <pthread.h>
 #include <endian.h>
 
+extern int verbose;
+
 // renvoie le FD du socket TCP créé
 int init_server_socket(int port);
 void* interact_with_client(void* arg);

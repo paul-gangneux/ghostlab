@@ -6,7 +6,33 @@
 #define MIN(a, b) (a<b?a:b)
 #define MAX(a, b) (a>b?a:b)
 
-#define send_string(sock, str) send(sock, str, strlen(str), 0)
+#define check_error(n)\
+  if (n < 0) {\
+    perror("send");\
+    goto end;\
+  }
+
+#define send_msg(sock, msg, length)\
+  if (verbose) {\
+    n = write(STDOUT_FILENO, "-> ", 3);\
+    check_error(n)\
+    n = write(STDOUT_FILENO, msg, length);\
+    check_error(n)\
+    n = write(STDOUT_FILENO, "\n", 1);\
+    check_error(n)\
+  }\
+  n = send(sock, msg, length, 0);\
+  check_error(n)
+
+#define send_string(sock, str) send_msg(sock, str, strlen(str))
+
+#define print_incoming_req(reqbuf, len)\
+  n = write(STDOUT_FILENO, "<- ", 3);\
+  check_error(n);\
+  n = write(STDOUT_FILENO, reqbuf.req, len);\
+  check_error(n);\
+  n = write(STDOUT_FILENO, "\n", 1);\
+  check_error(n)
 
 // checks that tcp message has the
 // proper size and ends with ***
@@ -26,6 +52,8 @@
   int port = atoi(portstr);\
   player->addr.sin_port = htons(port)
 
+int verbose;
+
 gameList_t* gameList;
 
 int main(int argc, char* argv[]) {
@@ -35,6 +63,14 @@ int main(int argc, char* argv[]) {
     accept_port = atoi(argv[1]);
   else {
     accept_port = 4242;
+  }
+
+  verbose = 0;
+  for (int i = 0; i < argc; i++) {
+    if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "-verbose") == 0) {
+      verbose = 1;
+      break;
+    }
   }
 
   int sock = init_server_socket(accept_port);
@@ -198,13 +234,16 @@ void* interact_with_client(void* arg) {
   player_t* player = (player_t*) arg;
   game_t* game = NULL;
   int cli_fd = player->fd;
-  int n;
+  int n = 0, len = 0;
   int exit_loop = 0;
 
   reqbuf_t reqbuf;
   rw_buffers_initialize(&reqbuf);
 
   char ansbuf[32];
+
+  if (verbose)
+    printf("new client connected\n");
 
   // sends GAMES and OGAME to client
   n = gameList_sendToCli(gameList, cli_fd);
@@ -215,25 +254,28 @@ void* interact_with_client(void* arg) {
   // FIRST LOOP - BEFORE GAME
   // client creates or joins game
   while (!exit_loop) {
-    n = nextRequest(player, &reqbuf);
-    if (n == -1) {
+    len = nextRequest(player, &reqbuf);
+    if (len == -1) {
       perror("nextRequest");
       goto end;
     }
-    if (n == 0) {
+    if (len == 0) {
       printf("client disconnected\n");
       goto end;
     }
-    if (n == -2) {
+    if (len == -2) {
       printf("client disconnected by server\n");
       goto end;
     }
-    if (!(check_tcp_message(reqbuf, n))) {
+    if (verbose) {
+      print_incoming_req(reqbuf, len);
+    }
+    if (!(check_tcp_message(reqbuf, len))) {
       printf("bad client request, discarding\n");
     }
     // new game creation
     // expecting [NEWPL username port***]
-    else if (comp_keyword(reqbuf, "NEWPL") && n == 22) {
+    else if (comp_keyword(reqbuf, "NEWPL") && len == 22) {
       if (isInGame) {
         send_string(cli_fd, "DUNNO***");
       }
@@ -250,14 +292,10 @@ void* interact_with_client(void* arg) {
 
         memmove(ansbuf, "REGOK 0***", 10);
         ansbuf[6] = (u_int8_t) id;
-        n = send(cli_fd, ansbuf, 10, 0);
-        if (n < 0) {
-          perror("send");
-          goto end;
-        }
+        send_msg(cli_fd, ansbuf, 10);
 
         game_addPlayer(game, player);
-        //todo: verbose only
+        // todo: verbose only
         printf("new game created with id %d\n", id);
         isInGame = 1;
       }
@@ -265,7 +303,7 @@ void* interact_with_client(void* arg) {
     }
     // joining game
     // expecting [REGIS username port m***]
-    else if (comp_keyword(reqbuf, "REGIS") && n == 24) {
+    else if (comp_keyword(reqbuf, "REGIS") && len == 24) {
 
       update_player_infos(player, reqbuf);
       u_int8_t id = reqbuf.req[20];
@@ -284,18 +322,14 @@ void* interact_with_client(void* arg) {
           // redundant code sue me
           memmove(ansbuf, "REGOK 0***", 10);
           ansbuf[6] = (u_int8_t) id;
-          n = send(cli_fd, ansbuf, 10, 0);
-          if (n < 0) {
-            perror("send");
-            goto end;
-          }
+          send_msg(cli_fd, ansbuf, 10);
           isInGame = 1;
         }
       }
     }
     // leaves game
     // expecting [UNREG***]
-    else if (comp_keyword(reqbuf, "UNREG") && n == 8) {
+    else if (comp_keyword(reqbuf, "UNREG") && len == 8) {
       if (!isInGame) {
         send_string(cli_fd, "DUNNO***");
       }
@@ -309,16 +343,12 @@ void* interact_with_client(void* arg) {
         isInGame = 0;
         memmove(ansbuf, "UNROK 0***", 10);
         ansbuf[6] = id_game;
-        n = send(cli_fd, ansbuf, 10, 0);
-        if (n < 0) {
-          perror("send");
-          goto end;
-        }
+        send_msg(cli_fd, ansbuf, 10);
       }
     }
     // ready to start game
     // expecting [START***]
-    else if (comp_keyword(reqbuf, "START") && n == 8) {
+    else if (comp_keyword(reqbuf, "START") && len == 8) {
       if (!isInGame) {
         send_string(cli_fd, "DUNNO***");
       }
@@ -328,9 +358,9 @@ void* interact_with_client(void* arg) {
     }
     // asking for game length and width
     // expecting [SIZE? m***]
-    else if (comp_keyword(reqbuf, "SIZE?") && n == 10) {
+    else if (comp_keyword(reqbuf, "SIZE?") && len == 10) {
       u_int8_t id_game = reqbuf.req[6];
-      //TODO: make this thread safe
+      // TODO: make this thread safe
       game_t* temp = game_get(gameList, id_game);
       if (temp == NULL) {
         send_string(cli_fd, "DUNNO***");
@@ -344,22 +374,18 @@ void* interact_with_client(void* arg) {
         memmove(ansbuf + 6, &id_game, sizeof(id_game));
         memmove(ansbuf + 8, &h, sizeof(h));
         memmove(ansbuf + 11, &w, sizeof(w));
-        n = send(cli_fd, ansbuf, 16, 0);
-        if (n < 0) {
-          perror("send");
-          goto end;
-        }
+        send_msg(cli_fd, ansbuf, 16);
       }
     }
     // asking for player list
     // expecting [LIST? m***]
-    else if (comp_keyword(reqbuf, "LIST?") && n == 10) {
+    else if (comp_keyword(reqbuf, "LIST?") && len == 10) {
       u_int8_t id_game = reqbuf.req[6];
       n = game_sendPlayerList(gameList, id_game, cli_fd);
     }
     // asking for game list
     // expecting [GAME?***]
-    else if (comp_keyword(reqbuf, "GAME?") && n == 8) {
+    else if (comp_keyword(reqbuf, "GAME?") && len == 8) {
       // sends GAMES and OGAME to client
       n = gameList_sendToCli(gameList, cli_fd);
       if (n == -1) {
@@ -383,43 +409,58 @@ void* interact_with_client(void* arg) {
   while (!exit_loop) {
     direction = MV_NONE;
     amount = 0;
-    n = nextRequest(player, &reqbuf);
-    if (n == -1) {
+    len = nextRequest(player, &reqbuf);
+    if (len == -1) {
       perror("nextRequest");
       goto end;
     }
-    if (n == 0) {
+    if (len == 0) {
       printf("client disconnected\n");
       goto end;
     }
-    if (n == -2) {
+    if (len == -2) {
       printf("client disconnected by server\n");
       goto end;
     }
-    if (!(check_tcp_message(reqbuf, n))) {
+    if (verbose) {
+      print_incoming_req(reqbuf, len);
+    }
+    if (!(check_tcp_message(reqbuf, len))) {
       printf("bad client request, discarding\n");
     }
     else if (!game->hasStarted) {
       send_string(cli_fd, "DUNNO***");
     }
     // expecting [UPMOV ddd***]
-    else if (comp_keyword(reqbuf, "UPMOV") && n == 12) {
+    else if (comp_keyword(reqbuf, "UPMOV") && len == 12) {
       direction = MV_UP;
     }
     // expecting [DOMOV ddd***]
-    else if (comp_keyword(reqbuf, "DOMOV") && n == 12) {
+    else if (comp_keyword(reqbuf, "DOMOV") && len == 12) {
       direction = MV_DOWN;
     }
     // expecting [LEMOV ddd***]
-    else if (comp_keyword(reqbuf, "LEMOV") && n == 12) {
+    else if (comp_keyword(reqbuf, "LEMOV") && len == 12) {
       direction = MV_LEFT;
     }
     // expecting [RIMOV ddd***]
-    else if (comp_keyword(reqbuf, "RIMOV") && n == 12) {
+    else if (comp_keyword(reqbuf, "RIMOV") && len == 12) {
       direction = MV_RIGHT;
     }
+    // expecting [GLIS?***]
+    else if (comp_keyword(reqbuf, "GLIS?") && len == 8) {
+      // todo
+    }
+    // expecting [MALL? mess***]
+    else if (comp_keyword(reqbuf, "MALL?") && len >= 10) {
+      // todo
+    }
+    // expecting [SEND? username mess***]
+    else if (comp_keyword(reqbuf, "SEND?") && len >= 19) {
+      // todo
+    }
     // expecting [IQUIT***]
-    else if (comp_keyword(reqbuf, "IQUIT") && n == 8) {
+    else if (comp_keyword(reqbuf, "IQUIT") && len == 8) {
       send_string(cli_fd, "GOBYE***");
       goto end;
     }
@@ -447,16 +488,12 @@ void* interact_with_client(void* arg) {
       ansbuf[7] = (player->x / 10) % 10;
       ansbuf[8] = player->x % 10;
 
-      ansbuf[10] = (player->x / 100) % 10;
-      ansbuf[11] = (player->x / 10) % 10;
-      ansbuf[12] = player->x % 10;
+      ansbuf[10] = (player->y / 100) % 10;
+      ansbuf[11] = (player->y / 10) % 10;
+      ansbuf[12] = player->y % 10;
 
       // sends [MOVE! x y***] or [MOVEF x y p***]
-      n = send(cli_fd, ansbuf, size, 0);
-      if (n < 0) {
-        perror("send");
-        goto end;
-      }
+      send_msg(cli_fd, ansbuf, size);
     }
   }
 
