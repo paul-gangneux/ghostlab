@@ -8,6 +8,10 @@ public class GameInfo {
     private int labyheight;
     private int labywidth;
 
+    public GameInfo(int gameID, int playerCount) {
+        this(gameID, playerCount, 0, 0);
+    }
+
     public GameInfo(int gameID, int playerCount, int labyheight, int labywidth) {
         this.gameID = gameID;
         this.playerCount = playerCount;

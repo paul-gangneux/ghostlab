@@ -1,6 +1,8 @@
 package model;
 
 public class PlayerModel {
+    private String name = "default";
+    private String udpPort = "5555";
     private int xpos;
     private int ypos;
     private int score;

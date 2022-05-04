@@ -1,13 +1,14 @@
 package ui;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import java.awt.GridLayout;
 
 import ui.panels.lobby.GameListPanel;
 import ui.panels.lobby.LobbyButtonPanel;
 
-public class LobbyWindow extends JFrame {
+public class LobbyWindow extends JPanel {
     
     private static final int DEFAULT_LAUNCHER_WINDOW_WIDTH = 1000;
     private static final int DEFAULT_LAUNCHER_WINDOW_HEIGHT = 600;
@@ -27,11 +28,7 @@ public class LobbyWindow extends JFrame {
         add(glp);
         lbp = new LobbyButtonPanel(this);
         add(lbp);
-        setTitle("Lobby window");
         setSize(width, height);
-        setLocationRelativeTo(null); // centers the window
-        setResizable(false);
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE); 
     }
 
     public void allowGameJoin() {

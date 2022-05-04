@@ -1,9 +1,10 @@
 package client;
 // import java.io.*;
 import java.net.*;
-public class ClientUdp extends Thread{
-    int port ;
-    InetAddress address ;
+public class ClientUdp extends Thread {
+    int port;
+    InetAddress address;
+
     public ClientUdp(String ip, int port){
         try {
             this.port = port ;
@@ -14,7 +15,7 @@ public class ClientUdp extends Thread{
     }
 
     @Override
-    public void run(){
+    public void run() {
         DatagramSocket dso = null;
         try{
             dso=new DatagramSocket(port);

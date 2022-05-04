@@ -1,6 +1,7 @@
 package ui.panels.lobby;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,7 +38,7 @@ public class GameListPanel extends JPanel {
         return selectedGameInfo;
     }
 
-    public void processGameList(ArrayList<GameInfo> gameList) {
+    public void processGameList(List<GameInfo> gameList) {
         // it is expected that the client will have a method to process the [OGAME m s***] requests in a row to produce this ArrayList
         // Do not call this method before initialisation of the GameListPanel
         clearList();

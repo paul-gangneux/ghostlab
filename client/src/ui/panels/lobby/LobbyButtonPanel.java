@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import client.Client;
 import ui.LobbyWindow;
 
 public class LobbyButtonPanel extends JPanel {
@@ -23,7 +24,7 @@ public class LobbyButtonPanel extends JPanel {
             setText("Create game");
             setEnabled(true);
             addActionListener( event -> {
-                // Game creation routine : TODO
+                Client.getInstance().createGame();
             });
         }
     }

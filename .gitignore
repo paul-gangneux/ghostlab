@@ -4,3 +4,5 @@ server/server
 notes protocole.txt
 client/bld/
 client/client.jar
+client.jar
+server.out

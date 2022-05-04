@@ -4,7 +4,7 @@ OBJECTS := $(addsuffix .o, $(OBJECTS))
 CFLAGS := -Wall -Wextra -pedantic -O2
 LIBS := -pthread
 
-server: $(OBJECTS)
+../server.out: $(OBJECTS)
 	gcc $(CFLAGS) $(LIBS) $^ -o $@
 
 obj/%.o: src/%.c include/%.h | obj
@@ -14,4 +14,4 @@ obj:
 	mkdir obj
 
 clean:
-	rm -f obj/* server
+	rm -f obj/* ../server.out

@@ -1,6 +1,7 @@
 package ui;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import model.GameInfo;
 import model.PlayerModel;
@@ -8,7 +9,7 @@ import ui.panels.game.LabyDisplayerPanel;
 
 //import java.awt.GridLayout;
 
-public class GameWindow extends JFrame {
+public class GameWindow extends JPanel {
 
     private static final int DEFAULT_GAMEWINDOW_WIDTH = 1000;
     private static final int DEFAULT_GAMEWINDOW_HEIGHT = 1000;
@@ -34,10 +35,10 @@ public class GameWindow extends JFrame {
         // setLayout(gl);
         ldp = new LabyDisplayerPanel(this, gameinfo);
         add(ldp);
-        setTitle("Game window");
+        // setTitle("Game window");
         setSize(DEFAULT_GAMEWINDOW_WIDTH, DEFAULT_GAMEWINDOW_HEIGHT);
-        setLocationRelativeTo(null); // centers the window
-        setResizable(false);
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE); 
+        // setLocationRelativeTo(null); // centers the window
+        // setResizable(false);
+        // setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE); 
     }
 }
