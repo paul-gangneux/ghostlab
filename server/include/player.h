@@ -9,6 +9,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "server.h"
+
 #define MAX_NAME 8
 
 typedef struct player player_t;
@@ -43,5 +45,8 @@ int playerList_sendToCli(playerList_t* playerList, u_int8_t game_id, int cli_fd)
 // returns 1 if all players are ready
 // returns 0 if not all player are, or if list is empty
 int playerList_allReady(playerList_t* playerList);
+
+// applies f to all player within playerList
+void playerList_forAll(playerList_t* playerList, void (*f)(player_t*));
 
 #endif

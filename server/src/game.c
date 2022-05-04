@@ -3,6 +3,11 @@
 #define lock(x) pthread_mutex_lock(&x->mutex)
 #define unlock(x) pthread_mutex_unlock(&x->mutex)
 
+#define check_error(n)\
+  if (n < 0) {\
+    goto error;\
+  }
+
 typedef struct gameCell gameCell_t;
 
 struct gameCell {
@@ -179,12 +184,7 @@ int gameList_sendToCli(gameList_t* gameList, int cli_fd) {
   char buf[OGAME_LEN * NB_MAX];
   memmove(buf, "GAMES 0***", 10);
   buf[6] = gameList->length - get_nb_of_started_games(gameList);
-  n = send(cli_fd, buf, 10, 0);
-  if (n < 0) {
-    perror("sendGameList");
-    unlock(gameList);
-    return -1;
-  }
+  send_msg(cli_fd, buf, 10);
 
   gameCell_t* gc = gameList->first;
   for (i = 0; i < NB_MAX; i++)
@@ -198,27 +198,23 @@ int gameList_sendToCli(gameList_t* gameList, int cli_fd) {
     }
     gc = gc->next;
     if (i == NB_MAX) {
-      n = send(cli_fd, buf, OGAME_LEN * NB_MAX, 0);
-      if (n < 0) {
-        perror("sendGameList");
-        unlock(gameList);
-        return -1;
-      }
+      send_msg(cli_fd, buf, OGAME_LEN * NB_MAX);
       i = 0;
     }
   }
 
   if (i > 0) {
-    n = send(cli_fd, buf, OGAME_LEN * i, 0);
-    if (n < 0) {
-      perror("sendGameList");
-      unlock(gameList);
-      return -1;
-    }
+    send_msg(cli_fd, buf, OGAME_LEN * i);
   }
 
   unlock(gameList);
   return 0;
+
+  error:
+
+  perror("sendGameList");
+  unlock(gameList);
+  return -1;
 }
 
 game_t* aux_game_get(gameCell_t* gc, u_int8_t id) {
@@ -238,14 +234,21 @@ game_t* game_get(gameList_t* gameList, u_int8_t id) {
 }
 
 // returns -1 on failure, 0 on success
-int game_addPlayer(game_t* game, player_t* player) {
-  lock(game);
+int game_addPlayer(gameList_t* gameList, u_int8_t game_id, player_t* player) {
+  lock(gameList);
+  game_t* game = aux_game_get(gameList->first, game_id);
+  if (game == NULL) {
+    unlock(gameList);
+    return -1;
+  }
   int i = 0;
+  lock(game);
   if (game->hasStarted)
     i = -1;
   else
     player_addToList(game->playerList, player);
   unlock(game);
+  unlock(gameList);
   return i;
 }
 
@@ -303,6 +306,13 @@ int game_sendPlayerList(gameList_t* gameList, u_int8_t game_id, int cli_fd) {
   return n;
 }
 
+void send_begin_message(player_t* player) {
+  int n = write(player->pipe[1], "bgn", 3);
+  if (n < 0) {
+    perror("send_begin_message");
+  }
+}
+
 // starts game in a new thread if all players are ready.
 // demands that at least one player is registered
 void game_startIfAllReady(game_t* game) {
@@ -311,11 +321,13 @@ void game_startIfAllReady(game_t* game) {
   if (game->hasStarted)
     ready = 0; // to avoid launching a game twice
   game->hasStarted = 1;
-  unlock(game);
 
-  if (ready)
-    printf("all players ready\n");
-  // TODO: launch game thread
+  if (ready) {
+    printf("game %d: all players ready\n", game->id);
+    // TODO: launch game thread
+    playerList_forAll(game->playerList, send_begin_message);
+  }
+  unlock(game);
 }
 
 // out of bounds
@@ -375,6 +387,45 @@ int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
   }
 
   return capturedAGhost;
+}
+
+game_t* game_getSize(gameList_t* gameList, u_int8_t id_game, u_int16_t* h, u_int16_t* w) {
+  lock(gameList);
+  game_t* game = aux_game_get(gameList->first, id_game);
+  if (game == NULL) {
+    unlock(gameList);
+    return NULL;
+  }
+  *h = game->h;
+  *w = game->w;
+  unlock(gameList);
+  return game;
+}
+
+int in_a_ghost(game_t* game, player_t* player) {
+  for (int i = 0; i < game->nb_ghosts; i++) {
+    if (game->ghosts[i].x == player->x && game->ghosts[i].y == player->y)
+      return 1;
+  }
+  return 0;
+}
+
+// int in_another_player(game_t* game, player_t* player); todo ?
+
+void game_randomizePosition(game_t* game, player_t* player) {
+  int i = 0;
+  do {
+    player->x = random() % game->w;
+    player->y = random() % game->h;
+    i++;
+  } while ((in_a_wall(game, player) || in_a_ghost(game, player)) && i < 10000);
+  if (i == 10000) {
+    printf("problem with game_randomizePosition function");
+    int n = write(player->pipe[1], "end", 3);
+    if (n < 0) {
+      perror("send_begin_message");
+    }
+  }
 }
 
 // will likely remain the same

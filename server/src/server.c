@@ -12,18 +12,6 @@
     goto end;\
   }
 
-#define send_msg(sock, msg, length)\
-  if (verbose) {\
-    n = write(STDOUT_FILENO, "-> ", 3);\
-    check_error(n)\
-    n = write(STDOUT_FILENO, msg, length);\
-    check_error(n)\
-    n = write(STDOUT_FILENO, "\n", 1);\
-    check_error(n)\
-  }\
-  n = send(sock, msg, length, 0);\
-  check_error(n)
-
 #define send_string(sock, str) send_msg(sock, str, strlen(str))
 
 #define print_incoming_req(reqbuf, len)\
@@ -53,10 +41,13 @@
   player->addr.sin_port = htons(port)
 
 int verbose;
+const char* multicast_address;
 
 gameList_t* gameList;
 
 int main(int argc, char* argv[]) {
+
+  multicast_address = "225.100.100.100";
 
   int accept_port;
   if (argc > 1)
@@ -172,10 +163,12 @@ int nextRequest(player_t* player, reqbuf_t* reqbuf) {
     poll(pollfd, 2, -1);
 
     if (pollfd[1].revents & POLLIN) {
-      char buf[3];
+      char buf[3] = { 0, 0, 0 };
       n = read(player->pipe[0], buf, 3);
       if (n == 3 && buf[0] == 'e' && buf[1] == 'n' && buf[2] == 'd')
-        return -2;
+        return -2; // force end
+      if (n == 3 && buf[0] == 'b' && buf[1] == 'g' && buf[2] == 'n')
+        return -3; // game begins
     }
 
     n = recv(player->fd, reqbuf->readbuf, READBUF_SIZE, 0);
@@ -227,6 +220,8 @@ int nextRequest(player_t* player, reqbuf_t* reqbuf) {
   (reqbuf.req[7] - '0') * 10 +\
   (reqbuf.req[8] - '0')
 
+#define nb_to_char(nb, factor) ((nb / factor) % 10) + '0'
+
 // very big function
 void* interact_with_client(void* arg) {
   int isInGame = 0;
@@ -240,7 +235,7 @@ void* interact_with_client(void* arg) {
   reqbuf_t reqbuf;
   rw_buffers_initialize(&reqbuf);
 
-  char ansbuf[32];
+  char ansbuf[64];
 
   if (verbose)
     printf("new client connected\n");
@@ -294,7 +289,7 @@ void* interact_with_client(void* arg) {
         ansbuf[6] = (u_int8_t) id;
         send_msg(cli_fd, ansbuf, 10);
 
-        game_addPlayer(game, player);
+        game_addPlayer(gameList, id, player);
         // todo: verbose only
         printf("new game created with id %d\n", id);
         isInGame = 1;
@@ -314,7 +309,7 @@ void* interact_with_client(void* arg) {
       }
 
       else {
-        n = game_addPlayer(game, player);
+        n = game_addPlayer(gameList, id, player);
         if (n == -1) {
           send_string(cli_fd, "DUNNO***");
         }
@@ -360,15 +355,14 @@ void* interact_with_client(void* arg) {
     // expecting [SIZE? m***]
     else if (comp_keyword(reqbuf, "SIZE?") && len == 10) {
       u_int8_t id_game = reqbuf.req[6];
-      // TODO: make this thread safe
-      game_t* temp = game_get(gameList, id_game);
+      u_int16_t h, w;
+      game_t* temp = game_getSize(gameList, id_game, &h, &w);
       if (temp == NULL) {
         send_string(cli_fd, "DUNNO***");
       }
       else {
-        u_int16_t h, w;
-        h = htole16(temp->h);
-        w = htole16(temp->w);
+        h = htole16(h);
+        w = htole16(w);
 
         memmove(ansbuf, "SIZE! m hh ww***", 16);
         memmove(ansbuf + 6, &id_game, sizeof(id_game));
@@ -400,11 +394,13 @@ void* interact_with_client(void* arg) {
   }
 
   player->is_ready = 1;
+  game_randomizePosition(game, player);
   game_startIfAllReady(game);
-  exit_loop = 0;
 
+  exit_loop = 0;
   int direction;
   int amount;
+
   // SECOND LOOP - IN GAME
   while (!exit_loop) {
     direction = MV_NONE;
@@ -422,10 +418,39 @@ void* interact_with_client(void* arg) {
       printf("client disconnected by server\n");
       goto end;
     }
-    if (verbose) {
+    if (verbose && len > 0) {
       print_incoming_req(reqbuf, len);
     }
-    if (!(check_tcp_message(reqbuf, len))) {
+    if (len == -3) { // game begins
+      memmove(ansbuf, "WELCO m hh ww f ip_.___.___.___ port***", 39);
+      ansbuf[6] = game->id;
+      u_int16_t h = htole16(game->h);
+      u_int16_t w = htole16(game->w);
+      memmove(ansbuf + 8, &h, sizeof(u_int16_t));
+      memmove(ansbuf + 11, &w, sizeof(u_int16_t));
+      ansbuf[14] = game->nb_ghosts;
+      memmove(ansbuf + 16, multicast_address, 15);
+      memmove(ansbuf + 32, game->multicast_port, 4);
+
+      // sending [WELCO m h w f ip port***]
+      send_msg(cli_fd, ansbuf, 39);
+
+      memmove(ansbuf, "POSIT username xxx yyy***", 25);
+      memmove(ansbuf + 6, player->name, 8);
+
+      ansbuf[15] = nb_to_char(player->x, 100);
+      ansbuf[16] = nb_to_char(player->x, 10);
+      ansbuf[17] = nb_to_char(player->x, 1);
+
+      ansbuf[19] = nb_to_char(player->y, 100);
+      ansbuf[20] = nb_to_char(player->y, 10);
+      ansbuf[21] = nb_to_char(player->y, 1);
+
+      // sending [POSIT username xxx yyy***]
+      send_msg(cli_fd, ansbuf, 25);
+
+    }
+    else if (!(check_tcp_message(reqbuf, len))) {
       printf("bad client request, discarding\n");
     }
     else if (!game->hasStarted) {
@@ -465,7 +490,6 @@ void* interact_with_client(void* arg) {
       goto end;
     }
     else {
-      // send_string(cli_fd, "DUNNO***");
       printf("unknown client request, discarding\n");
     }
     if (direction != MV_NONE) {
@@ -479,18 +503,18 @@ void* interact_with_client(void* arg) {
       else {
         memmove(ansbuf, "MOVEF xxx yyy pppp***", 21);
         size = 21;
-        ansbuf[14] = (player->score / 1000) % 10;
-        ansbuf[15] = (player->score / 100) % 10;
-        ansbuf[16] = (player->score / 10) % 10;
-        ansbuf[17] = player->score % 10;
+        ansbuf[14] = nb_to_char(player->score, 1000);
+        ansbuf[15] = nb_to_char(player->score, 100);
+        ansbuf[16] = nb_to_char(player->score, 10);
+        ansbuf[17] = nb_to_char(player->score, 1);
       }
-      ansbuf[6] = (player->x / 100) % 10;
-      ansbuf[7] = (player->x / 10) % 10;
-      ansbuf[8] = player->x % 10;
+      ansbuf[6] = nb_to_char(player->x, 100);
+      ansbuf[7] = nb_to_char(player->x, 10);
+      ansbuf[8] = nb_to_char(player->x, 1);
 
-      ansbuf[10] = (player->y / 100) % 10;
-      ansbuf[11] = (player->y / 10) % 10;
-      ansbuf[12] = player->y % 10;
+      ansbuf[10] = nb_to_char(player->y, 100);
+      ansbuf[11] = nb_to_char(player->y, 10);
+      ansbuf[12] = nb_to_char(player->y, 1);
 
       // sends [MOVE! x y***] or [MOVEF x y p***]
       send_msg(cli_fd, ansbuf, size);

@@ -1,5 +1,9 @@
 #include "player.h"
-#include "server.h"
+
+#define check_error(n)\
+  if (n < 0) {\
+    goto error;\
+  }
 
 typedef struct playerCell playerCell_t;
 
@@ -121,23 +125,20 @@ int playerList_sendToCli(playerList_t* playerList, u_int8_t game_id, int cli_fd)
   memmove(buf, "LIST! m s***", 12);
   buf[6] = game_id;
   buf[8] = playerList->length;
-  n = send(cli_fd, buf, 12, 0);
-  if (n < 0) {
-    perror("send");
-    return -1;
-  }
+  send_msg(cli_fd, buf, 12);
   memmove(buf, "PLAYR username***", 17);
   playerCell_t* pc = playerList->first;
   while (pc != NULL) {
     memmove(buf + 6, pc->player->name, 8);
-    n = send(cli_fd, buf, 17, 0);
-    if (n < 0) {
-      perror("send");
-      return -1;
-    }
+    send_msg(cli_fd, buf, 17);
     pc = pc->next;
   }
   return 0;
+
+  error:
+
+  perror("send");
+  return -1;
 }
 
 int playerList_allReady_aux(playerCell_t* pc) {
@@ -154,4 +155,15 @@ int playerList_allReady(playerList_t* playerList) {
   if (playerList->first == NULL)
     return 0;
   return playerList_allReady_aux(playerList->first);
+}
+
+void playerList_forAll_aux(playerCell_t* pc, void (*f)(player_t*)) {
+  if (pc == NULL)
+    return;
+  f(pc->player);
+  playerList_forAll_aux(pc->next, f);
+}
+
+void playerList_forAll(playerList_t* playerList, void (*f)(player_t*)) {
+  playerList_forAll_aux(playerList->first, f);
 }

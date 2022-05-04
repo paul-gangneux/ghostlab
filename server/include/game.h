@@ -10,6 +10,7 @@
 #include <pthread.h>
 
 #include "player.h"
+#include "server.h"
 
 // #define GAME_DESC_SIZE 12
 
@@ -56,7 +57,7 @@ void freeGameList(gameList_t* gameList);
 int gameList_add(gameList_t* gl, game_t* g);
 
 // returns -1 on failure, 0 on success
-int game_addPlayer(game_t* game, player_t* player);
+int game_addPlayer(gameList_t* gameList, u_int8_t game_id, player_t* player);
 
 void game_removePlayer(game_t* game, player_t* player);
 
@@ -76,5 +77,10 @@ void game_startIfAllReady(game_t* game);
 
 // returns 1 if the player captured at least one ghost, else returns 0
 int game_movePlayer(game_t* game, player_t* player, int amount, int direction);
+
+// returns NULL on failure
+game_t* game_getSize(gameList_t* gameList, u_int8_t id_game, u_int16_t* h, u_int16_t* w);
+
+void game_randomizePosition(game_t* game, player_t* player);
 
 #endif
