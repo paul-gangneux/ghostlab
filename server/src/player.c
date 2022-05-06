@@ -104,19 +104,23 @@ int playerList_remove_aux(playerCell_t* pc, player_t* player) {
 }
 
 // lock mutex before using
-void playerList_remove(playerList_t* playerList, player_t* player) {
+// returns 1 on success, 0 on failure
+int playerList_remove(playerList_t* playerList, player_t* player) {
   if (playerList->first == NULL)
-    return;
+    return 0;
   if (playerList->first->player == player) {
     playerCell_t* pc = playerList->first;
     playerList->first = playerList->first->next;
     pc->next = NULL;
     freePlayerCell(pc);
     playerList->length -= 1;
-    return;
+    return 1;
   }
-  if (playerList_remove_aux(playerList->first, player))
+  if (playerList_remove_aux(playerList->first, player)) {
     playerList->length -= 1;
+    return 1;
+  }
+  return 0;
 }
 
 int playerList_sendToCli(playerList_t* playerList, u_int8_t game_id, int cli_fd) {

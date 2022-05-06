@@ -37,8 +37,10 @@ void freePlayer(player_t* player);
 void freePlayerList(playerList_t* pl);
 // lock mutex before using
 void player_addToList(playerList_t* playerList, player_t* player);
+
 // lock mutex before using
-void playerList_remove(playerList_t* playerList, player_t* player);
+// returns 1 on success, 0 on failure
+int playerList_remove(playerList_t* playerList, player_t* player);
 
 int playerList_sendToCli(playerList_t* playerList, u_int8_t game_id, int cli_fd);
 

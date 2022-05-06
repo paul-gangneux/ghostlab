@@ -49,6 +49,7 @@ int main(int argc, char* argv[]) {
 
   multicast_address = "225.100.100.100";
 
+  //TODO: parse parameters properly
   int accept_port;
   if (argc > 1)
     accept_port = atoi(argv[1]);
@@ -225,7 +226,6 @@ int nextRequest(player_t* player, reqbuf_t* reqbuf) {
 // very big function
 void* interact_with_client(void* arg) {
   int isInGame = 0;
-  int isHost = 0;
   player_t* player = (player_t*) arg;
   game_t* game = NULL;
   int cli_fd = player->fd;
@@ -277,7 +277,6 @@ void* interact_with_client(void* arg) {
       else {
         update_player_infos(player, reqbuf);
         game = newGame();
-        isHost = 1;
         int id = gameList_add(gameList, game);
         if (id == -1) {
           // shouldn't happen, ever
@@ -290,8 +289,8 @@ void* interact_with_client(void* arg) {
         send_msg(cli_fd, ansbuf, 10);
 
         game_addPlayer(gameList, id, player);
-        // todo: verbose only
-        printf("new game created with id %d\n", id);
+        if (verbose)
+          printf("new game created with id %d\n", id);
         isInGame = 1;
       }
 
@@ -331,10 +330,8 @@ void* interact_with_client(void* arg) {
       else {
         u_int8_t id_game = game->id;
         game_removePlayer(game, player);
-        if (isHost) {
-          gameList_remove(gameList, game);
-          isHost = 0;
-        }
+        // game removed if no players are left in it
+        gameList_remove(gameList, game, RM_NOPLAYERS);
         isInGame = 0;
         memmove(ansbuf, "UNROK 0***", 10);
         ansbuf[6] = id_game;
@@ -523,12 +520,11 @@ void* interact_with_client(void* arg) {
 
   end:
 
-  if (isInGame)
+  if (isInGame) {
     game_removePlayer(game, player);
+    // game removed if no players are left in it
+    gameList_remove(gameList, game, RM_NOPLAYERS);
+  }
   freePlayer(player);
-  if (game != NULL && isHost)
-    // TODO: faire en sorte que la partie soit supprimée quand le dernier 
-    // joueur la quitte, pas l'hôte
-    gameList_remove(gameList, game);
   return NULL;
 }

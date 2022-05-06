@@ -97,6 +97,9 @@ void freeGame(game_t* game) {
   pthread_mutex_destroy(&game->mutex);
   free(game->labyrinth);
   free(game->ghosts);
+  if (verbose) {
+    printf("game %d deleted\n", game->id);
+  }
   free(game);
   game = NULL;
 }
@@ -245,17 +248,20 @@ int game_addPlayer(gameList_t* gameList, u_int8_t game_id, player_t* player) {
   lock(game);
   if (game->hasStarted)
     i = -1;
-  else
+  else {
     player_addToList(game->playerList, player);
+    game->nb_players++;
+  }
   unlock(game);
   unlock(gameList);
   return i;
 }
 
-// free player or not with flag set to PLAYER_FREE or PLAYER_NOFREE
+// remove player from game and asks for his thread to end
 void game_removePlayer(game_t* game, player_t* player) {
   lock(game);
-  playerList_remove(game->playerList, player);
+  if (playerList_remove(game->playerList, player))
+    game->nb_players--;
   unlock(game);
 }
 
@@ -273,9 +279,18 @@ int gameList_remove_aux(gameCell_t* gc, game_t* game) {
   return gameList_remove_aux(gc->next, game);
 }
 
-// free game
-void gameList_remove(gameList_t* gameList, game_t* game) {
+// removes game from gameList and free memory
+// use with option RM_NOPLAYERS to only remove if no players are in the game.
+// use with option RM_FORCE to remove no matter what
+// will free associated playerlist and ask player to disconnect
+void gameList_remove(gameList_t* gameList, game_t* game, int option) {
   lock(gameList);
+  if(option == RM_NOPLAYERS) {
+    if (game->nb_players > 0) {
+      unlock(gameList);
+      return;
+    }
+  }
   if (gameList->first == NULL) {
     unlock(gameList);
     return;
@@ -385,7 +400,7 @@ int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
     unlock(game);
     amount--;
   }
-
+  //TODO: check for end game
   return capturedAGhost;
 }
 

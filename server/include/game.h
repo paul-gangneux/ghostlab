@@ -20,6 +20,9 @@
 #define MV_RIGHT 3
 #define MV_LEFT 4
 
+#define RM_FORCE 0
+#define RM_NOPLAYERS 1
+
 typedef struct game game_t;
 typedef struct gameList gameList_t;
 typedef struct ghost ghost_t;
@@ -59,13 +62,17 @@ int gameList_add(gameList_t* gl, game_t* g);
 // returns -1 on failure, 0 on success
 int game_addPlayer(gameList_t* gameList, u_int8_t game_id, player_t* player);
 
+// remove player from game and asks for his thread to end
 void game_removePlayer(game_t* game, player_t* player);
 
 // returns NULL on failure
 game_t* game_get(gameList_t* gameList, u_int8_t id);
 
-// free game
-void gameList_remove(gameList_t* gameList, game_t* game);
+// removes game from gameList and free memory
+// use with option RM_NOPLAYERS to only remove if no players are in the game.
+// use with option RM_FORCE to remove no matter what
+// will free associated playerlist and disconnect players
+void gameList_remove(gameList_t* gameList, game_t* game, int option);
 
 // send the [LIST! m s***] and [PLAYR id***] messages to client.
 // returns -1 on failure, 0 on success
