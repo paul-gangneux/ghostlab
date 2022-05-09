@@ -9,9 +9,6 @@
 #include <sys/socket.h>
 #include <pthread.h>
 
-#include "player.h"
-#include "server.h"
-
 // #define GAME_DESC_SIZE 12
 
 #define MV_NONE 0
@@ -26,6 +23,9 @@
 typedef struct game game_t;
 typedef struct gameList gameList_t;
 typedef struct ghost ghost_t;
+
+#include "player.h"
+#include "server.h"
 
 struct game {
   pthread_mutex_t mutex;
@@ -89,5 +89,9 @@ int game_movePlayer(game_t* game, player_t* player, int amount, int direction);
 game_t* game_getSize(gameList_t* gameList, u_int8_t id_game, u_int16_t* h, u_int16_t* w);
 
 void game_randomizePosition(game_t* game, player_t* player);
+
+// sends [GLIS! s***] and [GPLYR username x y p***]
+// returns 1 on success, 0 on failure
+int game_sendPlayerList_AllInfos(game_t* game, int cli_fd);
 
 #endif

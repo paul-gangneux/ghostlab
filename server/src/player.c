@@ -1,10 +1,5 @@
 #include "player.h"
 
-#define check_error(n)\
-  if (n < 0) {\
-    goto error;\
-  }
-
 typedef struct playerCell playerCell_t;
 
 struct playerCell {
@@ -131,20 +126,53 @@ int playerList_sendToCli(playerList_t* playerList, u_int8_t game_id, int cli_fd)
   memmove(buf, "LIST! m s***", 12);
   buf[6] = game_id;
   buf[8] = playerList->length;
-  send_msg(cli_fd, buf, 12);
+  if (!send_msg(cli_fd, buf, 12))
+    return -1;
   memmove(buf, "PLAYR username***", 17);
   playerCell_t* pc = playerList->first;
   while (pc != NULL) {
     memmove(buf + 6, pc->player->name, 8);
-    send_msg(cli_fd, buf, 17);
+    if (!send_msg(cli_fd, buf, 17))
+      return -1;
     pc = pc->next;
   }
   return 0;
+}
 
-  error:
+// sends [GLIS! s***] and [GPLYR username x y p***]
+// returns 1 on success, 0 on failure
+// lock mutex before using
+int playerList_sendToCli_AllInfos(playerList_t* playerList, int cli_fd) {
+  char buf[30];
+  int n;
+  memmove(buf, "GLIS! s***", 10);
+  buf[6] = playerList->length;
+  if (!send_msg(cli_fd, buf, 10))
+    return 0;
 
-  perror("send");
-  return -1;
+  memmove(buf, "GPLYR username xxx yyy pppp***", 30);
+  playerCell_t* pc = playerList->first;
+  while (pc != NULL) {
+    memmove(buf + 6, pc->player->name, 8);
+
+    buf[15] = nb_to_char(pc->player->x, 100);
+    buf[16] = nb_to_char(pc->player->x, 10);
+    buf[17] = nb_to_char(pc->player->x, 1);
+
+    buf[19] = nb_to_char(pc->player->y, 100);
+    buf[20] = nb_to_char(pc->player->y, 10);
+    buf[21] = nb_to_char(pc->player->y, 1);
+
+    buf[23] = nb_to_char(pc->player->score, 1000);
+    buf[24] = nb_to_char(pc->player->score, 100);
+    buf[25] = nb_to_char(pc->player->score, 10);
+    buf[26] = nb_to_char(pc->player->score, 1);
+
+    if (!send_msg(cli_fd, buf, 30))
+      return 0;
+    pc = pc->next;
+  }
+  return 1;
 }
 
 int playerList_allReady_aux(playerCell_t* pc) {

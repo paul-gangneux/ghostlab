@@ -3,11 +3,6 @@
 #define lock(x) pthread_mutex_lock(&x->mutex)
 #define unlock(x) pthread_mutex_unlock(&x->mutex)
 
-#define check_error(n)\
-  if (n < 0) {\
-    goto error;\
-  }
-
 typedef struct gameCell gameCell_t;
 
 struct gameCell {
@@ -183,7 +178,7 @@ u_int8_t get_nb_of_started_games(gameList_t* gameList) {
 // returns 0 on success, -1 on error.
 int gameList_sendToCli(gameList_t* gameList, int cli_fd) {
   lock(gameList);
-  int n, i;
+  int i;
   char buf[OGAME_LEN * NB_MAX];
   memmove(buf, "GAMES 0***", 10);
   buf[6] = gameList->length - get_nb_of_started_games(gameList);
@@ -201,13 +196,15 @@ int gameList_sendToCli(gameList_t* gameList, int cli_fd) {
     }
     gc = gc->next;
     if (i == NB_MAX) {
-      send_msg(cli_fd, buf, OGAME_LEN * NB_MAX);
+      if (!send_msg(cli_fd, buf, OGAME_LEN * NB_MAX))
+        goto error;
       i = 0;
     }
   }
 
   if (i > 0) {
-    send_msg(cli_fd, buf, OGAME_LEN * i);
+    if (!send_msg(cli_fd, buf, OGAME_LEN * i))
+      goto error;
   }
 
   unlock(gameList);
@@ -215,7 +212,6 @@ int gameList_sendToCli(gameList_t* gameList, int cli_fd) {
 
   error:
 
-  perror("sendGameList");
   unlock(gameList);
   return -1;
 }
@@ -441,6 +437,15 @@ void game_randomizePosition(game_t* game, player_t* player) {
       perror("send_begin_message");
     }
   }
+}
+
+// sends [GLIS! s***] and [GPLYR username x y p***]
+// returns 1 on success, 0 on failure
+int game_sendPlayerList_AllInfos(game_t* game, int cli_fd) {
+  lock(game);
+  int n = playerList_sendToCli_AllInfos(game->playerList, cli_fd);
+  unlock(game);
+  return n;
 }
 
 // will likely remain the same

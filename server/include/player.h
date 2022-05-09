@@ -9,8 +9,6 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "server.h"
-
 #define MAX_NAME 8
 
 typedef struct player player_t;
@@ -25,6 +23,9 @@ struct player {
   int x, y;
   int score;
 };
+
+#include "server.h"
+#include "communication.h"
 
 // allocate memory for player. free with freePlayer()
 // needs infos recieved from accept() as parameter
@@ -50,5 +51,10 @@ int playerList_allReady(playerList_t* playerList);
 
 // applies f to all player within playerList
 void playerList_forAll(playerList_t* playerList, void (*f)(player_t*));
+
+// sends [GLIS! s***] and [GPLYR username x y p***]
+// returns 1 on success, 0 on failure
+// lock mutex before using
+int playerList_sendToCli_AllInfos(playerList_t* playerList, int cli_fd);
 
 #endif
