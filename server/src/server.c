@@ -17,7 +17,6 @@
   buf.req[n-2] == '*' &&\
   buf.req[n-3] == '*'
 
-// TODO: check is username is alphanum
 // expecting [NEWPL username port***]
 #define update_player_infos(player, reqbuf)\
   memmove(player->name, reqbuf.req + 6, MAX_NAME);\
@@ -26,6 +25,18 @@
   memmove(portstr, reqbuf.req + 15, 4);\
   int port = atoi(portstr);\
   player->addr.sin_port = htons(port)
+
+#define comp_keyword(reqbuf, word)\
+  reqbuf.req[0] == word[0] &&\
+  reqbuf.req[1] == word[1] &&\
+  reqbuf.req[2] == word[2] &&\
+  reqbuf.req[3] == word[3] &&\
+  reqbuf.req[4] == word[4]
+
+#define get_move_amount(reqbuf)\
+  (reqbuf.req[6] - '0') * 100 +\
+  (reqbuf.req[7] - '0') * 10 +\
+  (reqbuf.req[8] - '0')
 
 int verbose;
 int very_verbose;
@@ -111,7 +122,7 @@ int main(int argc, char* argv[]) {
   }
 }
 
-// renvoie le FD du socket TCP créé
+// returns fd or newly created TCP socket
 int init_server_socket(int port) {
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock == -1) {
@@ -136,17 +147,28 @@ int init_server_socket(int port) {
   return sock;
 }
 
-#define comp_keyword(reqbuf, word)\
-  reqbuf.req[0] == word[0] &&\
-  reqbuf.req[1] == word[1] &&\
-  reqbuf.req[2] == word[2] &&\
-  reqbuf.req[3] == word[3] &&\
-  reqbuf.req[4] == word[4]
+#define charIsAlphaNum(c)\
+  (\
+    (c >= 'a' && c <= 'z') ||\
+    (c >= 'A' && c <= 'Z') ||\
+    (c >= '0' && c <= '9')\
+  )\
 
-#define get_move_amount(reqbuf)\
-  (reqbuf.req[6] - '0') * 100 +\
-  (reqbuf.req[7] - '0') * 10 +\
-  (reqbuf.req[8] - '0')
+int username_isValid(char username[MAX_NAME]) {
+  int i = MAX_NAME - 1;
+  while (i >= 0 && username[i] == '\0') {
+    i--;
+  }
+  if (i == -1) // empty username
+    return 0;
+
+  while (i >= 0) {
+    if (!charIsAlphaNum(username[i]))
+      return 0;
+    i--;
+  }
+  return 1;
+}
 
 // very big function
 void* interact_with_client(void* arg) {
@@ -200,7 +222,12 @@ void* interact_with_client(void* arg) {
     // new game creation
     // expecting [NEWPL username port***]
     else if (comp_keyword(reqbuf, "NEWPL") && len == 22) {
+      char username[MAX_NAME];
+      memmove(username, reqbuf.req + 6, MAX_NAME);
       if (isInGame) {
+        send_str_and_check_error(cli_fd, "DUNNO***");
+      }
+      else if (!username_isValid(username)) {
         send_str_and_check_error(cli_fd, "DUNNO***");
       }
       else {
@@ -226,7 +253,12 @@ void* interact_with_client(void* arg) {
     // joining game
     // expecting [REGIS username port m***]
     else if (comp_keyword(reqbuf, "REGIS") && len == 24) {
+      char username[MAX_NAME];
+      memmove(username, reqbuf.req + 6, MAX_NAME);
       if (isInGame) {
+        send_str_and_check_error(cli_fd, "DUNNO***");
+      }
+      else if (!username_isValid(username)) {
         send_str_and_check_error(cli_fd, "DUNNO***");
       }
       else {

@@ -36,6 +36,7 @@ void rw_buffers_initialize(reqbuf_t* buf);
 // REQ_DISCONNECTION if client disconnected
 // REQ_END if server wants player thread to end
 // REQ_GAME_START if server wants to inform that the game has started
+// REQ_GAME_END if server wants to inform that the game has ended
 int next_request(player_t* player, reqbuf_t* reqbuf);
 
 // sends [WELCO m h w f ip port***] and
