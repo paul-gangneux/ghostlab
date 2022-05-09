@@ -65,6 +65,8 @@ void player_endThread(player_t* player) {
   }
 }
 
+// free all subsequent player cells.
+// set pc->next to NULL to avoid this
 void freePlayerCell(playerCell_t* pc) {
   if (pc == NULL) return;
   if (pc->next != NULL)

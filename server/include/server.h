@@ -10,14 +10,20 @@
 #include <string.h>
 #include <pthread.h>
 #include <endian.h>
+#include <getopt.h>
+#include <poll.h>
+
+#include "game.h"
+#include "player.h"
 
 extern int verbose;
+extern int very_verbose;
 
 extern const char* multicast_address;
 
 // check_error must be defined in each file
 #define send_msg_specify_n(dest_fd, msg_buf, msg_length, n)\
-  if (verbose) {\
+  if (very_verbose) {\
     n = write(STDOUT_FILENO, "-> ", 3);\
     check_error(n)\
     n = write(STDOUT_FILENO, msg_buf, msg_length);\

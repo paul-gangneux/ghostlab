@@ -285,7 +285,7 @@ int gameList_remove_aux(gameCell_t* gc, game_t* game) {
 // will free associated playerlist and ask player to disconnect
 void gameList_remove(gameList_t* gameList, game_t* game, int option) {
   lock(gameList);
-  if(option == RM_NOPLAYERS) {
+  if (option == RM_NOPLAYERS) {
     if (game->nb_players > 0) {
       unlock(gameList);
       return;

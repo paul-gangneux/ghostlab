@@ -1,7 +1,4 @@
 #include "server.h"
-#include "game.h"
-#include "player.h"
-#include <poll.h>
 
 #define MIN(a, b) (a<b?a:b)
 #define MAX(a, b) (a>b?a:b)
@@ -41,27 +38,59 @@
   player->addr.sin_port = htons(port)
 
 int verbose;
+int very_verbose;
 const char* multicast_address;
 
 gameList_t* gameList;
+
+void print_help(const char* progName) {
+  printf(
+    "Usage: %s [-vVh] -p port\n\n"
+    "options\n"
+    "    -p port\n"
+    "        Sets listening port to option argument.\n"
+    "        Default port is 4242.\n\n"
+    "    -v\n"
+    "        Verbose mode, see client connections / disconnections\n"
+    "        and game creations / destructions.\n\n"
+    "    -V\n"
+    "        Very verbose mode. Prints all incoming and outcoming\n"
+    "        network messages.\n\n"
+    "    -h\n"
+    "        Displays help.\n"
+    , progName);
+}
 
 int main(int argc, char* argv[]) {
 
   multicast_address = "225.100.100.100";
 
-  //TODO: parse parameters properly
-  int accept_port;
-  if (argc > 1)
-    accept_port = atoi(argv[1]);
-  else {
-    accept_port = 4242;
-  }
-
+  int accept_port = 4242;
   verbose = 0;
-  for (int i = 0; i < argc; i++) {
-    if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "-verbose") == 0) {
-      verbose = 1;
-      break;
+  very_verbose = 0;
+
+  int opt;
+  while ((opt = getopt(argc, argv, "Vvhp:")) != -1) {
+    switch (opt) {
+      case 'v':
+        verbose = 1;
+        break;
+      case 'V':
+        very_verbose = 1;
+        break;
+      case 'p':
+        accept_port = atoi(optarg);
+        if (accept_port == 0) {
+          print_help(argv[0]);
+          return -1;
+        }
+        break;
+      case 'h':
+        print_help(argv[0]);
+        return 0;
+      default:
+        print_help(argv[0]);
+        return -1;
     }
   }
 
@@ -255,14 +284,16 @@ void* interact_with_client(void* arg) {
       goto end;
     }
     if (len == 0) {
-      printf("client disconnected\n");
+      if (verbose)
+        printf("client disconnected\n");
       goto end;
     }
     if (len == -2) {
-      printf("client disconnected by server\n");
+      if (verbose)
+        printf("client disconnected by server\n");
       goto end;
     }
-    if (verbose) {
+    if (very_verbose && len > 0) {
       print_incoming_req(reqbuf, len);
     }
     if (!(check_tcp_message(reqbuf, len))) {
@@ -415,7 +446,7 @@ void* interact_with_client(void* arg) {
       printf("client disconnected by server\n");
       goto end;
     }
-    if (verbose && len > 0) {
+    if (very_verbose && len > 0) {
       print_incoming_req(reqbuf, len);
     }
     if (len == -3) { // game begins
