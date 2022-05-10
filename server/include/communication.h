@@ -45,4 +45,12 @@ int next_request(player_t* player, reqbuf_t* reqbuf);
 // returns 1 on success, 0 on failure
 int send_welcome_msg(player_t* player, game_t* game, char* ansbuf);
 
+// allows sending of UDP messages
+void init_udp_sock();
+
+// send UDP message to player adress
+// make sure to call init_udp_sock() before using
+// returns 1 on success, 0 on failure
+int send_msg_to(player_t* player, char* buf, int len);
+
 #endif

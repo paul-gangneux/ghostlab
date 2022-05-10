@@ -57,4 +57,9 @@ void playerList_forAll(playerList_t* playerList, void (*f)(player_t*));
 // lock mutex before using
 int playerList_sendToCli_AllInfos(playerList_t* playerList, int cli_fd);
 
+int playerList_hasPlayerWithSameId(playerList_t* playerList, player_t* player);
+
+// returns null if player doesn't exist
+player_t* playerList_getPlayer(playerList_t* playerlist, char name[MAX_NAME]);
+
 #endif

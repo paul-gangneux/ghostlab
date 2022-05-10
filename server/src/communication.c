@@ -16,6 +16,9 @@
   write_stdout_and_check_error(reqbuf->req, len);\
   write_stdout_and_check_error("\n", 1)
 
+int udp_sock = -1;
+pthread_mutex_t udp_sock_mutex;
+
 // returns 1 on success, 0 on failure
 int send_msg(int fd, char* buf, int length) {
   if (very_verbose) {
@@ -158,4 +161,26 @@ int next_request(player_t* player, reqbuf_t* reqbuf) {
   }
 
   return n;
+}
+
+// allows sending of UDP messages
+void init_udp_sock() {
+  if (udp_sock == -1) {
+    udp_sock = socket(PF_INET, SOCK_DGRAM, 0);
+    pthread_mutex_init(&udp_sock_mutex, NULL);
+  }
+}
+
+// send UDP message to player adress
+// make sure to call init_udp_sock() before using
+// returns 1 on success, 0 on failure
+int send_msg_to(player_t* player, char* buf, int len) {
+  pthread_mutex_lock(&udp_sock_mutex);
+  int n = sendto(udp_sock, buf, len, 0, (struct sockaddr*) &player->addr, sizeof(struct sockaddr_in));
+  pthread_mutex_unlock(&udp_sock_mutex);
+  if (n == -1) {
+    perror("sendto");
+    return 0;
+  }
+  return 1;
 }

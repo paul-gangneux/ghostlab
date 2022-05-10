@@ -233,6 +233,7 @@ game_t* game_get(gameList_t* gameList, u_int8_t id) {
 }
 
 // returns -1 on failure, 0 on success
+// will fail if there's another user with the same name in that game
 int game_addPlayer(gameList_t* gameList, u_int8_t game_id, player_t* player) {
   lock(gameList);
   game_t* game = aux_game_get(gameList->first, game_id);
@@ -242,7 +243,7 @@ int game_addPlayer(gameList_t* gameList, u_int8_t game_id, player_t* player) {
   }
   int i = 0;
   lock(game);
-  if (game->hasStarted)
+  if (game->hasStarted || playerList_hasPlayerWithSameId(game->playerList, player))
     i = -1;
   else {
     player_addToList(game->playerList, player);
@@ -448,5 +449,15 @@ int game_sendPlayerList_AllInfos(game_t* game, int cli_fd) {
   return n;
 }
 
-// will likely remain the same
-// const char multicast_ip[15];
+// send n bytes from buf to dest user via UDP
+// returns 1 on success, 0 on failure
+int game_sendMessageToOnePlayer(game_t* game, char destId[8], char* buf, int len) {
+  int ret = 0;
+  lock(game);
+  player_t* destPlayer = playerList_getPlayer(game->playerList, destId);
+  if (destPlayer != NULL) {
+    ret = send_msg_to(destPlayer, buf, len);
+  }
+  unlock(game);
+  return ret;
+}

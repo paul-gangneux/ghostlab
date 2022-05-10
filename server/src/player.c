@@ -26,6 +26,8 @@ player_t* newPlayer(int fd, struct sockaddr_in addrinfo) {
   p->addr.sin_family = AF_INET;
   p->addr.sin_addr.s_addr = addrinfo.sin_addr.s_addr;
   p->is_ready = 0;
+  p->x = 0;
+  p->y = 0;
   p->score = 0;
   return p;
 }
@@ -122,7 +124,6 @@ int playerList_remove(playerList_t* playerList, player_t* player) {
 
 int playerList_sendToCli(playerList_t* playerList, u_int8_t game_id, int cli_fd) {
   char buf[17];
-  int n;
   memmove(buf, "LIST! m s***", 12);
   buf[6] = game_id;
   buf[8] = playerList->length;
@@ -144,7 +145,6 @@ int playerList_sendToCli(playerList_t* playerList, u_int8_t game_id, int cli_fd)
 // lock mutex before using
 int playerList_sendToCli_AllInfos(playerList_t* playerList, int cli_fd) {
   char buf[30];
-  int n;
   memmove(buf, "GLIS! s***", 10);
   buf[6] = playerList->length;
   if (!send_msg(cli_fd, buf, 10))
@@ -201,3 +201,29 @@ void playerList_forAll_aux(playerCell_t* pc, void (*f)(player_t*)) {
 void playerList_forAll(playerList_t* playerList, void (*f)(player_t*)) {
   playerList_forAll_aux(playerList->first, f);
 }
+
+int namesAreEqual(player_t* p1, char name[MAX_NAME]) {
+  for (int i = 0; i < MAX_NAME; i++) {
+    if (p1->name[i] != name[i])
+      return 0;
+  }
+  return 1;
+}
+
+player_t* playerList_getPlayer_aux(playerCell_t* pc, char name[MAX_NAME]) {
+  if (pc == NULL)
+    return NULL;
+  if (namesAreEqual(pc->player, name))
+    return pc->player;
+  return playerList_getPlayer_aux(pc->next, name);
+}
+
+// returns null if player doesn't exist
+player_t* playerList_getPlayer(playerList_t* playerlist, char name[MAX_NAME]) {
+  return playerList_getPlayer_aux(playerlist->first, name);
+}
+
+int playerList_hasPlayerWithSameId(playerList_t* playerList, player_t* player) {
+  return (playerList_getPlayer(playerList, player->name) != NULL);
+}
+

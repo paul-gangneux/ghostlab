@@ -60,6 +60,7 @@ void freeGameList(gameList_t* gameList);
 int gameList_add(gameList_t* gl, game_t* g);
 
 // returns -1 on failure, 0 on success
+// will fail if there's another user with the same name in that game
 int game_addPlayer(gameList_t* gameList, u_int8_t game_id, player_t* player);
 
 // remove player from game and asks for his thread to end
@@ -93,5 +94,9 @@ void game_randomizePosition(game_t* game, player_t* player);
 // sends [GLIS! s***] and [GPLYR username x y p***]
 // returns 1 on success, 0 on failure
 int game_sendPlayerList_AllInfos(game_t* game, int cli_fd);
+
+// send n bytes from buf to dest user via UDP
+// returns 1 on success, 0 on failure
+int game_sendMessageToOnePlayer(game_t* game, char destId[8], char* buf, int len);
 
 #endif

@@ -101,6 +101,8 @@ int main(int argc, char* argv[]) {
     exit(1);
   }
 
+  init_udp_sock();
+
   printf("server created on port %d\n", accept_port);
   gameList = newGameList();
   socklen_t socklen = sizeof(struct sockaddr_in);
@@ -240,14 +242,21 @@ void* interact_with_client(void* arg) {
           goto end;
         }
 
-        memmove(ansbuf, "REGOK 0***", 10);
-        ansbuf[6] = (u_int8_t) id;
-        send_and_check_error(cli_fd, ansbuf, 10);
+        n = game_addPlayer(gameList, id, player);
+        if (n == -1) {
+          gameList_remove(gameList, game, RM_FORCE);
+          game = NULL;
+          send_str_and_check_error(cli_fd, "DUNNO***");
+        }
+        else {
+          isInGame = 1;
+          memmove(ansbuf, "REGOK 0***", 10);
+          ansbuf[6] = (u_int8_t) id;
+          send_and_check_error(cli_fd, ansbuf, 10);
 
-        game_addPlayer(gameList, id, player);
-        if (verbose)
-          printf("new game created with id %d\n", id);
-        isInGame = 1;
+          if (verbose)
+            printf("new game created with id %d\n", id);
+        }
       }
     }
     // joining game
@@ -274,13 +283,13 @@ void* interact_with_client(void* arg) {
           n = game_addPlayer(gameList, id, player);
           if (n == -1) {
             send_str_and_check_error(cli_fd, "DUNNO***");
+            game = NULL;
           }
           else {
-            // redundant code sue me
+            isInGame = 1;
             memmove(ansbuf, "REGOK 0***", 10);
             ansbuf[6] = (u_int8_t) id;
             send_and_check_error(cli_fd, ansbuf, 10);
-            isInGame = 1;
           }
         }
       }
@@ -452,11 +461,28 @@ void* interact_with_client(void* arg) {
     }
     // expecting [MALL? mess***]
     else if (comp_keyword(reqbuf, "MALL?") && len >= 10) {
-      // todo
+      // TODO
+      send_str_and_check_error(cli_fd, "MALL!***");
     }
     // expecting [SEND? username mess***]
     else if (comp_keyword(reqbuf, "SEND?") && len >= 19) {
-      // todo
+      char destId[MAX_NAME];
+      memmove(destId, reqbuf.req + 6, MAX_NAME);
+
+      // we use reqbuf.req as a send buffer. kinda dirty but works
+      memmove(reqbuf.req, "MESSP", 5);
+      memmove(reqbuf.req + 6, player->name, MAX_NAME);
+      reqbuf.req[len - 1] = '+';
+      reqbuf.req[len - 2] = '+';
+      reqbuf.req[len - 3] = '+';
+
+      // sends MESSP username mess+++ to dest player
+      if (game_sendMessageToOnePlayer(game, destId, reqbuf.req, len)) {
+        send_str_and_check_error(cli_fd, "SEND!***");
+      }
+      else {
+        send_str_and_check_error(cli_fd, "NSEND***");
+      }
     }
     // expecting [IQUIT***]
     else if (comp_keyword(reqbuf, "IQUIT") && len == 8) {
@@ -496,8 +522,7 @@ void* interact_with_client(void* arg) {
     }
   }
 
-  //TODO : send end game message
-
+  //TODO : send end game message [ENDGA username pppp+++]
 
   exit_loop = 0;
 
