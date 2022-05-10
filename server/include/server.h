@@ -22,7 +22,7 @@
 extern int verbose;
 extern int very_verbose;
 
-extern const char* multicast_address;
+extern const char* multicast_ip_address;
 
 // renvoie le FD du socket TCP créé
 int init_server_socket(int port);

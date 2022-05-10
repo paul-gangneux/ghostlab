@@ -1,5 +1,10 @@
 #include "game.h"
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+
 #define lock(x) pthread_mutex_lock(&x->mutex)
 #define unlock(x) pthread_mutex_unlock(&x->mutex)
 
@@ -65,6 +70,8 @@ game_t* newGame() {
   g->ghosts[1].y = 2;
   g->ghosts[2].x = 5;
   g->ghosts[2].y = 4;
+
+  memset(&g->multicast_addr, 0, sizeof(g->multicast_addr));
   return g;
 }
 
@@ -130,8 +137,19 @@ int insertIntoList(gameCell_t* curr, gameCell_t* gc, u_int8_t n) {
   return insertIntoList(curr->next, gc, n + 1);
 }
 
+void init_multicast_addr(game_t* game) {
+  char strport[5];
+  strport[4] = '\0';
+  memmove(strport, game->multicast_port, 4);
+  int port = atoi(strport);
+  game->multicast_addr.sin_port = htons(port);
+  game->multicast_addr.sin_family = AF_INET;
+  inet_aton(multicast_ip_address, &game->multicast_addr.sin_addr);
+}
+
 // add game to the game list, returns game id on success, -1 on failure.
 // sets game->id and game->multicast_port appropriately.
+// initiates the multicast socket
 int gameList_add(gameList_t* gl, game_t* g) {
   lock(gl);
   if (gl->length == 0xff) {
@@ -139,6 +157,7 @@ int gameList_add(gameList_t* gl, game_t* g) {
     return -1;
   }
   gameCell_t* gc = newGameCell(g);
+  int x;
 
   if (gl->first == NULL || gl->first->game->id > 1) {
     gc->next = gl->first;
@@ -146,11 +165,14 @@ int gameList_add(gameList_t* gl, game_t* g) {
     gc->game->multicast_port[3] = '1';
     gl->length += 1;
     gl->first = gc;
-    unlock(gl);
-    return 1;
+    x = 1;
   }
-  int x = insertIntoList(gl->first, gc, 2);
-  gl->length += 1;
+
+  else {
+    x = insertIntoList(gl->first, gc, 2);
+    gl->length += 1;
+  }
+  init_multicast_addr(g);
   unlock(gl);
   return x;
 }

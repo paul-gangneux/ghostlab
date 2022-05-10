@@ -40,7 +40,7 @@
 
 int verbose;
 int very_verbose;
-const char* multicast_address;
+const char* multicast_ip_address;
 
 gameList_t* gameList;
 
@@ -64,7 +64,7 @@ void print_help(const char* progName) {
 
 int main(int argc, char* argv[]) {
 
-  multicast_address = "225.100.100.100";
+  multicast_ip_address = "225.100.100.100";
 
   int accept_port = 4242;
   verbose = 0;
@@ -461,7 +461,20 @@ void* interact_with_client(void* arg) {
     }
     // expecting [MALL? mess***]
     else if (comp_keyword(reqbuf, "MALL?") && len >= 10) {
-      // TODO
+      int newlen = len + 9;
+      char* messbuf = (char*) malloc(newlen);
+
+      memmove(messbuf, "MESSA ", 6);
+      memmove(messbuf + 6, player->name, MAX_NAME);
+      memmove(messbuf + 14, reqbuf.req + 5, len - 5);
+
+      messbuf[newlen - 1] = '+';
+      messbuf[newlen - 2] = '+';
+      messbuf[newlen - 3] = '+';
+
+      // sends [MESSA username mess+++] to all players
+      send_msg_multicast(game, messbuf, newlen);
+      free(messbuf);
       send_str_and_check_error(cli_fd, "MALL!***");
     }
     // expecting [SEND? username mess***]
@@ -476,7 +489,7 @@ void* interact_with_client(void* arg) {
       reqbuf.req[len - 2] = '+';
       reqbuf.req[len - 3] = '+';
 
-      // sends MESSP username mess+++ to dest player
+      // sends [MESSP username mess+++] to dest player
       if (game_sendMessageToOnePlayer(game, destId, reqbuf.req, len)) {
         send_str_and_check_error(cli_fd, "SEND!***");
       }

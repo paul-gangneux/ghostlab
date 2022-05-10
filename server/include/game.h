@@ -38,6 +38,7 @@ struct game {
   playerList_t* playerList;
   char* labyrinth;
   ghost_t* ghosts;
+  struct sockaddr_in multicast_addr;
 };
 
 // send the [GAMES n***] and [OGAME id_game nb_players***] messages to client.

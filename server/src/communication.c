@@ -48,7 +48,7 @@ int send_welcome_msg(player_t* player, game_t* game, char* ansbuf) {
   memmove(ansbuf + 8, &h, sizeof(u_int16_t));
   memmove(ansbuf + 11, &w, sizeof(u_int16_t));
   ansbuf[14] = game->nb_ghosts;
-  memmove(ansbuf + 16, multicast_address, 15);
+  memmove(ansbuf + 16, multicast_ip_address, 15);
   memmove(ansbuf + 32, game->multicast_port, 4);
 
   // sending [WELCO m h w f ip port***]
@@ -177,6 +177,20 @@ void init_udp_sock() {
 int send_msg_to(player_t* player, char* buf, int len) {
   pthread_mutex_lock(&udp_sock_mutex);
   int n = sendto(udp_sock, buf, len, 0, (struct sockaddr*) &player->addr, sizeof(struct sockaddr_in));
+  pthread_mutex_unlock(&udp_sock_mutex);
+  if (n == -1) {
+    perror("sendto");
+    return 0;
+  }
+  return 1;
+}
+
+// multicasts UDP message game multicast adress
+// make sure to call init_udp_sock() before using
+// returns 1 on success, 0 on failure
+int send_msg_multicast(game_t* game, char* buf, int len) {
+  pthread_mutex_lock(&udp_sock_mutex);
+  int n = sendto(udp_sock, buf, len, 0, (struct sockaddr*) &game->multicast_addr, sizeof(struct sockaddr_in));
   pthread_mutex_unlock(&udp_sock_mutex);
   if (n == -1) {
     perror("sendto");
