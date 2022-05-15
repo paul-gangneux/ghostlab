@@ -1,4 +1,5 @@
 package client;
+
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
@@ -12,8 +13,8 @@ public class ClientTcp extends Thread {
     // private Scanner key; // Scanner for input
     BufferedReader istream;
     PrintWriter ostream;
-    String ogameList; // we initialize the list of the games available with a string so we can parse it later
-    // int numberOfGames; // ???
+    String ogameList; // we initialize the list of the games available with a string so we can parse
+                      // it later
 
     public ClientTcp(String ip, int portTcp) {
         try {
@@ -33,62 +34,26 @@ public class ClientTcp extends Thread {
         }
     }
 
-    /* 
-    public void getNumberOfGames (String reply){ //get the server message GAMES n*** THE NUMBER OF GAMES
-        if(reply.startsWith("GAMES")) {
-            String parts[] = reply.split("/");
-            String number = parts[0].replace("***","");
-            System.out.println(parts[0]);
-            if(number.equals(" ")){
-                this.numberOfGames = 0 ;
-            }
-            this.numberOfGames = Integer.parseInt(number);
-            System.out.println("games : "+this.numberOfGames);
+    public boolean checkRequest(String request) {
+        if (request.isEmpty() || request.equals("")) {
+            System.out.println("ERROR : empty request");
+            return false;
         }
-    }
-    */
-
-    public boolean checkRequest(String request){
-        if(request.isEmpty() || request.equals("")){
-          System.out.println("ERROR : empty request");
-          return false;
-        }
-        if(!(request.endsWith("***"))){
-          System.out.println("ERROR : bad fomulated request");
-          return false;
+        if (!(request.endsWith("***"))) {
+            System.out.println("ERROR : bad fomulated request");
+            return false;
         }
         return true;
     }
-
-    /*
-    public String command_start(){
-        return "START***";
-    }
-
-    public String ask_players_list(int m){
-        return "LIST? "+m+"***";
-    }
-
-    public String ask_unreg_pl_game_list(){
-        return "GAME?***";
-    }
-    */
-    
-    // public void connect(Socket socket) throws IOException{
-    //     this.server = socket ;
-    //     //istream = new DataInputStream(socket.getInputStream()); 
-    //     ostream = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-
-    // }
 
     @Override
     public void run() {
         // boolean end = false;
         byte[] buf = new byte[128];
         // key = new Scanner(System.in);
-            
-        while(true) {
-            
+
+        while (true) {
+
             int size = 0;
             try {
                 size = readMessage(istream, buf);
@@ -114,9 +79,9 @@ public class ClientTcp extends Thread {
                             size = readMessage(istream, buf);
                         } catch (IOException e) {
                             e.printStackTrace();
-                        } 
+                        }
                         keyword = getKeyword(buf);
-                        
+
                         if (size != 12 || !keyword.equals("OGAME")) {
                             System.out.println("error at game info reading");
                             break;
@@ -128,31 +93,45 @@ public class ClientTcp extends Thread {
                     View.getInstance().updateLobbyWindow(info);
                     break;
 
-                case "REGOK": // [REGOK m***]
-                    // do stuff
+                case "REGOK": { // [REGOK m***]
+                    int id = 0xff & buf[6];
+                    GameInfo.getCurrentGameInfo().setId(id);
+                    View.getInstance().regOk();
                     break;
+                }
+                case "REGNO": { // [REGNO***]
+                    View.getInstance().regError();
+                    break;
+                }
 
-                case "REGNO": // [REGNO***]
-                    // do stuff
+                case "SIZE!": { // [SIZE! m hh ww***]
+                    int id = 0xff & buf[6];
+                    // pour avoir en little-endian:
+                    int h = (0xff & buf[8]) + (0xff & buf[9]) * 0x100;
+                    int w = (0xff & buf[11]) + (0xff & buf[12]) * 0x100;
+                    // TODO: change something else ?
+                    GameInfo.setCurrentGameInfo(new GameInfo(id, 0, h, w));
                     break;
-            
+                }
+
+                case "WELCO": { // [WELCO m hh ww f ip_.___.___.___ port***]
+                    int id = 0xff & buf[6];
+                    // pour avoir en little-endian:
+                    int h = (0xff & buf[8]) + (0xff & buf[9]) * 0x100;
+                    int w = (0xff & buf[11]) + (0xff & buf[12]) * 0x100;
+                    // TODO : mettre à jour les autres infos
+                    // TODO : se connecter au multicast
+                    GameInfo.setCurrentGameInfo(new GameInfo(id, 0, h, w));
+                    View.getInstance().showGame();
+                    break;
+                }
+
                 default:
                     System.out.println("message non compris");
                     break;
             }
-
-
-            // while(istream.available() > 0) {
-                
-            // }
-            // System.out.print(">");
-            // String tosend = key.nextLine();
-            // if(checkRequest(tosend)){
-            //     ostream.print(tosend);   // Send whatever the user typed to the server
-            //     ostream.flush();
-            // }
         }
-        
+
     }
 
     // return true on success, false on failure
@@ -184,14 +163,16 @@ public class ClientTcp extends Thread {
         int n = 0;
         int i = 0;
 
-        while(i < buf.length) {
+        while (i < buf.length) {
             n = in.read();
-            if (n == -1) 
+            if (n == -1)
                 break;
-            buf[i] = (byte)n;
+            buf[i] = (byte) n;
             i++;
-            if (n == '*') star++;
-            else star = 0;
+            if (n == '*')
+                star++;
+            else
+                star = 0;
             if (star == 3) {
                 // morceau de code qui permet d'éviter le problème du byte = 42 avant ***
                 if (in.ready()) {
@@ -201,7 +182,7 @@ public class ClientTcp extends Thread {
                     in.reset();
                     if (n == '*') {
                         n = in.read();
-                        buf[i] = (byte)n;
+                        buf[i] = (byte) n;
                         i++;
                         // on peut lire jusqu'à 2 fois 42 avant un ***
                         in.mark(1);
@@ -209,7 +190,7 @@ public class ClientTcp extends Thread {
                         in.reset();
                         if (n == '*') {
                             n = in.read();
-                            buf[i] = (byte)n;
+                            buf[i] = (byte) n;
                             i++;
                         }
                     }
@@ -220,7 +201,7 @@ public class ClientTcp extends Thread {
         return i;
     }
 
-    //return the first five characters read from the inputstream in string format
+    // return the first five characters read from the inputstream in string format
     public String getKeyword(byte[] buf) {
         byte[] keyBytes = new byte[5];
         for (int i = 0; i < 5; i++)
@@ -228,27 +209,13 @@ public class ClientTcp extends Thread {
         return new String(keyBytes, StandardCharsets.UTF_8);
     }
 
-    // public void count_to_go_to_line(byte[] buf,DataInputStream dis) throws IOException{
-    //     int response = dis.read(buf,0,3);
-    //     int stars = 0 ;
-    //     for (byte b: buf) {
-    //         if(stars==3){
-    //             System.out.println();
-    //             break;
-    //         }
-    //         if ((char)b == '*'){
-    //             stars++;
-    //         }
-    //     }
-    // }
-
-    //get the local port
-    public int getPort(){
+    // get the local port
+    public int getPort() {
         return this.server.getLocalPort();
     }
 
-    //get the local inet adress
-    public InetAddress getAdress(){
+    // get the local inet adress
+    public InetAddress getAdress() {
         return this.server.getLocalAddress();
     }
 }

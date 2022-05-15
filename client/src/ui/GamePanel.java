@@ -1,6 +1,5 @@
 package ui;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import model.GameInfo;
@@ -9,7 +8,7 @@ import ui.panels.game.LabyDisplayerPanel;
 
 //import java.awt.GridLayout;
 
-public class GameWindow extends JPanel {
+public class GamePanel extends JPanel {
 
     private static final int DEFAULT_GAMEWINDOW_WIDTH = 1000;
     private static final int DEFAULT_GAMEWINDOW_HEIGHT = 1000;
@@ -29,7 +28,7 @@ public class GameWindow extends JPanel {
         return playerModel;
     }
 
-    public GameWindow(GameInfo gameinfo, PlayerModel playermodel) {
+    public GamePanel(GameInfo gameinfo, PlayerModel playermodel) {
         this.gameinfo = gameinfo;
         playerModel = playermodel;
         // setLayout(gl);

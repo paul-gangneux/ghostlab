@@ -8,6 +8,8 @@ public class GameInfo {
     private int labyheight;
     private int labywidth;
 
+    private static GameInfo currentGameInfo;
+
     public GameInfo(int gameID, int playerCount) {
         this(gameID, playerCount, 0, 0);
     }
@@ -35,7 +37,19 @@ public class GameInfo {
         return labywidth;
     }
 
+    public void setId(int gameID) {
+      this.gameID = gameID;
+    }
+
     public String toString() {
         return String.format("Game #%d            %d players", getID(), getPlayerCount());
+    }
+
+    public static void setCurrentGameInfo(GameInfo gameInfo) {
+      GameInfo.currentGameInfo = gameInfo;
+    }
+
+    public static GameInfo getCurrentGameInfo() {
+        return GameInfo.currentGameInfo;
     }
 }

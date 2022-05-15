@@ -8,11 +8,11 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import client.Client;
-import ui.LobbyWindow;
+import ui.LobbyPanel;
 
 public class LobbyButtonPanel extends JPanel {
 
-    private LobbyWindow parentWindow;
+    private LobbyPanel parentWindow;
     private GridLayout gl;
     private GameCreateButton gcb;
     private GameJoinButton gjb;
@@ -36,9 +36,7 @@ public class LobbyButtonPanel extends JPanel {
             setText("Join game");
             setEnabled(false); // A good thing would be to prevent the button from being clicked if no game is selected
             addActionListener( event -> {
-                // Game joining routine : TODO
-                // Here we have to gather the selectedGameInfo from the GameListPanel of the LobbyWindow
-                // -> parentWindow.getGameListPanel().getSelectedGameInfo()
+                Client.getInstance().askSize(parentWindow.getGameListPanel().getSelectedGameInfo().getID());
             });
         }
     }
@@ -47,7 +45,7 @@ public class LobbyButtonPanel extends JPanel {
         gjb.setEnabled(true);
     }
 
-    public LobbyButtonPanel(LobbyWindow parentWindow) {
+    public LobbyButtonPanel(LobbyPanel parentWindow) {
         super();
         this.parentWindow = parentWindow;
         gl = new GridLayout(1, 2, 5, 0); // 1 row, 2 columns for the two buttons, 5 px horizontal shift, no vertical shift

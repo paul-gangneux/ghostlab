@@ -11,16 +11,16 @@ import java.awt.Color;
 import java.awt.Component;
 
 import model.GameInfo;
-import ui.LobbyWindow;
+import ui.LobbyPanel;
 
 public class GameListPanel extends JPanel {
 
-    private LobbyWindow parentWindow;
+    private LobbyPanel parentWindow;
 
     private GridLayout gl;
     private transient GameInfo selectedGameInfo; // GameInfo of the selected game. Null if none is selected.
     
-    public GameListPanel(LobbyWindow parentWindow) {
+    public GameListPanel(LobbyPanel parentWindow) {
         super();
         this.parentWindow = parentWindow;
         gl = new GridLayout(1, 1, 0, 5); // 1 row, 1 column, no horizontal shift, 5 px vertical shift

@@ -25,8 +25,25 @@ public class Client {
     }
 
     public void createGame() {
-        byte[] msg = ("NEWPL username "+c2.getPort()+"***").getBytes();
         //TODO: récuperer username depuis les infos client
+        byte[] msg = ("NEWPL username "+c2.getPort()+"***").getBytes();
+        c1.sendToServer(msg);
+    }
+
+    public void joinGame(int gameId) {
+        //TODO: récuperer username depuis les infos client
+        byte[] msg = ("REGIS username "+c2.getPort()+" i***").getBytes();
+        msg[17] = (byte) gameId;
+        c1.sendToServer(msg);
+    }
+
+    public void ready() {
+        c1.sendToServer("START***");
+    }
+
+    public void askSize(int gameId) {
+        byte[] msg = ("SIZE? i***").getBytes();
+        msg[6] = (byte) gameId;
         c1.sendToServer(msg);
     }
 }

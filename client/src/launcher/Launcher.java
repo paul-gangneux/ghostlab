@@ -2,9 +2,11 @@ package launcher;
 
 import ui.*;
 import client.*;
+import model.GameInfo;
 
 public class Launcher {
     public static void main(String [] args) {
+        // TODO : parse arguments properly to get ip and port
         String serverIp = "localhost";
         int tcpPort = 4242;
         if (args.length >= 2) {
@@ -16,12 +18,7 @@ public class Launcher {
         }
         View.initialize();
         Client.initialize(serverIp, tcpPort);
-        Client.getInstance().startInteraction();
-
-        /*
-        javax.swing.SwingUtilities.invokeLater( () -> {
-                new LauncherWindow().setVisible(true);
-        });
-        */
+        GameInfo.setCurrentGameInfo(new GameInfo(0, 0, 0, 0));
+        Client.getInstance().startInteraction(); 
     }
 }

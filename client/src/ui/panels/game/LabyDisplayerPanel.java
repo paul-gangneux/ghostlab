@@ -3,14 +3,14 @@ package ui.panels.game;
 import javax.swing.JPanel;
 
 import model.GameInfo;
-import ui.GameWindow;
+import ui.GamePanel;
 
 import java.awt.GridLayout;
 import java.util.ArrayList;
 
 public class LabyDisplayerPanel extends JPanel {
 
-    private GameWindow parentWindow;
+    private GamePanel parentWindow;
     private GridLayout gl;
 
     private LabyTile[][] labyGrid;
@@ -98,7 +98,7 @@ public class LabyDisplayerPanel extends JPanel {
         y_pointed = -1;
     }
     
-    public LabyDisplayerPanel(GameWindow parentWindow, GameInfo gameinfo) {
+    public LabyDisplayerPanel(GamePanel parentWindow, GameInfo gameinfo) {
         super();
         this.parentWindow = parentWindow;
         coordPath = new ArrayList<>();
