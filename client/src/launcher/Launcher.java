@@ -2,6 +2,7 @@ package launcher;
 
 import ui.*;
 import client.*;
+import model.PlayerModel;
 
 public class Launcher {
     public static void main(String [] args) {
@@ -17,7 +18,6 @@ public class Launcher {
         View.initialize();
         Client.initialize(serverIp, tcpPort);
         Client.getInstance().startInteraction();
-
         /*
         javax.swing.SwingUtilities.invokeLater( () -> {
                 new LauncherWindow().setVisible(true);

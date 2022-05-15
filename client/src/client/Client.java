@@ -1,5 +1,7 @@
 package client;
 
+import model.PlayerModel;
+
 public class Client {
     private ClientTcp c1;
     private ClientUdp c2;
@@ -25,8 +27,10 @@ public class Client {
         c2.start();
     }
 
-    public void createGame() {
-        byte[] msg = "NEWPL username 5555***".getBytes();
+    public void createGame(String username) {
+        String StrMsg = "NEWPL "+username+" "+c2.port+"***";
+        System.out.println("created "+username);
+        byte[] msg = StrMsg.getBytes();
         //TODO: récuperer username et port depuis les infos client
         c1.sendToServer(msg);
     }
