@@ -376,8 +376,6 @@ int game_sendPlayerList(gameList_t* gameList, u_int8_t game_id, int cli_fd) {
 }
 
 void* gameThread(void* arg) {
-  // TODO
-
   game_t* game = (game_t*) arg;
 
   struct pollfd pollfd = { .fd = game->pipe1[0], .events = POLLIN };
@@ -426,7 +424,6 @@ void game_startIfAllReady(game_t* game) {
     if (verbose) {
       printf("game %d: all players ready\n", game->id);
     }
-    // TODO: launch game thread
     pthread_t thread;
     pthread_create(&thread, NULL, gameThread, (void*) game);
     playerList_forAll(game->playerList, send_begin_message);

@@ -88,7 +88,6 @@ void rw_buffers_initialize(reqbuf_t* buf) {
 // REQ_END if server wants player thread to end
 // REQ_GAME_START if server wants to inform that a game has started
 int next_request(player_t* player, reqbuf_t* reqbuf) {
-  //TODO: bien tester tout ça
   int n = 0;
   if (reqbuf->beg >= READBUF_SIZE - REQ_SIZE) {
     memmove(reqbuf->readbuf, reqbuf->readbuf + reqbuf->beg, reqbuf->end - reqbuf->beg);

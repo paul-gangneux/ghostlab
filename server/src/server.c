@@ -530,8 +530,6 @@ void* interact_with_client(void* arg) {
     }
   }
 
-  //TODO : send end game message [ENDGA username pppp+++]
-
   exit_loop = 0;
 
   // FOURTH LOOP - AFTER GAME ENDED
