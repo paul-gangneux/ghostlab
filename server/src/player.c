@@ -227,3 +227,17 @@ int playerList_hasPlayerWithSameId(playerList_t* playerList, player_t* player) {
   return (playerList_getPlayer(playerList, player->name) != NULL);
 }
 
+player_t* playerList_getPlayerWithMaxScore_aux(playerCell_t* pc, player_t* maxPlayer) {
+  if (pc == NULL) 
+    return maxPlayer;
+  if (pc->player->score > maxPlayer->score)
+    maxPlayer = pc->player;
+  return playerList_getPlayerWithMaxScore_aux(pc->next, maxPlayer);
+}
+
+player_t* playerList_getPlayerWithMaxScore(playerList_t* playerList) {
+  if (playerList->first == NULL)
+    return NULL;
+  return playerList_getPlayerWithMaxScore_aux(playerList->first, playerList->first->player);
+}
+

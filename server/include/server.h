@@ -19,6 +19,17 @@
 
 #define nb_to_char(nb, factor) ((nb / factor) % 10) + '0'
 
+#define mv_num3toBuf(buf, ind, num)\
+  buf[ind] = nb_to_char(num, 100);\
+  buf[ind + 1] = nb_to_char(num, 10);\
+  buf[ind + 2] = nb_to_char(num, 1)
+
+#define mv_num4toBuf(buf, ind, num)\
+  buf[ind] = nb_to_char(num, 1000);\
+  buf[ind + 1] = nb_to_char(num, 100);\
+  buf[ind + 2] = nb_to_char(num, 10);\
+  buf[ind + 3] = nb_to_char(num, 1)
+
 extern int verbose;
 extern int very_verbose;
 

@@ -20,6 +20,8 @@ typedef struct reqbuf {
 #include "player.h"
 #include "game.h"
 
+#define cmp3chars(buf, str) (buf[0] == str[0] && buf[1] == str[1] && buf[2] == str[2])
+
 // returns 1 on success, 0 on failure
 int send_msg(int fd, char* buf, int length);
 

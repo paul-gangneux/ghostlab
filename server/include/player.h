@@ -62,4 +62,6 @@ int playerList_hasPlayerWithSameId(playerList_t* playerList, player_t* player);
 // returns null if player doesn't exist
 player_t* playerList_getPlayer(playerList_t* playerlist, char name[MAX_NAME]);
 
+player_t* playerList_getPlayerWithMaxScore(playerList_t* playerList);
+
 #endif

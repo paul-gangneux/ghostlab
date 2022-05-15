@@ -517,21 +517,16 @@ void* interact_with_client(void* arg) {
       else {
         memmove(ansbuf, "MOVEF xxx yyy pppp***", 21);
         size = 21;
-        ansbuf[14] = nb_to_char(player->score, 1000);
-        ansbuf[15] = nb_to_char(player->score, 100);
-        ansbuf[16] = nb_to_char(player->score, 10);
-        ansbuf[17] = nb_to_char(player->score, 1);
+        mv_num4toBuf(ansbuf, 14, player->score);
       }
-      ansbuf[6] = nb_to_char(player->x, 100);
-      ansbuf[7] = nb_to_char(player->x, 10);
-      ansbuf[8] = nb_to_char(player->x, 1);
-
-      ansbuf[10] = nb_to_char(player->y, 100);
-      ansbuf[11] = nb_to_char(player->y, 10);
-      ansbuf[12] = nb_to_char(player->y, 1);
+      mv_num3toBuf(ansbuf, 6, player->x);
+      mv_num3toBuf(ansbuf, 10, player->y);
 
       // sends [MOVE! x y***] or [MOVEF x y p***]
       send_and_check_error(cli_fd, ansbuf, size);
+      if (n) {
+        game_endIfNoGhost(game);
+      }
     }
   }
 

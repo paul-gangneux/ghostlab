@@ -109,11 +109,11 @@ int next_request(player_t* player, reqbuf_t* reqbuf) {
     if (pollfd[1].revents & POLLIN) {
       char buf[3] = { 0, 0, 0 };
       n = read(player->pipe[0], buf, 3);
-      if (n == 3 && buf[0] == 'e' && buf[1] == 'n' && buf[2] == 'd')
+      if (n == 3 && cmp3chars(buf, "end"))
         return REQ_FORCE_END; // force end
-      if (n == 3 && buf[0] == 'b' && buf[1] == 'g' && buf[2] == 'n')
+      if (n == 3 && cmp3chars(buf, "bgn"))
         return REQ_GAME_START; // game begins
-      if (n == 3 && buf[0] == 'f' && buf[1] == 'i' && buf[2] == 'n')
+      if (n == 3 && cmp3chars(buf, "fin"))
         return REQ_GAME_END; // game ended
     }
 

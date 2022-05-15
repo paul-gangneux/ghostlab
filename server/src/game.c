@@ -50,6 +50,20 @@ char* newLabyrinth(u_int16_t* w, u_int16_t* h) {
 // does not set id and port to their correct values
 game_t* newGame() {
   game_t* g = (game_t*) malloc(sizeof(game_t));
+  int n = pipe(g->pipe1);
+  if (n < 0) {
+    perror("pipe");
+    free(g);
+    return NULL;
+  }
+  n = pipe(g->pipe2);
+  if (n < 0) {
+    perror("pipe");
+    close(g->pipe1[0]);
+    close(g->pipe1[1]);
+    free(g);
+    return NULL;
+  }
   pthread_mutex_init(&g->mutex, NULL);
   g->id = 0;
   g->nb_players = 0;
@@ -96,9 +110,30 @@ void freeGame(game_t* game) {
   lock(game);
   freePlayerList(game->playerList);
   unlock(game);
+  if (game->hasStarted) {
+    int n = write(game->pipe1[1], "end", 3);
+    if (n > 0) {
+      char buf[3];
+      // on attend la fin du thread de jeu
+      n = read(game->pipe2[0], buf, 3);
+      if (n < 0) {
+        perror("read from pipe");
+      }
+      else if (verbose) {
+        printf("game thread ended\n");
+      }
+    }
+    else {
+      perror("write in pipe");
+    }
+  }
   pthread_mutex_destroy(&game->mutex);
   free(game->labyrinth);
   free(game->ghosts);
+  close(game->pipe1[0]);
+  close(game->pipe1[1]);
+  close(game->pipe2[0]);
+  close(game->pipe2[1]);
   if (verbose) {
     printf("game %d deleted\n", game->id);
   }
@@ -340,6 +375,36 @@ int game_sendPlayerList(gameList_t* gameList, u_int8_t game_id, int cli_fd) {
   return n;
 }
 
+void* gameThread(void* arg) {
+  // TODO
+
+  game_t* game = (game_t*) arg;
+
+  struct pollfd pollfd = { .fd = game->pipe1[0], .events = POLLIN };
+
+  while (1) {
+    poll(&pollfd, 1, 1000);
+
+    if (pollfd.revents & POLLIN) {
+      char buf[3] = { 0, 0, 0 };
+      int n = read(game->pipe1[0], buf, 3);
+      if (n == 3 && cmp3chars(buf, "end"))
+        goto end;
+    }
+
+    lock(game);
+    //TODO : move ghosts
+    unlock(game);
+  }
+
+  end:
+
+  if (write(game->pipe2[1], "yes", 3) < 0) {
+    perror("gameThread: write");
+  }
+  return NULL;
+}
+
 void send_begin_message(player_t* player) {
   int n = write(player->pipe[1], "bgn", 3);
   if (n < 0) {
@@ -362,6 +427,8 @@ void game_startIfAllReady(game_t* game) {
       printf("game %d: all players ready\n", game->id);
     }
     // TODO: launch game thread
+    pthread_t thread;
+    pthread_create(&thread, NULL, gameThread, (void*) game);
     playerList_forAll(game->playerList, send_begin_message);
   }
   unlock(game);
@@ -409,6 +476,10 @@ int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
       break;
     }
 
+    char buf[30];
+    memmove(buf, "SCORE username pppp xxx yyy+++", 30);
+    memmove(buf + 6, player->name, MAX_NAME);
+
     lock(game);
     for (int i = 0; i < game->nb_ghosts; i++) {
       if (game->ghosts[i].x == player->x && game->ghosts[i].y == player->y) {
@@ -416,13 +487,16 @@ int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
         game->ghosts[i] = game->ghosts[game->nb_ghosts];
         capturedAGhost = 1;
         player->score++;
-        //TODO: multicast ghost capture
+
+        mv_num4toBuf(buf, 15, player->score);
+        mv_num3toBuf(buf, 20, player->x);
+        mv_num3toBuf(buf, 24, player->y);
+        send_msg_multicast(game, buf, 30);
       }
     }
     unlock(game);
     amount--;
   }
-  //TODO: check for end game
   return capturedAGhost;
 }
 
@@ -485,4 +559,29 @@ int game_sendMessageToOnePlayer(game_t* game, char destId[8], char* buf, int len
   }
   unlock(game);
   return ret;
+}
+
+// for when game ended properly
+void send_end_message(player_t* player) {
+  int n = write(player->pipe[1], "fin", 3);
+  if (n < 0) {
+    perror("send_end_message");
+  }
+}
+
+void game_endIfNoGhost(game_t* game) {
+  lock(game);
+  if (game->nb_ghosts == 0) {
+    playerList_forAll(game->playerList, send_end_message);
+  }
+  player_t* winner = playerList_getPlayerWithMaxScore(game->playerList);
+  if (winner != NULL) {
+    // ENDGA username pppp+++
+    char buf[22];
+    memmove(buf, "ENDGA username pppp+++", 22);
+    memmove(buf + 6, winner->name, MAX_NAME);
+    mv_num4toBuf(buf, 15, winner->score);
+    send_msg_multicast(game, buf, 22);
+  }
+  unlock(game);
 }

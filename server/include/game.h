@@ -29,6 +29,8 @@ typedef struct ghost ghost_t;
 
 struct game {
   pthread_mutex_t mutex;
+  int pipe1[2]; // pour parler au thread de jeu
+  int pipe2[2]; // réponses du thead de jeu
   u_int8_t id;
   u_int16_t w, h;
   u_int8_t nb_players;
@@ -99,5 +101,7 @@ int game_sendPlayerList_AllInfos(game_t* game, int cli_fd);
 // send n bytes from buf to dest user via UDP
 // returns 1 on success, 0 on failure
 int game_sendMessageToOnePlayer(game_t* game, char destId[8], char* buf, int len);
+
+void game_endIfNoGhost(game_t* game);
 
 #endif
