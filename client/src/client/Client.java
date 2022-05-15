@@ -8,8 +8,7 @@ public class Client {
 
     private Client(String serverIp, int tcpPort) {
         c1 = new ClientTcp(serverIp, tcpPort);
-        //TODO: générer un port UDP différent pour chaque client
-        c2 = new ClientUdp(serverIp, 5555);
+        c2 = new ClientUdp(serverIp);
     }
 
     public static void initialize(String serverIp, int tcpPort) {
@@ -26,8 +25,8 @@ public class Client {
     }
 
     public void createGame() {
-        byte[] msg = "NEWPL username 5555***".getBytes();
-        //TODO: récuperer username et port depuis les infos client
+        byte[] msg = ("NEWPL username "+c2.getPort()+"***").getBytes();
+        //TODO: récuperer username depuis les infos client
         c1.sendToServer(msg);
     }
 }
