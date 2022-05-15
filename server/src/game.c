@@ -352,12 +352,15 @@ void send_begin_message(player_t* player) {
 void game_startIfAllReady(game_t* game) {
   lock(game);
   int ready = playerList_allReady(game->playerList);
-  if (game->hasStarted)
+  if (game->hasStarted) {
     ready = 0; // to avoid launching a game twice
-  game->hasStarted = 1;
+  }
 
   if (ready) {
-    printf("game %d: all players ready\n", game->id);
+    game->hasStarted = 1;
+    if (verbose) {
+      printf("game %d: all players ready\n", game->id);
+    }
     // TODO: launch game thread
     playerList_forAll(game->playerList, send_begin_message);
   }
