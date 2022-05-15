@@ -3,6 +3,7 @@ package launcher;
 import ui.*;
 import client.*;
 import model.GameInfo;
+import model.PlayerModel;
 
 public class Launcher {
     public static void main(String [] args) {
