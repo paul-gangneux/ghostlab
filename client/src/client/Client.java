@@ -37,7 +37,7 @@ public class Client {
                 msg[6 + i] = 0;
             }
         }
-        msg[17] = (byte) gameId;
+        msg[20] = (byte) gameId;
         System.out.println("created " + username);
         c1.sendToServer(msg);
     }

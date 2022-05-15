@@ -21,7 +21,7 @@ public class View extends JFrame {
     private void switchPanel(JPanel newPanel) {
         getContentPane().remove(mainPanel);
         mainPanel = newPanel;
-        
+
         EventQueue.invokeLater(() -> {
             getContentPane().add(mainPanel);
             // pack();
@@ -53,7 +53,10 @@ public class View extends JFrame {
     }
 
     public void updateLobbyWindow(List<GameInfo> gameList) {
-        EventQueue.invokeLater(() -> lobbyp.getGameListPanel().processGameList(gameList));
+        EventQueue.invokeLater(() -> {
+            lobbyp.getGameListPanel().processGameList(gameList);
+            revalidate();
+        });
     }
 
     public void regError() {
@@ -66,10 +69,8 @@ public class View extends JFrame {
     }
 
     public void showGame() {
-        //TODO: make sure game infos has been recieved
-
-        PlayerModel pm = new PlayerModel(2, 2); // TODO: get player info
-        gamep = new GamePanel(GameInfo.getCurrentGameInfo(),pm);
+        // TODO: make sure game infos has been recieved
+        gamep = new GamePanel(GameInfo.getCurrentGameInfo(), PlayerModel.getCurrentPlayer());
         switchPanel(gamep);
     }
 }

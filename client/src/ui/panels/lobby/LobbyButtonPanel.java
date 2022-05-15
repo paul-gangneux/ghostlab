@@ -82,6 +82,7 @@ public class LobbyButtonPanel extends JPanel {
         add(username);
         add(gcb);
         add(gjb);
+        add(new RefreshButton());
     }
 
 }
