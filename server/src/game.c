@@ -8,6 +8,12 @@
 #define lock(x) pthread_mutex_lock(&x->mutex)
 #define unlock(x) pthread_mutex_unlock(&x->mutex)
 
+#define in_a_wall(game, thing)\
+  game->maze[thing->x + thing->y * game->w] == '1'
+
+#define in_a_wall2(game, thing)\
+  game->maze[thing.x + thing.y * game->w] == '1'
+
 typedef struct gameCell gameCell_t;
 
 struct gameCell {
@@ -25,25 +31,24 @@ struct ghost {
   int x, y;
 };
 
-// generate and return the labyrinth
-// sets w and h appropriately
-char* newLabyrinth(u_int16_t* w, u_int16_t* h) {
-  *w = 8;
-  *h = 6;
-  char* lab = (char*) malloc((*w) * (*h) * sizeof(char));
+void randomise_ghosts_pos(game_t* game, int informPlayers) {
+  char buf[16];
+  memmove(buf, "GHOST xxx yyy+++", 16);
 
-  //TODO : generate walls
-  // placeholder labyrinth:
-  char temp[49] =
-    "01000000"
-    "01010101"
-    "00010001"
-    "11011100"
-    "00001000"
-    "00100011";
-  memmove(lab, temp, 48);
-
-  return lab;
+  lock(game);
+  for (int i = 0; i < game->nb_ghosts; i++) {
+    do {
+      game->ghosts[i].x = random() % game->w;
+      game->ghosts[i].y = random() % game->h;
+    } while (in_a_wall2(game, game->ghosts[i]));
+    if (informPlayers) {
+      mv_num3toBuf(buf, 6, game->ghosts[i].x);
+      mv_num3toBuf(buf, 10, game->ghosts[i].y);
+      // sends [GHOST x y+++]
+      send_msg_multicast(game, buf, 16);
+    }
+  }
+  unlock(game);
 }
 
 // allocate memory for a game. free with freeGame()
@@ -67,24 +72,16 @@ game_t* newGame() {
   pthread_mutex_init(&g->mutex, NULL);
   g->id = 0;
   g->nb_players = 0;
-  g->nb_ghosts = 3; // TODO: randomise
+  g->nb_ghosts = random() % 5 + 3;
   g->multicast_port[0] = '4';
   g->multicast_port[1] = '0';
   g->multicast_port[2] = '0';
   g->multicast_port[3] = '0';
   g->hasStarted = 0;
-  g->labyrinth = newLabyrinth(&g->w, &g->h);
+  g->maze = maze_generate(&g->w, &g->h);
   g->playerList = newPlayerList();
   g->ghosts = (ghost_t*) malloc(sizeof(ghost_t) * g->nb_ghosts);
-  // for (int i = 0; i < g->nb_ghosts; i++) // do stuff
-  //TODO : randomise initial position
-  g->ghosts[0].x = 2;
-  g->ghosts[0].y = 1;
-  g->ghosts[1].x = 4;
-  g->ghosts[1].y = 2;
-  g->ghosts[2].x = 5;
-  g->ghosts[2].y = 4;
-
+  randomise_ghosts_pos(g, 0);
   memset(&g->multicast_addr, 0, sizeof(g->multicast_addr));
   return g;
 }
@@ -128,7 +125,7 @@ void freeGame(game_t* game) {
     }
   }
   pthread_mutex_destroy(&game->mutex);
-  free(game->labyrinth);
+  free(game->maze);
   free(game->ghosts);
   close(game->pipe1[0]);
   close(game->pipe1[1]);
@@ -390,9 +387,7 @@ void* gameThread(void* arg) {
         goto end;
     }
 
-    lock(game);
-    //TODO : move ghosts
-    unlock(game);
+    randomise_ghosts_pos(game, 1);
   }
 
   end:
@@ -435,9 +430,6 @@ void game_startIfAllReady(game_t* game) {
 #define out_of_bounds(game, thing)\
   thing->x < 0 || thing->x >= game->w ||\
   thing->y < 0 || thing->y >= game->h
-
-#define in_a_wall(game, thing)\
-  game->labyrinth[thing->x + thing->y * game->w] == '1'
 
 // returns 1 if the player captured at least one ghost, else returns 0
 int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
@@ -518,15 +510,25 @@ int in_a_ghost(game_t* game, player_t* player) {
   return 0;
 }
 
-// int in_another_player(game_t* game, player_t* player); todo ?
+int in_another_player(game_t* game, player_t* player) {
+  return playerList_inAnotherPlayer(game->playerList, player);
+}
 
 void game_randomizePosition(game_t* game, player_t* player) {
   int i = 0;
+  lock(game);
   do {
     player->x = random() % game->w;
     player->y = random() % game->h;
     i++;
-  } while ((in_a_wall(game, player) || in_a_ghost(game, player)) && i < 10000);
+  } while (
+    (
+      in_a_wall(game, player) ||
+      in_a_ghost(game, player) ||
+      in_another_player(game, player))
+    && i < 10000);
+  unlock(game);
+
   if (i == 10000) {
     printf("problem with game_randomizePosition function");
     int n = write(player->pipe[1], "end", 3);
@@ -573,11 +575,11 @@ void game_endIfNoGhost(game_t* game) {
   }
   player_t* winner = playerList_getPlayerWithMaxScore(game->playerList);
   if (winner != NULL) {
-    // ENDGA username pppp+++
     char buf[22];
     memmove(buf, "ENDGA username pppp+++", 22);
     memmove(buf + 6, winner->name, MAX_NAME);
     mv_num4toBuf(buf, 15, winner->score);
+    // sends [ENDGA id p+++]
     send_msg_multicast(game, buf, 22);
   }
   unlock(game);

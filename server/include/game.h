@@ -26,6 +26,7 @@ typedef struct ghost ghost_t;
 
 #include "player.h"
 #include "server.h"
+#include "maze.h"
 
 struct game {
   pthread_mutex_t mutex;
@@ -38,7 +39,7 @@ struct game {
   u_int8_t hasStarted;
   char multicast_port[4]; // will be 4000 + id
   playerList_t* playerList;
-  char* labyrinth;
+  char* maze;
   ghost_t* ghosts;
   struct sockaddr_in multicast_addr;
 };

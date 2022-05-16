@@ -26,8 +26,8 @@ player_t* newPlayer(int fd, struct sockaddr_in addrinfo) {
   p->addr.sin_family = AF_INET;
   p->addr.sin_addr.s_addr = addrinfo.sin_addr.s_addr;
   p->is_ready = 0;
-  p->x = 0;
-  p->y = 0;
+  p->x = -1;
+  p->y = -1;
   p->score = 0;
   return p;
 }
@@ -228,7 +228,7 @@ int playerList_hasPlayerWithSameId(playerList_t* playerList, player_t* player) {
 }
 
 player_t* playerList_getPlayerWithMaxScore_aux(playerCell_t* pc, player_t* maxPlayer) {
-  if (pc == NULL) 
+  if (pc == NULL)
     return maxPlayer;
   if (pc->player->score > maxPlayer->score)
     maxPlayer = pc->player;
@@ -239,5 +239,19 @@ player_t* playerList_getPlayerWithMaxScore(playerList_t* playerList) {
   if (playerList->first == NULL)
     return NULL;
   return playerList_getPlayerWithMaxScore_aux(playerList->first, playerList->first->player);
+}
+
+int inAnotherPlayer_aux(playerCell_t* pc, player_t* p) {
+  if (pc == NULL)
+    return 0;
+  if (pc->player != p &&
+    pc->player->x == p->x &&
+    pc->player->y == p->y)
+    return 1;
+  return inAnotherPlayer_aux(pc->next, p);
+}
+
+int playerList_inAnotherPlayer(playerList_t* playerList, player_t* player) {
+  return inAnotherPlayer_aux(playerList->first, player);
 }
 

@@ -40,6 +40,7 @@
 
 int verbose;
 int very_verbose;
+int print_mazes;
 const char* multicast_ip_address;
 
 gameList_t* gameList;
@@ -57,6 +58,10 @@ void print_help(const char* progName) {
     "    -V\n"
     "        Very verbose mode. Prints all incoming and outcoming\n"
     "        network messages.\n\n"
+    "    -m\n"
+    "        Prints generated mazes.\n\n"
+    "    -s\n"
+    "        Sixes seed for random calculations at 0.\n\n"
     "    -h\n"
     "        Displays help.\n"
     , progName);
@@ -69,9 +74,12 @@ int main(int argc, char* argv[]) {
   int accept_port = 4242;
   verbose = 0;
   very_verbose = 0;
+  print_mazes = 0;
+
+  srandom(time(0));
 
   int opt;
-  while ((opt = getopt(argc, argv, "Vvhp:")) != -1) {
+  while ((opt = getopt(argc, argv, "Vvhsmp:")) != -1) {
     switch (opt) {
       case 'v':
         verbose = 1;
@@ -79,12 +87,18 @@ int main(int argc, char* argv[]) {
       case 'V':
         very_verbose = 1;
         break;
+      case 'm':
+        print_mazes = 1;
+        break;
       case 'p':
         accept_port = atoi(optarg);
         if (accept_port == 0) {
           print_help(argv[0]);
           return -1;
         }
+        break;
+      case 's':
+        srandom(0);
         break;
       case 'h':
         print_help(argv[0]);

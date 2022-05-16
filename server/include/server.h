@@ -32,6 +32,7 @@
 
 extern int verbose;
 extern int very_verbose;
+extern int print_mazes;
 
 extern const char* multicast_ip_address;
 

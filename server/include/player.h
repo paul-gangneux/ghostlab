@@ -64,4 +64,8 @@ player_t* playerList_getPlayer(playerList_t* playerlist, char name[MAX_NAME]);
 
 player_t* playerList_getPlayerWithMaxScore(playerList_t* playerList);
 
+// returns 1 if coordonates or player are the same as coordonates
+// of another player in playerList. returns 0 otherwise.
+int playerList_inAnotherPlayer(playerList_t* playerList, player_t* player);
+
 #endif
