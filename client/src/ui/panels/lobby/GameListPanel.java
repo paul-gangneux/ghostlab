@@ -1,6 +1,6 @@
 package ui.panels.lobby;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -13,20 +13,17 @@ import java.awt.Color;
 import java.awt.Component;
 
 import model.GameInfo;
-import ui.LobbyWindow;
+import ui.LobbyPanel;
 
 public class GameListPanel extends JPanel {
 
-    private Client client;
-
-    private LobbyWindow parentWindow;
+    private LobbyPanel parentWindow;
 
     private GridLayout gl;
-    private GameInfo selectedGameInfo; // GameInfo of the selected game. Null if none is selected.
+    private transient GameInfo selectedGameInfo; // GameInfo of the selected game. Null if none is selected.
     
-    public GameListPanel(Client client, LobbyWindow parentWindow) {
+    public GameListPanel(LobbyPanel parentWindow) {
         super();
-        this.client = client;
         this.parentWindow = parentWindow;
         gl = new GridLayout(1, 1, 0, 5); // 1 row, 1 column, no horizontal shift, 5 px vertical shift
         setLayout(gl);
@@ -42,7 +39,7 @@ public class GameListPanel extends JPanel {
         return selectedGameInfo;
     }
 
-    public void processGameList(ArrayList<GameInfo> gameList) {
+    public void processGameList(List<GameInfo> gameList) {
         // it is expected that the client will have a method to process the [OGAME m s***] requests in a row to produce this ArrayList
         // Do not call this method before initialisation of the GameListPanel
         clearList();

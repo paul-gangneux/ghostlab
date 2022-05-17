@@ -25,6 +25,6 @@ public class LauncherWindow extends JFrame {
         setSize(width, height);
         setLocationRelativeTo(null); // centers the window
         setResizable(false);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
     }
 }

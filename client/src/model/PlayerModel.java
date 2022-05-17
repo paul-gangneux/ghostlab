@@ -1,14 +1,31 @@
 package model;
 
 public class PlayerModel {
+    // private String name = "default"; à faire ?
+    private String name ;
     private int xpos;
     private int ypos;
     private int score;
 
-    public PlayerModel() {
+    static PlayerModel playerModel = null;  
+
+    private PlayerModel(String username ) {
+        this.name = username;
         xpos = 0;
         ypos = 0;
         score = 0;
+    }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public  String getPseudo(){
+        return name;
+    }
+
+    public static PlayerModel getCurrentPlayer() {
+        return playerModel;
     }
 
     public PlayerModel(int x, int y) {
@@ -16,9 +33,13 @@ public class PlayerModel {
         ypos = y;
     }
 
-    public PlayerModel(int x, int y, int initScore) {
+    private PlayerModel(int x, int y, int initScore) {
         this(x, y);
         score = initScore;
+    }
+
+    public static void initialize(String username) {
+        if (playerModel == null) playerModel = new PlayerModel(username);
     }
 
     public synchronized int getXPos() {

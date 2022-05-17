@@ -5,14 +5,14 @@ import java.awt.GridLayout;
 import javax.swing.JPanel;
 
 import client.Client;
-import model.MessageInfo;
-import ui.GameWindow;
+import model.*;
+import ui.*;
 
 public class ChatWholePanel extends JPanel {
     
     private GridLayout gl;
 
-    private GameWindow parentWindow;
+    private GamePanel parentWindow;
     private ChatHistoryPanel chp;
     private ChatInputPanel cip;
 
@@ -28,12 +28,12 @@ public class ChatWholePanel extends JPanel {
         return cip;
     }
 
-    public ChatWholePanel(Client c, GameWindow parentWindow) {
+    public ChatWholePanel(GamePanel parentWindow) {
         super();
         this.parentWindow = parentWindow;
         gl = new GridLayout(2, 1, 0, 0);
-        chp = new ChatHistoryPanel(c, parentWindow);
-        cip = new ChatInputPanel(c, parentWindow);
+        chp = new ChatHistoryPanel(this, parentWindow);
+        cip = new ChatInputPanel(this, parentWindow);
         add(chp);
         add(cip);
     }

@@ -17,7 +17,7 @@ import javax.swing.event.DocumentListener;
 import client.Client;
 import model.ChatScope;
 import model.MessageInfo;
-import ui.GameWindow;
+import ui.*;
 
 public class ChatInputPanel extends JPanel {
 
@@ -58,9 +58,11 @@ public class ChatInputPanel extends JPanel {
             ScopeMenuItem globalScope = new ScopeMenuItem("ALL", ChatScope.GLOBAL_MSG);
             add(globalScope);
             ScopeMenuItem teamScope = new ScopeMenuItem("TEAM", ChatScope.TEAM_MSG);
-            teamScope.setEnabled(client.hasTeam());
+            // teamScope.setEnabled(client.hasTeam());
             add(teamScope);
-            for (String playerName : client.getAllOtherPlayersNames()) {
+            // TODO get all player names
+            String[] placeholder = {"bob", "alice"};
+            for (String playerName : placeholder) {
                 ScopeMenuItem playerWhisper = new ScopeMenuItem(playerName, ChatScope.OUTGOING_PRIVATE_MSG);
                 add(playerWhisper);
             }
@@ -137,9 +139,10 @@ public class ChatInputPanel extends JPanel {
 
     private void sendChatMessage() {
         // Send the actual message... Use cif.getText()
-        MessageInfo mi = new MessageInfo(sm.scope, (sm.scope == ChatScope.OUTGOING_PRIVATE_MSG) ? sm.destName : client.getName(), cif.getText());
+        MessageInfo mi = new MessageInfo(sm.scope, (sm.scope == ChatScope.OUTGOING_PRIVATE_MSG) ? sm.destName : null, cif.getText());
+        cwp.addMessage(mi);
         // See MessageInfo comments for more info on this ternary
-        client.sendOnChat(mi);
+        Client.getInstance().sendMessToAll(mi.getContent());
         // We then reset the textfield
         cif.setText("Enter any message here... (max 40 chars)");
         cif.setForeground(Color.GRAY);
@@ -147,15 +150,16 @@ public class ChatInputPanel extends JPanel {
 
     private GridLayout gl;
 
-    private GameWindow parentWindow;
+    private GamePanel parentWindow;
     private ScopeMenu sm;
     private ChatInputField cif;
     private ChatSendButton csb;
+    private ChatWholePanel cwp;
 
-    public ChatInputPanel(Client c, GameWindow parentWindow) {
+    public ChatInputPanel(ChatWholePanel cwp, GamePanel parentWindow) {
         super();
+        this.cwp = cwp;
         this.parentWindow = parentWindow;
-        client = c;
         gl = new GridLayout(0, 3, 0, 0);
         sm = new ScopeMenu();
         cif = new ChatInputField();

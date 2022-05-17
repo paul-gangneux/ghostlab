@@ -25,8 +25,6 @@ public class LabyTile extends JPanel implements MouseInputListener {
         UNKNOWN
     }
 
-    private Client client;
-
     private int gridXPos;
     private int gridYPos;
 
@@ -36,9 +34,8 @@ public class LabyTile extends JPanel implements MouseInputListener {
 
     private JLabel icon;
 
-    public LabyTile(Client client, LabyDisplayerPanel ldp, int xpos, int ypos) {
+    public LabyTile(LabyDisplayerPanel ldp, int xpos, int ypos) {
         setSize(60, 60);
-        this.client = client;
         parentPanel = ldp;
         gridXPos = xpos;
         gridYPos = ypos;

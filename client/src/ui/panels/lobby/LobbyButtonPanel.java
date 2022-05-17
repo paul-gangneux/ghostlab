@@ -1,23 +1,25 @@
 package ui.panels.lobby;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+// import java.awt.event.ActionEvent;
+// import java.awt.event.ActionListener;
 import java.awt.GridLayout;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import client.Client;
-import ui.LobbyWindow;
+import model.PlayerModel;
+import ui.LobbyPanel;
 
 public class LobbyButtonPanel extends JPanel {
 
-    private Client client;
-
-    private LobbyWindow parentWindow;
+    private LobbyPanel parentWindow;
     private GridLayout gl;
     private GameCreateButton gcb;
     private GameJoinButton gjb;
+    private JTextField username;
+    private JTextField udpPort;
 
     private class GameCreateButton extends JButton {
 
@@ -25,13 +27,9 @@ public class LobbyButtonPanel extends JPanel {
             super();
             setText("Create game");
             setEnabled(true);
-            addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // Game creation routine : TODO
-                }
-                
+            addActionListener(event -> {
+                PlayerModel.initialize(username.getText());
+                Client.getInstance().createGame(username.getText());
             });
         }
     }
@@ -41,16 +39,26 @@ public class LobbyButtonPanel extends JPanel {
         private GameJoinButton() {
             super();
             setText("Join game");
-            setEnabled(false); // A good thing would be to prevent the button from being clicked if no game is selected
-            addActionListener(new ActionListener() {
+            setEnabled(false); // A good thing would be to prevent the button from being clicked if no game is
+                               // selected
+            addActionListener(event -> {
+                PlayerModel.initialize(username.getText());
+                Client.getInstance().joinGame(
+                        parentWindow.getGameListPanel().getSelectedGameInfo().getID(),
+                        username.getText());
+            });
+        }
+    }
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // Game joining routine : TODO
-                    // Here we have to gather the selectedGameInfo from the GameListPanel of the LobbyWindow
-                    // -> parentWindow.getGameListPanel().getSelectedGameInfo()
-                }
-                
+    private class RefreshButton extends JButton {
+
+        private RefreshButton() {
+            super();
+            setText("refresh games");
+            setEnabled(true); // A good thing would be to prevent the button from being clicked if no game is
+                              // selected
+            addActionListener(event -> {
+                Client.getInstance().askForGameList();
             });
         }
     }
@@ -59,16 +67,22 @@ public class LobbyButtonPanel extends JPanel {
         gjb.setEnabled(true);
     }
 
-    public LobbyButtonPanel(Client client, LobbyWindow parentWindow) {
+    public LobbyButtonPanel(LobbyPanel parentWindow) {
         super();
-        this.client = client;
         this.parentWindow = parentWindow;
-        gl = new GridLayout(1, 2, 5, 0); // 1 row, 2 columns for the two buttons, 5 px horizontal shift, no vertical shift
+        gl = new GridLayout(4, 1, 5, 0); // 1 row, 2 columns for the two buttons, 5 px horizontal shift, no vertical
+                                         // shift
         setLayout(gl);
         gcb = new GameCreateButton();
         gjb = new GameJoinButton();
+        username = new JTextField("enter pseudo");
+        username.setVisible(true);
+        udpPort = new JTextField("enter port");
+        udpPort.setVisible(true);
+        add(username);
         add(gcb);
         add(gjb);
+        add(new RefreshButton());
     }
-    
+
 }

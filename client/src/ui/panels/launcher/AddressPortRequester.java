@@ -2,8 +2,8 @@ package ui.panels.launcher;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+// import java.awt.event.ActionEvent;
+// import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -158,14 +158,8 @@ public class AddressPortRequester extends JPanel {
             super();
             setText("Connect");
             setEnabled(true);
-            addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // Connection routine : TODO
-                    // Don't hesitate to add a client field in the button subclasses if needed.
-                }
-                
+            addActionListener(event -> {
+                // Connection routine : TODO
             });
         }
 

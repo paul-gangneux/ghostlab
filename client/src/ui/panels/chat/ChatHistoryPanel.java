@@ -6,14 +6,14 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 import client.Client;
-import model.MessageInfo;
-import ui.GameWindow;
+import model.*;
+import ui.*;
 
 public class ChatHistoryPanel extends JPanel {
 
     private static final int CHAT_HISTORY_LENGTH = 50;
 
-    private GameWindow parentWindow;
+    private GamePanel parentWindow;
     private GridLayout gl;
     private ArrayList<MessageInfo> messageQueue;
     private int chatPosition = 0;
@@ -43,8 +43,11 @@ public class ChatHistoryPanel extends JPanel {
         revalidate(); // recomputes the layout, effectively refreshing the chat
     }
 
-    public ChatHistoryPanel(Client client, GameWindow parentWindow) {
+    private ChatWholePanel cwp;
+
+    public ChatHistoryPanel(ChatWholePanel cwp, GamePanel parentWindow) {
         super();
+        this.cwp = cwp;
         this.parentWindow = parentWindow;
         gl = new GridLayout(CHAT_HISTORY_LENGTH, 1, 0, 0);
         setLayout(gl);

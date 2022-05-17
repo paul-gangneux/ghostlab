@@ -1,19 +1,17 @@
 package ui;
 
-import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import java.awt.GridLayout;
 
 import client.Client;
-import model.GameInfo;
-import model.MessageInfo;
-import model.PlayerModel;
+import model.*;
 import ui.panels.chat.ChatWholePanel;
 import ui.panels.game.LabyDisplayerPanel;
 
 //import java.awt.GridLayout;
 
-public class GameWindow extends JFrame {
+public class GamePanel extends JPanel {
 
     private Client client;
 
@@ -24,13 +22,13 @@ public class GameWindow extends JFrame {
     private LabyDisplayerPanel ldp;
     private ChatWholePanel cwp;
 
-    private GameInfo gameinfo;
+    private transient GameInfo gameinfo;
 
     public GameInfo getGameInfo() {
         return gameinfo;
     }
 
-    private PlayerModel playerModel;
+    private transient PlayerModel playerModel;
 
     public PlayerModel getPlayerModel() {
         return playerModel;
@@ -48,20 +46,18 @@ public class GameWindow extends JFrame {
         cwp.addMessage(mi);
     }
 
-    public GameWindow(Client client, GameInfo gameinfo, PlayerModel playermodel) {
-        this.client = client;
+    public GamePanel(GameInfo gameinfo, PlayerModel playermodel) {
         this.gameinfo = gameinfo;
         this.playerModel = playermodel;
         gl = new GridLayout(1, 2, 0, 0);
         setLayout(gl);
-        ldp = new LabyDisplayerPanel(client, this, gameinfo);
+        ldp = new LabyDisplayerPanel(this, gameinfo);
         add(ldp);
-        cwp = new ChatWholePanel(client, this);
+        cwp = new ChatWholePanel(this);
         add(cwp);
-        setTitle("Game window");
         setSize(DEFAULT_GAMEWINDOW_WIDTH, DEFAULT_GAMEWINDOW_HEIGHT);
-        setLocationRelativeTo(null); // centers the window
-        setResizable(false);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
+        // setLocationRelativeTo(null); // centers the window
+        // setResizable(false);
+        // setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE); 
     }
 }

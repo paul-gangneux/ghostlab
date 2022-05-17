@@ -1,49 +1,75 @@
 package client;
 
-import java.util.ArrayList;
-
-import model.MessageInfo;
-import ui.GameWindow;
-import ui.View;
+import model.PlayerModel;
 
 public class Client {
+    private ClientTcp c1;
+    private ClientUdp c2;
 
-    private View view; // good way to do
+    static Client client = null;
 
-    private GameWindow gw; // bad way to do (for tests)
-
-    public void setGameWindow(GameWindow gw) {
-        this.gw = gw;
+    private Client(String serverIp, int tcpPort) {
+        c1 = new ClientTcp(serverIp, tcpPort);
+        c2 = new ClientUdp(serverIp);
     }
 
-    public ArrayList<String> getAllOtherPlayersNames() {
-        ArrayList<String> res = new ArrayList<String>();
-        // TODO : this is used for tests, please make it real !
-        for (int i = 1; i < 10; i++) {
-            res.add("Player " + Integer.toString(i));
+    public static void initialize(String serverIp, int tcpPort) {
+        if (client == null)
+            client = new Client(serverIp, tcpPort);
+    }
+
+    public static Client getInstance() {
+        return client;
+    }
+
+    public void startInteraction() {
+        c1.start();
+        c2.start();
+    }
+
+    public void joinGame(int gameId, String username) {
+        byte[] msg = ("REGIS username " + c2.getPort() + " i***").getBytes();
+        int n = username.length();
+        for (int i = 0; i < 8; i++) {
+            if (i < n) {
+                msg[6 + i] = username.getBytes()[i];
+            } else {
+                msg[6 + i] = 0;
+            }
         }
-        return res;
+        msg[20] = (byte) gameId;
+        System.out.println("created " + username);
+        c1.sendToServer(msg);
     }
 
-    public String getName() {
-        return "Uly";
+    public void createGame(String username) {
+        byte[] msg = ("NEWPL username " + c2.getPort() + "***").getBytes();
+        int n = username.length();
+        for (int i = 0; i < 8; i++) {
+            if (i < n) {
+                msg[6 + i] = username.getBytes()[i];
+            } else {
+                msg[6 + i] = 0;
+            }
+        }
+        System.out.println("created " + username);
+        c1.sendToServer(msg);
     }
 
-    public boolean hasTeam() {
-        return true; // TODO
+    public void ready() {
+        c1.sendToServer("START***");
     }
 
-    public void sendOnChat(MessageInfo mi) {
-        gw.addMessage(mi);
+    public void askSize(int gameId) {
+        byte[] msg = ("SIZE? i***").getBytes();
+        msg[6] = (byte) gameId;
     }
 
-    static ClientTcp c1;
-    static ClientUdp c2;
-    public static void main(String[] args) {
-        c1 = new ClientTcp("localhost", 4242);
-        c2 = new ClientUdp("localhost", 5555);
+    public void askForGameList() {
+        c1.sendToServer("GAME?***");
+    }
 
-        c1.run();
-        c2.run();
+    public void sendMessToAll(String mi) {
+        c1.sendToServer("MALL? "+mi+"***");
     }
 }

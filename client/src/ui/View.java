@@ -1,23 +1,76 @@
 package ui;
 
-import javax.swing.JFrame;
+import java.awt.*;
+import java.util.List;
+
+import javax.swing.*;
 
 import client.Client;
+import model.GameInfo;
+import model.PlayerModel;
+import ui.panels.lobby.WaitPanel;
 
-public class View {
-    private Client c;
+// unique jframe
+public class View extends JFrame {
+    JPanel mainPanel;
+    LobbyPanel lobbyp;
+    GamePanel gamep;
+    WaitPanel waitp;
+    static View view = null;
 
-    private JFrame currentWindow;
+    private void switchPanel(JPanel newPanel) {
+        getContentPane().remove(mainPanel);
+        mainPanel = newPanel;
 
-    public View(Client c) {
-        this.c = c;
+        EventQueue.invokeLater(() -> {
+            getContentPane().add(mainPanel);
+            // pack();
+            // repaint();
+            revalidate();
+        });
     }
 
-    public void switchToWindow(JFrame window) {
-        if (currentWindow != null) { // First window of the UI
-            currentWindow.dispose();
-        }
-        currentWindow = window;
-        currentWindow.setVisible(true);
+    private View() {
+        setTitle("ghost lab");
+        setSize(1000, 600);
+        setLocationRelativeTo(null); // centers the window
+        // setResizable(false);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        lobbyp = new LobbyPanel();
+        mainPanel = lobbyp;
+        getContentPane().add(mainPanel);
+        EventQueue.invokeLater(() -> setVisible(true));
+    }
+
+    public static void initialize() {
+        if (view == null)
+            view = new View();
+    }
+
+    public static View getInstance() {
+        initialize();
+        return view;
+    }
+
+    public void updateLobbyWindow(List<GameInfo> gameList) {
+        EventQueue.invokeLater(() -> {
+            lobbyp.getGameListPanel().processGameList(gameList);
+            revalidate();
+        });
+    }
+
+    public void regError() {
+        // TODO : show error msg
+    }
+
+    public void regOk() {
+        waitp = new WaitPanel();
+        switchPanel(waitp);
+    }
+
+    public void showGame() {
+        // TODO: make sure game infos has been recieved
+        gamep = new GamePanel(GameInfo.getCurrentGameInfo(), PlayerModel.getCurrentPlayer());
+        switchPanel(gamep);
     }
 }
