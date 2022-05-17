@@ -44,14 +44,14 @@ public class ClientUdp extends Thread {
         return port;
     }
 
-    public String getKeyword(byte[] buf) {
+    private String getKeyword(byte[] buf) {
         byte[] keyBytes = new byte[5];
         for (int i = 0; i < 5; i++)
             keyBytes[i] = buf[i];
         return new String(keyBytes, StandardCharsets.UTF_8);
     }
 
-    public String getPseudo(byte[] buf) {
+    public static String getPseudo(byte[] buf) {
         int n = 0;
         for (int i = 0; i < 8; i++) {
             if (buf[i + 6] != 0) {
@@ -68,7 +68,7 @@ public class ClientUdp extends Thread {
 
         try {
 
-            byte[] data = new byte[200];
+            byte[] data = new byte[218];
             DatagramPacket paquet = new DatagramPacket(data, data.length, address, port);
 
             while (true) {
@@ -83,11 +83,11 @@ public class ClientUdp extends Thread {
                     case "MESSP":
                         String senderPseudo = "";
                         String message = "";
-                        senderPseudo = getPseudo(data);
+                        senderPseudo = ClientUdp.getPseudo(data);
                         System.out.println("Depuis le pseudo : " + senderPseudo);
                         
                         // starts reading from the message directly until +++
-                        String st = new String(paquet.getData(), 15, paquet.getLength());
+                        String st = new String(paquet.getData(), 15, paquet.getLength() - 15);
                         Scanner sc = new Scanner(st);
                         String line = "";
                         try {
@@ -95,12 +95,12 @@ public class ClientUdp extends Thread {
                             System.out.println("message : " + line);
                             MessageInfo messageInfo = new MessageInfo(ChatScope.INCOMING_PRIVATE_MSG, senderPseudo,
                                     message);
-                            View.getInstance().incomingMessage(messageInfo);
-                            sc.close();
+                            View.getInstance().incomingMessage(messageInfo);       
                         } catch (Exception e) {
                             e.printStackTrace();
                             System.out.println("Error of server reply . Maybe doesn't end with +++");
                         }
+                        sc.close();
                         break;
 
                     default:

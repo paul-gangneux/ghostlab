@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.swing.*;
 
-import client.Client;
 import model.GameInfo;
 import model.MessageInfo;
 import model.PlayerModel;
@@ -60,8 +59,8 @@ public class View extends JFrame {
         });
     }
 
-    public void incomingMessage(MessageInfo mi){
-        //TODO do i
+    public void incomingMessage(MessageInfo mi) {
+        // TODO do it
     }
 
     public void regError() {
@@ -78,4 +77,17 @@ public class View extends JFrame {
         gamep = new GamePanel(GameInfo.getCurrentGameInfo(), PlayerModel.getCurrentPlayer());
         switchPanel(gamep);
     }
+
+    public void ghostMoved(int x, int y) {
+        // TODO
+    }
+
+    public void ghostCaptured(String username, int points, int x, int y) {
+        // TODO
+    }
+
+    public void endGameAndShowWinner(String id, int p) {
+        // TODO
+    }
+
 }
