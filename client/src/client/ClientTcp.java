@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 // import java.util.Scanner;
 import model.GameInfo;
 import ui.View;
@@ -99,8 +101,14 @@ public class ClientTcp extends Thread {
                     View.getInstance().regOk();
                     break;
                 }
+
                 case "REGNO": { // [REGNO***]
                     View.getInstance().regError();
+                    break;
+                }
+
+                case "UNROK": { // [UNROK m***]
+                    // TODO
                     break;
                 }
 
@@ -114,15 +122,76 @@ public class ClientTcp extends Thread {
                     break;
                 }
 
+                case "LIST!": { // [[LIST! m s***]
+                    // TODO: read all
+                    // [PLAYR username***]
+                    break;
+                }
+
                 case "WELCO": { // [WELCO m hh ww f ip_.___.___.___ port***]
                     int id = 0xff & buf[6];
                     // pour avoir en little-endian:
                     int h = (0xff & buf[8]) + (0xff & buf[9]) * 0x100;
                     int w = (0xff & buf[11]) + (0xff & buf[12]) * 0x100;
-                    // TODO : mettre à jour les autres infos
-                    // TODO : se connecter au multicast
+                    int f = 0xff & buf[14];
+
+                    String str = new String(buf, 16, 20, StandardCharsets.UTF_8);
+                    String ip = str.substring(0, 15);
+                    String strPort = str.substring(16, 20);
+                    ip = ip.replace("#", "");
+                    int port = Integer.parseInt(strPort);
+
+                    ClientMulticast.setMulticastSocket(ip, port);
+                    ClientMulticast.startListening();
                     GameInfo.setCurrentGameInfo(new GameInfo(id, 0, h, w));
+                    GameInfo.getCurrentGameInfo().setNbGhosts(f);
                     View.getInstance().showGame();
+                    break;
+                }
+
+                case "POSIT": { // [POSIT username xxx yyy***]
+                    // TODO
+                    break;
+                }
+
+                case "MOVE!": { // [MOVE! xxx yyy***]
+                    // TODO
+                    break;
+                }
+
+                case "MOVEF": { // [MOVEF xxx yyy pppp***]
+                    // TODO
+                    break;
+                }
+
+                case "GLIS": { // [GLIS! m***]
+                    // TODO : read all
+                    // [GPLYR username xxx yyy pppp***]
+                    break;
+                }
+
+                case "MALL!": { // [MALL!***]
+                    // TODO
+                    break;
+                }
+
+                case "SEND!": { // [SEND!***]
+                    // TODO
+                    break;
+                }
+
+                case "NSEND": { // [NSEND***]
+                    // TODO
+                    break;
+                }
+
+                case "GOBYE": { // [GOBYE***]
+                    // TODO
+                    break;
+                }
+
+                case "DUNNO": { // [DUNNO***]
+                    // TODO
                     break;
                 }
 

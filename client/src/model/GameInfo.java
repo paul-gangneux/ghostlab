@@ -7,6 +7,7 @@ public class GameInfo {
 
     private int labyheight;
     private int labywidth;
+    private int nbGhosts;
 
     private static GameInfo currentGameInfo;
 
@@ -39,6 +40,10 @@ public class GameInfo {
 
     public void setId(int gameID) {
       this.gameID = gameID;
+    }
+
+    public void setNbGhosts(int nbGhosts) {
+      this.nbGhosts = nbGhosts;
     }
 
     public String toString() {

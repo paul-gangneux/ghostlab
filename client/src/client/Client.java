@@ -1,8 +1,7 @@
 package client;
 
-import model.PlayerModel;
-
 public class Client {
+
     private ClientTcp c1;
     private ClientUdp c2;
 
