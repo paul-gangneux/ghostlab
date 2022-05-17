@@ -8,7 +8,7 @@
 #include "server.h"
 
 // generate and return the mazernth
-// sets w and h approprately
+// sets w and h appropriately
 // memory is allocated here, can be 
 // freed with a free()
 char* maze_generate(u_int16_t* str_w, u_int16_t* str_h);
