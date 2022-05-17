@@ -9,7 +9,7 @@ public class Client {
 
     private Client(String serverIp, int tcpPort) {
         c1 = new ClientTcp(serverIp, tcpPort);
-        c2 = new ClientUdp(serverIp);
+        c2 = new ClientUdp();
     }
 
     public static void initialize(String serverIp, int tcpPort) {

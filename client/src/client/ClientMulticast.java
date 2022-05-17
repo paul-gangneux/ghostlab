@@ -88,6 +88,8 @@ public class ClientMulticast {
 				break;
 			}
 			String keyword = new String(paquet.getData(), 0, 5, StandardCharsets.UTF_8);
+			// System.out.println(new String(paquet.getData(), 0, paquet.getLength()));
+
 			switch (keyword) {
 				case "GHOST": { // [GHOST xxx yyy+++]
 					String sx = new String(paquet.getData(), 6, 3, StandardCharsets.UTF_8);
