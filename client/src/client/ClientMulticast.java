@@ -60,7 +60,10 @@ public class ClientMulticast {
 	}
 
 	private static void listens() {
+		//TODO: verbose only
 		System.out.println("Multicast: starts listening");
-		// TODO
+
+		// byte[] data = new byte[200];
+        //     DatagramPacket paquet = new DatagramPacket(data, data.length, address, port);
 	}
 }
