@@ -7,6 +7,7 @@ import javax.swing.*;
 
 import client.Client;
 import model.GameInfo;
+import model.MessageInfo;
 import model.PlayerModel;
 import ui.panels.lobby.WaitPanel;
 
@@ -57,6 +58,10 @@ public class View extends JFrame {
             lobbyp.getGameListPanel().processGameList(gameList);
             revalidate();
         });
+    }
+
+    public void incomingMessage(MessageInfo mi){
+        //TODO do i
     }
 
     public void regError() {

@@ -1,8 +1,16 @@
 package client;
 
 import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.io.*;
+import java.util.*;
+
+import model.ChatScope;
+import model.MessageInfo;
+import ui.View;
 
 public class ClientUdp extends Thread {
+
     private int port;
     private InetAddress address;
     private DatagramSocket dso = null;
@@ -14,7 +22,7 @@ public class ClientUdp extends Thread {
             e.printStackTrace();
         }
 
-        int p = 5000;
+        int p = 5000; // default port in case
         boolean b = true;
 
         while (b) {
@@ -36,22 +44,68 @@ public class ClientUdp extends Thread {
         return port;
     }
 
+    public String getKeyword(byte[] buf) {
+        byte[] keyBytes = new byte[5];
+        for (int i = 0; i < 5; i++)
+            keyBytes[i] = buf[i];
+        return new String(keyBytes, StandardCharsets.UTF_8);
+    }
+
+    public String getPseudo(byte[] buf) {
+        int n = 0;
+        for (int i = 0; i < 8; i++) {
+            if (buf[i + 6] != 0) {
+                n++;
+            } else {
+                break;
+            }
+        }
+        return new String(buf, 6, n, StandardCharsets.UTF_8);
+    }
+
     @Override
     public void run() {
 
         try {
 
-            byte[] data = new byte[100];
+            byte[] data = new byte[200];
+            DatagramPacket paquet = new DatagramPacket(data, data.length, address, port);
+
             while (true) {
-                DatagramPacket paquet = new DatagramPacket(data, data.length, address, port);
                 // Prepare the packet for receive
-                paquet.setData(new byte[100]);
+                // paquet.setData(new byte[200]);
                 // receive a response from the server
                 dso.receive(paquet);
-                String st = new String(paquet.getData(), 0, paquet.getLength());
-                System.out.println("J'ai reçu :" + st);
-                System.out.println("De la machine " + paquet.getAddress().toString());
-                System.out.println("Depuis le port " + paquet.getPort());
+                data = paquet.getData();
+
+                String keyword = getKeyword(data);
+                switch (keyword) {
+                    case "MESSP":
+                        String senderPseudo = "";
+                        String message = "";
+                        senderPseudo = getPseudo(data);
+                        System.out.println("Depuis le pseudo : " + senderPseudo);
+                        
+                        // starts reading from the message directly until +++
+                        String st = new String(paquet.getData(), 15, paquet.getLength());
+                        Scanner sc = new Scanner(st);
+                        String line = "";
+                        try {
+                            line = sc.useDelimiter("\\+\\+\\+").next(); // we use delimeter +++ to get only the message
+                            System.out.println("message : " + line);
+                            MessageInfo messageInfo = new MessageInfo(ChatScope.INCOMING_PRIVATE_MSG, senderPseudo,
+                                    message);
+                            View.getInstance().incomingMessage(messageInfo);
+                            sc.close();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.out.println("Error of server reply . Maybe doesn't end with +++");
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,4 +114,5 @@ public class ClientUdp extends Thread {
                 dso.close();
         }
     }
+
 }
