@@ -123,6 +123,24 @@ public class ClientTcp extends Thread {
                 }
 
                 case "LIST!": { // [[LIST! m s***]
+                    int num = buf[8];
+                    ArrayList<String> infoPlayers = new ArrayList<>();
+                    for (int i = 0; i < num; i++) {
+                        try {
+                            size = readMessage(istream, buf);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        keyword = getKeyword(buf);
+
+                        if (size != 12 || !keyword.equals("PLAYR")) {
+                            System.out.println("error at game info reading");
+                            break;
+                        }
+                        String playerid = ClientUdp.getPseudo(buf);
+                        infoPlayers.add(playerid);
+                    }
+
                     // TODO: read all
                     // [PLAYR username***]
                     break;

@@ -51,7 +51,7 @@ public class ClientUdp extends Thread {
         return new String(keyBytes, StandardCharsets.UTF_8);
     }
 
-    public String getPseudo(byte[] buf) {
+    public static String getPseudo(byte[] buf) {
         int n = 0;
         for (int i = 0; i < 8; i++) {
             if (buf[i + 6] != 0) {
