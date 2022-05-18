@@ -255,3 +255,10 @@ int playerList_inAnotherPlayer(playerList_t* playerList, player_t* player) {
   return inAnotherPlayer_aux(playerList->first, player);
 }
 
+int playerList_inAPlayer(playerList_t* playerList, int x, int y) {
+  player_t p;
+  p.x = x;
+  p.y = y;
+  return playerList_inAnotherPlayer(playerList, &p);
+}
+

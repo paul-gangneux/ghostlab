@@ -40,7 +40,8 @@ void randomise_ghosts_pos(game_t* game, int informPlayers) {
     do {
       game->ghosts[i].x = random() % game->w;
       game->ghosts[i].y = random() % game->h;
-    } while (in_a_wall2(game, game->ghosts[i]));
+    } while (in_a_wall2(game, game->ghosts[i]) ||
+      playerList_inAPlayer(game->playerList, game->ghosts[i].x, game->ghosts[i].y));
     if (informPlayers) {
       mv_num3toBuf(buf, 6, game->ghosts[i].x);
       mv_num3toBuf(buf, 10, game->ghosts[i].y);

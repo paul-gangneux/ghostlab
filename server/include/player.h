@@ -68,4 +68,6 @@ player_t* playerList_getPlayerWithMaxScore(playerList_t* playerList);
 // of another player in playerList. returns 0 otherwise.
 int playerList_inAnotherPlayer(playerList_t* playerList, player_t* player);
 
+int playerList_inAPlayer(playerList_t* playerList, int x, int y);
+
 #endif
