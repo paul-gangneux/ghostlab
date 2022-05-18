@@ -14,12 +14,17 @@ public class MessageLabel extends JLabel {
         setBackground(Color.WHITE);
         switch (msginfo.getScope()) {
             case OUTGOING_PRIVATE_MSG:
-                setForeground(Color.GRAY);
+                setForeground(Color.DARK_GRAY);
                 setFont(getFont().deriveFont(Font.ITALIC));
                 setText("(whispered to " + msginfo.getPlayerName() + ") : " + msginfo.getContent());
                 break;
+            case OUTGOING_FAILED_PRIVATE_MSG:
+                setForeground(Color.RED);
+                setFont(getFont().deriveFont(Font.ITALIC));
+                setText("(failed to send) : " + msginfo.getContent());
+                break;
             case INCOMING_PRIVATE_MSG:
-                setForeground(Color.GRAY);
+                setForeground(Color.DARK_GRAY);
                 setFont(getFont().deriveFont(Font.ITALIC));
                 setText("(whisper from " + msginfo.getPlayerName() + ") : " + msginfo.getContent());
                 break;
@@ -33,9 +38,11 @@ public class MessageLabel extends JLabel {
                 setText("(TEAM) " + msginfo.getPlayerName() + " : " + msginfo.getContent());
                 break;
             case SERVER_MSG:
-                setForeground(Color.RED);
+                setForeground(Color.GREEN);
                 setFont(getFont().deriveFont(Font.BOLD));
                 setText("(SERVER) " + msginfo.getContent());
+                break;
+            default:
                 break;
         }
     }

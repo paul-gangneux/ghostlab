@@ -3,6 +3,7 @@ package model;
 public enum ChatScope {
     INCOMING_PRIVATE_MSG,
     OUTGOING_PRIVATE_MSG,
+    OUTGOING_FAILED_PRIVATE_MSG,
     TEAM_MSG,
     GLOBAL_MSG,
     SERVER_MSG

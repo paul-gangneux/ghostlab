@@ -6,6 +6,20 @@ public class MessageInfo {
     // Think of it as : the name we can't guess from the message scope.
     private String messageContent;
 
+    public MessageInfo(ChatScope scope, String name, String content) {
+        this.scope = scope;
+        playerName = name;
+        messageContent = content;
+    }
+
+    public MessageInfo(String name, String content) {
+        this(ChatScope.GLOBAL_MSG, name, content);
+    }
+
+    public MessageInfo(String content) {
+        this(ChatScope.SERVER_MSG, "[SERVER]", content);
+    } 
+
     public ChatScope getScope() {
         return scope;
     }
@@ -18,17 +32,7 @@ public class MessageInfo {
         return messageContent;
     }
 
-    public MessageInfo(String content) {
-        this(ChatScope.SERVER_MSG, "[SERVER]", content);
-    }
-
-    public MessageInfo(String name, String content) {
-        this(ChatScope.GLOBAL_MSG, name, content);
-    }
-
-    public MessageInfo(ChatScope scope, String name, String content) {
-        this.scope = scope;
-        playerName = name;
-        messageContent = content;
+    public void setScope(ChatScope scope) {
+      this.scope = scope;
     }
 }

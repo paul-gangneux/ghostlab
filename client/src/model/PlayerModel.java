@@ -4,47 +4,67 @@ import client.Client;
 
 public class PlayerModel {
     // private String name = "default"; à faire ?
-    private String name ;
-    private int xpos;
-    private int ypos;
+    private String name;
+    private int x;
+    private int y;
     private int score;
 
-    static PlayerModel playerModel = null;  
+    static PlayerModel currentPlayer = null;
 
     public static final int MV_UP = 1;
     public static final int MV_LE = 2;
     public static final int MV_RI = 3;
     public static final int MV_DO = 4;
+    private static boolean isMoving;
 
-    public PlayerModel(String username, int x, int y) {
+    private int desiredX = 0;
+    private int desiredY = 0;
+
+    public PlayerModel(String username, int posX, int posY) {
         this.name = username;
-        xpos = x;
-        ypos = y;
+        x = posX;
+        y = posY;
         score = 0;
     }
 
     private PlayerModel(String username) {
         this.name = username;
-        xpos = 0;
-        ypos = 0;
+        x = 0;
+        y = 0;
         score = 0;
     }
 
-    public void setName(String name){
+    public void setName(String name) {
         this.name = name;
     }
 
-    public  String getPseudo(){
+    public static void setMoving(boolean isMoving) {
+      PlayerModel.isMoving = isMoving;
+    }
+
+    public static boolean isMoving() {
+      return isMoving;
+    }
+
+    public String getPseudo() {
         return name;
     }
 
-    public static PlayerModel getCurrentPlayer() {
-        return playerModel;
+    public int getDesiredX() {
+      return desiredX;
     }
 
-    public PlayerModel(int x, int y) {
-        xpos = x;
-        ypos = y;
+    public int getDesiredY() {
+      return desiredY;
+    }
+
+    public static PlayerModel getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public PlayerModel(int posX, int posY) {
+        x = posX;
+        y = posY;
     }
 
     public PlayerModel(int x, int y, int initScore) {
@@ -52,53 +72,55 @@ public class PlayerModel {
         score = initScore;
     }
 
-    public PlayerModel(String id,int x, int y, int initScore) {
+    public PlayerModel(String id, int x, int y, int initScore) {
         this(x, y);
         score = initScore;
-        name= id;
+        name = id;
     }
 
     public static void initialize(String username) {
-        if (playerModel == null) playerModel = new PlayerModel(username);
+        if (currentPlayer == null)
+            currentPlayer = new PlayerModel(username);
     }
 
-    public synchronized int getXPos() {
-        return xpos;
+    public synchronized int getX() {
+        return x;
     }
 
-    public synchronized int getYPos() {
-        return ypos;
+    public synchronized int getY() {
+        return y;
     }
 
     public synchronized int getScore() {
         return score;
     }
 
-    public synchronized void setXPos(int value) {
-        xpos = value; // TODO : check validity
+    public synchronized void setX(int value) {
+        x = value; // TODO : check validity
     }
 
-    public synchronized void setYPos(int value) {
-        ypos = value; // TODO : check validity
+    public synchronized void setY(int value) {
+        y = value; // TODO : check validity
     }
 
     public synchronized void setScore(int value) {
         score = value; // TODO : check validity
     }
 
-    public void moveTo(int gridXPos, int gridYPos) {
+    public void moveTo(int gridx, int gridy) {
+        
         int direction = 0;
         int amount = 0;
-        if (gridXPos == xpos) {
-            amount = gridYPos - ypos;
+        if (gridx == x) {
+            amount = gridy - y;
             if (amount < 0) {
                 amount = -amount;
                 direction = MV_UP;
             } else {
                 direction = MV_DO;
             }
-        } else if (gridYPos == ypos) {
-            amount = gridXPos - xpos;
+        } else if (gridy == y) {
+            amount = gridx - x;
             if (amount < 0) {
                 amount = -amount;
                 direction = MV_LE;
@@ -109,6 +131,13 @@ public class PlayerModel {
             return;
         }
         if (amount > 0) {
+            synchronized(currentPlayer) {
+                if (isMoving)
+                    return;
+                setMoving(true);
+            }
+            desiredX = gridx;
+            desiredY = gridy;
             Client.getInstance().move(amount, direction);
         }
     }

@@ -15,8 +15,8 @@ public class LabyDisplayerPanel extends JPanel {
 
     private LabyTile[][] labyGrid;
 
-    private int x_pointed = -1;
-    private int y_pointed = -1;
+    // private int x_pointed = -1;
+    // private int y_pointed = -1;
 
     private ArrayList<int[]> coordPath; // the coords of all tiles that form a straight path from the player to the
                                         // cursor-selected tile
@@ -28,11 +28,11 @@ public class LabyDisplayerPanel extends JPanel {
         int labyHeight = gameinfo.getLabyHeight();
         int labyWidth = gameinfo.getLabyWidth();
         gl = new GridLayout(labyHeight, labyWidth, 1, 1); // 1 px horizontal shift, 1 px vertical shift
-        
+
         int size1 = maxHeight / labyHeight;
         int size2 = maxWidth / labyWidth;
         int tileSize = (size1 < size2) ? size1 : size2;
-        
+
         setPreferredSize(new Dimension(tileSize * labyWidth, tileSize * labyHeight));
         setMaximumSize(new Dimension(tileSize * labyWidth, tileSize * labyHeight));
         setLayout(gl);
@@ -68,8 +68,8 @@ public class LabyDisplayerPanel extends JPanel {
     public void makeSelection(int gridXPos, int gridYPos) { // updates stored cursor position, and selects tiles from
                                                             // the player to the specified one.
         // TODO : check coord validity ?
-        int playerX = parentWindow.getPlayerModel().getXPos();
-        int playerY = parentWindow.getPlayerModel().getYPos();
+        int playerX = parentWindow.getPlayerModel().getX();
+        int playerY = parentWindow.getPlayerModel().getY();
         if (gridXPos != playerX && gridYPos != playerY) {
             // No straight line from each tiles
             return; // Nothing to do
@@ -77,7 +77,7 @@ public class LabyDisplayerPanel extends JPanel {
         synchronized (coordPath) {
             if (gridXPos == playerX) { // case of a vertical selection
                 if (gridYPos <= playerY) { // case of a up to down selection
-                    for (int i = gridYPos; i < playerY + 1; i++) { // +1 includes player home tile
+                    for (int i = gridYPos; i < playerY; i++) { // exludes player home time
                         labyGrid[i][gridXPos].setSelected();
                         int[] coords = new int[2];
                         coords[0] = gridXPos;
@@ -85,7 +85,7 @@ public class LabyDisplayerPanel extends JPanel {
                         coordPath.add(coords);
                     }
                 } else { // case of a down to up selection
-                    for (int i = playerY; i < gridYPos + 1; i++) { // +1 includes player home tile
+                    for (int i = playerY + 1; i < gridYPos + 1; i++) { // exludes player home time
                         labyGrid[i][gridXPos].setSelected();
                         int[] coords = new int[2];
                         coords[0] = gridXPos;
@@ -95,7 +95,7 @@ public class LabyDisplayerPanel extends JPanel {
                 }
             } else { // case of an horizontal selection
                 if (gridXPos <= playerX) { // case of a left to right selection
-                    for (int i = gridXPos; i < playerX + 1; i++) { // +1 includes player home tile
+                    for (int i = gridXPos; i < playerX; i++) { // exludes player home time
                         labyGrid[gridYPos][i].setSelected();
                         int[] coords = new int[2];
                         coords[0] = i;
@@ -103,7 +103,7 @@ public class LabyDisplayerPanel extends JPanel {
                         coordPath.add(coords);
                     }
                 } else { // case of a right to left selection
-                    for (int i = playerX; i < gridXPos + 1; i++) { // +1 includes player home tile
+                    for (int i = playerX + 1; i < gridXPos + 1; i++) { // exludes player home time
                         labyGrid[gridYPos][i].setSelected();
                         int[] coords = new int[2];
                         coords[0] = i;
@@ -122,8 +122,8 @@ public class LabyDisplayerPanel extends JPanel {
             }
             coordPath.clear();
         }
-        x_pointed = -1;
-        y_pointed = -1;
+        // x_pointed = -1;
+        // y_pointed = -1;
     }
 
 }

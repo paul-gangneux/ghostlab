@@ -97,13 +97,13 @@ public class ClientTcp extends Thread {
     public String getPosYOnMove(byte[] buf){
         int n = 0;
         for (int i = 0; i < 3; i++) {
-            if (buf[i + 11] != 0) {
+            if (buf[i + 10] != 0) {
                 n++;
             } else {
                 break;
             }
         }
-        String pos = new String(buf, 11, n, StandardCharsets.UTF_8);
+        String pos = new String(buf, 10, n, StandardCharsets.UTF_8);
         //fill the numbers with 0 to get a number of 3 digits
         if(pos.length()==1)pos="00"+pos;
         if(pos.length()==2)pos="0"+pos;
@@ -113,13 +113,13 @@ public class ClientTcp extends Thread {
     public String getPoints(byte[] buf){
         int n = 0;
         for (int i = 0; i < 4; i++) {
-            if (buf[i + 16] != 0) {
+            if (buf[i + 14] != 0) {
                 n++;
             } else {
                 break;
             }
         }
-        String pos = new String(buf, 16, n, StandardCharsets.UTF_8);
+        String pos = new String(buf, 14, n, StandardCharsets.UTF_8);
         if(pos.length()==1)pos="000"+pos;
         if(pos.length()==2)pos="00"+pos;
         if(pos.length()==3)pos="0"+pos;
@@ -236,9 +236,6 @@ public class ClientTcp extends Thread {
                         String playerid = ClientUdp.getPseudo(buf);
                         infoPlayers.add(playerid);
                     }
-
-                    // TODO: read all
-                    // [PLAYR username***]
                     break;
                 }
 
@@ -320,27 +317,29 @@ public class ClientTcp extends Thread {
                 }
 
                 case "MALL!": { // [MALL!***]
-                    // TODO
                     break;
                 }
 
                 case "SEND!": { // [SEND!***]
-                    // TODO
+                    View.getInstance().privateMessageSuccess();
                     break;
                 }
 
                 case "NSEND": { // [NSEND***]
-                    // TODO
+                    View.getInstance().privateMessageFailure();
                     break;
                 }
 
                 case "GOBYE": { // [GOBYE***]
-                    // TODO
+                    try {
+                        server.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 }
 
                 case "DUNNO": { // [DUNNO***]
-                    // TODO
                     break;
                 }
 

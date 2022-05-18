@@ -14,14 +14,14 @@ public class LabyTile extends JPanel implements MouseInputListener {
 
     public enum TileType {
         MAIN_PLAYER,
-        //TEAM_PLAYER,
+        // TEAM_PLAYER,
         VISIBLE_ENEMY_PLAYER,
         MEMORY_ENEMY_PLAYER,
         VISIBLE_GHOST,
         MEMORY_GHOST,
         VISIBLE_EMPTY,
         MEMORY_EMPTY,
-        //BONUS,
+        // BONUS,
         WALL,
         UNKNOWN
     }
@@ -35,7 +35,7 @@ public class LabyTile extends JPanel implements MouseInputListener {
     private int tileSize;
 
     public LabyTile(LabyDisplayerPanel ldp, int xpos, int ypos, int size) {
-        setLayout(new GridLayout(1,1));
+        setLayout(new GridLayout(1, 1));
         setMinimumSize(new Dimension(10, 10));
         tileSize = size;
         setPreferredSize(new Dimension(size, size));
@@ -69,7 +69,7 @@ public class LabyTile extends JPanel implements MouseInputListener {
                     icon = new JLabel(new ImageIcon("client/resources/main_character_facing_left_selected.png"));
                     break;
                 case MEMORY_ENEMY_PLAYER:
-                    icon = new JLabel(new ImageIcon("client/resources/enemy_character_facing_left_selected.png"));   
+                    icon = new JLabel(new ImageIcon("client/resources/enemy_character_facing_left_selected.png"));
                     break;
                 case MEMORY_GHOST:
                     icon = new JLabel(new ImageIcon("client/resources/memory_ghost_selected.png"));
@@ -86,9 +86,11 @@ public class LabyTile extends JPanel implements MouseInputListener {
                 case WALL:
                     icon = new JLabel(new ImageIcon("client/resources/wall_selected.png"));
                     break;
+                default:
+                    icon = new JLabel(new ImageIcon("client/resources/error.png"));
+                    break;
             }
-        }
-        else {
+        } else {
             switch (type) {
                 case VISIBLE_EMPTY:
                     icon = new JLabel(new ImageIcon("client/resources/empty_tile.png"));
@@ -100,7 +102,7 @@ public class LabyTile extends JPanel implements MouseInputListener {
                     icon = new JLabel(new ImageIcon("client/resources/main_character_facing_left.png"));
                     break;
                 case MEMORY_ENEMY_PLAYER:
-                    icon = new JLabel(new ImageIcon("client/resources/enemy_character_facing_left_memory.png"));   
+                    icon = new JLabel(new ImageIcon("client/resources/enemy_character_facing_left_memory.png"));
                     break;
                 case MEMORY_GHOST:
                     icon = new JLabel(new ImageIcon("client/resources/memory_ghost.png"));
@@ -117,11 +119,16 @@ public class LabyTile extends JPanel implements MouseInputListener {
                 case WALL:
                     icon = new JLabel(new ImageIcon("client/resources/wall.png"));
                     break;
+                default:
+                    icon = new JLabel(new ImageIcon("client/resources/error.png"));
+                    break;
             }
         }
         icon.setSize(tileSize, tileSize);
         add(icon);
-        revalidate();
+        EventQueue.invokeLater(() -> {
+            revalidate();
+        });
     }
 
     public void setSelected() {
@@ -134,12 +141,14 @@ public class LabyTile extends JPanel implements MouseInputListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        PlayerModel.getCurrentPlayer().moveTo(gridXPos,  gridYPos);
+        PlayerModel.getCurrentPlayer().moveTo(gridXPos, gridYPos);
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        // System.out.println(String.format("Entered tile (%d, %d) of type " + tileType.name(), gridXPos,  gridYPos)); // TODO : Remove this for final version please
+        // System.out.println(String.format("Entered tile (%d, %d) of type " +
+        // tileType.name(), gridXPos, gridYPos)); // TODO : Remove this for final
+        // version please
         parentPanel.makeSelection(gridXPos, gridYPos);
     }
 
@@ -149,15 +158,23 @@ public class LabyTile extends JPanel implements MouseInputListener {
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {
+    }
 
     @Override
-    public void mouseReleased(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {
+    }
 
     @Override
-    public void mouseDragged(MouseEvent e) {}
+    public void mouseDragged(MouseEvent e) {
+    }
 
     @Override
-    public void mouseMoved(MouseEvent e) {}
-    
+    public void mouseMoved(MouseEvent e) {
+    }
+
+    public TileType getType() {
+        return tileType;
+    }
+
 }
