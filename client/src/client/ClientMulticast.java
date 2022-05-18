@@ -5,6 +5,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
+import launcher.Launcher;
 import model.ChatScope;
 import model.MessageInfo;
 import ui.View;
@@ -17,7 +18,8 @@ public class ClientMulticast {
 
 	private static final Object lock = new Object();
 
-	private ClientMulticast() {}
+	private ClientMulticast() {
+	}
 
 	public static void setMulticastSocket(String ip, int port) {
 		stopListening();
@@ -74,8 +76,8 @@ public class ClientMulticast {
 	}
 
 	private static void listens() {
-		// TODO: verbose only
-		System.out.println("Multicast: starts listening");
+		if (Launcher.isVerbose())
+			System.out.println("Multicast: starts listening");
 
 		byte[] data = new byte[218];
 		DatagramPacket paquet = new DatagramPacket(data, data.length);
@@ -146,7 +148,7 @@ public class ClientMulticast {
 			sock = null;
 		}
 
-		// TODO: verbose only
-		System.out.println("Multicast: stops listening");
+		if (Launcher.isVerbose())
+			System.out.println("Multicast: stops listening");
 	}
 }

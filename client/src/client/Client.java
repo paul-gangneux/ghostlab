@@ -74,6 +74,19 @@ public class Client {
         c1.sendToServer("MALL? " + mi + "***");
     }
 
+    public void sendPrivateMess(String mi, String username) {
+        byte[] msg = ("SEND? username " + mi + "***").getBytes();
+        int n = username.length();
+        for (int i = 0; i < 8; i++) {
+            if (i < n) {
+                msg[6 + i] = username.getBytes()[i];
+            } else {
+                msg[6 + i] = 0;
+            }
+        }
+        c1.sendToServer(msg);
+    }
+
     public void move(int amount, int direction) {
         String a = String.valueOf(amount);
         if (a.length() == 1) {

@@ -181,4 +181,12 @@ public class View extends JFrame {
         // TODO
     }
 
+    public void privateMessageSuccess() {
+        gamePanel.getChatWholePanel().lastMsgSuccess();
+    }
+
+    public void privateMessageFailure() {
+        gamePanel.getChatWholePanel().lastMsgFailed();
+    }
+
 }

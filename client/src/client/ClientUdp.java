@@ -84,23 +84,20 @@ public class ClientUdp extends Thread {
 
             if (keyword.equals("MESSP")) {
 
-                String username = ClientUdp.getPseudo(data);
-                System.out.println("Depuis le pseudo : " + username);
-
-                // starts reading from the message directly until +++
+                String name = ClientUdp.getPseudo(paquet.getData());
                 String st = new String(paquet.getData(), 15, paquet.getLength() - 15);
                 Scanner sc = new Scanner(st);
                 String msg;
                 try {
-                    msg = sc.useDelimiter("\\+\\+\\+").next(); // we use delimeter +++ to get only the message
-                    System.out.println("message : " + msg);
-                    MessageInfo messageInfo = new MessageInfo(ChatScope.INCOMING_PRIVATE_MSG, username, msg);
-                    View.getInstance().incomingMessage(messageInfo);
+                    msg = sc.useDelimiter("\\+\\+\\+").next();
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("Error of server reply . Maybe doesn't end with +++");
+                    System.out.println("MESSP: bad incoming string");
+                    sc.close();
+                    break;
                 }
                 sc.close();
+                MessageInfo mi = new MessageInfo(ChatScope.INCOMING_PRIVATE_MSG, name, msg);
+                View.getInstance().incomingMessage(mi);
             }
 
             else {

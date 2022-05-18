@@ -38,4 +38,16 @@ public class ChatWholePanel extends JPanel {
         return cip;
     }
 
+    public void lastMsgSuccess() {
+        MessageInfo mi = cip.getLastMessageInfo();
+        mi.setScope(ChatScope.OUTGOING_PRIVATE_MSG);
+        chp.addMessage(mi, jsp);
+    }
+
+    public void lastMsgFailed() {
+        MessageInfo mi = cip.getLastMessageInfo();
+        mi.setScope(ChatScope.OUTGOING_FAILED_PRIVATE_MSG);
+        chp.addMessage(mi, jsp);
+    }
+
 }

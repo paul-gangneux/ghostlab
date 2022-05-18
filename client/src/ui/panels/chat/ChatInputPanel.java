@@ -18,6 +18,7 @@ public class ChatInputPanel extends JPanel {
     private ScopeMenu sm;
     private ChatInputField cif;
     private ChatSendButton csb;
+    private transient MessageInfo lastPmInfo;
     // private ChatWholePanel cwp;
 
     private class ScopeMenu extends JMenu {
@@ -54,9 +55,9 @@ public class ChatInputPanel extends JPanel {
             scope = ChatScope.GLOBAL_MSG;
             ScopeMenuItem globalScope = new ScopeMenuItem("ALL", ChatScope.GLOBAL_MSG);
             add(globalScope);
-            ScopeMenuItem teamScope = new ScopeMenuItem("TEAM", ChatScope.TEAM_MSG);
+            // ScopeMenuItem teamScope = new ScopeMenuItem("TEAM", ChatScope.TEAM_MSG);
             // teamScope.setEnabled(client.hasTeam());
-            add(teamScope);
+            // add(teamScope);
             // TODO get all player names
             String[] placeholder = { "bob", "alice" };
             for (String playerName : placeholder) {
@@ -123,10 +124,12 @@ public class ChatInputPanel extends JPanel {
                 }
 
                 @Override
-                public void keyReleased(KeyEvent e) {}
+                public void keyReleased(KeyEvent e) {
+                }
 
                 @Override
-                public void keyTyped(KeyEvent e) {}
+                public void keyTyped(KeyEvent e) {
+                }
 
             });
         }
@@ -150,9 +153,14 @@ public class ChatInputPanel extends JPanel {
             MessageInfo mi = new MessageInfo(sm.scope,
                     (sm.scope == ChatScope.OUTGOING_PRIVATE_MSG) ? sm.destName : null,
                     cif.getText());
-            // cwp.addMessage(mi);
             // See MessageInfo comments for more info on this ternary
-            Client.getInstance().sendMessToAll(mi.getContent());
+
+            if (mi.getScope() == ChatScope.GLOBAL_MSG) {
+                Client.getInstance().sendMessToAll(mi.getContent());
+            } else if (mi.getScope() == ChatScope.OUTGOING_PRIVATE_MSG) {
+                lastPmInfo = mi;
+                Client.getInstance().sendPrivateMess(mi.getContent(), mi.getPlayerName());
+            }
             // We then reset the textfield
             cif.setText("");
             cif.setForeground(Color.GRAY);
@@ -160,11 +168,9 @@ public class ChatInputPanel extends JPanel {
 
     }
 
-    public ChatInputPanel(/* ChatWholePanel cwp, GamePanel parentWindow */) {
+    public ChatInputPanel() {
         super();
-        // this.cwp = cwp;
-        // this.parentWindow = parentWindow;
-        // gl = new FlowLayout();
+        this.lastPmInfo = new MessageInfo("");
         sm = new ScopeMenu();
         cif = new ChatInputField();
         csb = new ChatSendButton();
@@ -176,4 +182,7 @@ public class ChatInputPanel extends JPanel {
         add(csb);
     }
 
+    public MessageInfo getLastMessageInfo() {
+      return lastPmInfo;
+    }
 }

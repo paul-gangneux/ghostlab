@@ -321,10 +321,12 @@ public class ClientTcp extends Thread {
                 }
 
                 case "SEND!": { // [SEND!***]
+                    View.getInstance().privateMessageSuccess();
                     break;
                 }
 
                 case "NSEND": { // [NSEND***]
+                    View.getInstance().privateMessageFailure();
                     break;
                 }
 
