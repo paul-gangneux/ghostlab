@@ -5,7 +5,6 @@ import java.awt.Font;
 
 import javax.swing.JLabel;
 
-import model.ChatScope;
 import model.MessageInfo;
 
 public class MessageLabel extends JLabel {
