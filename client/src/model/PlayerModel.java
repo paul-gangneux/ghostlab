@@ -1,8 +1,13 @@
 package model;
 
+import java.util.ArrayList;
+
 import client.Client;
 
 public class PlayerModel {
+
+    static ArrayList<PlayerModel> otherPlayers = new ArrayList<>();
+
     // private String name = "default"; à faire ?
     private String name;
     private int x;
@@ -32,6 +37,15 @@ public class PlayerModel {
         x = 0;
         y = 0;
         score = 0;
+    }
+
+    public static void addPlayer(PlayerModel pm) {
+        // Watch out, no duplicate check is performed here.
+        otherPlayers.add(pm);
+    }
+
+    public static ArrayList<PlayerModel> getOtherPlayers() {
+        return otherPlayers;
     }
 
     public void setName(String name) {

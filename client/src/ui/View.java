@@ -203,11 +203,11 @@ public class View extends JFrame {
     }
 
     public void privateMessageSuccess() {
-        gamePanel.getChatWholePanel().lastMsgSuccess();
+        gamePanel.getChatAndScorePanel().getChatWholePanel().lastMsgSuccess();
     }
 
     public void privateMessageFailure() {
-        gamePanel.getChatWholePanel().lastMsgFailed();
+        gamePanel.getChatAndScorePanel().getChatWholePanel().lastMsgFailed();
     }
 
     private void sleep(int milis) {

@@ -25,7 +25,7 @@ public class ChatAndScorePanel extends JPanel {
         cwp.addMessage(mi);
     }
 
-    public ChatWholePanel getChatHistoryPanel() {
+    public ChatWholePanel getChatWholePanel() {
         return cwp;
     }
 

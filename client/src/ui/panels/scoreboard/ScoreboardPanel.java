@@ -21,9 +21,7 @@ public class ScoreboardPanel extends JPanel {
     }
 
     public void initScoreboard() {
-        // TODO get player lists
-        PlayerModel[] placeholder = {new PlayerModel("alice", 0, 0), new PlayerModel("bob", 0, 0)};
-        for (PlayerModel pm : placeholder) {
+        for (PlayerModel pm : PlayerModel.getOtherPlayers()) {
             add(new ScoreLabel(pm));
         }
     }
