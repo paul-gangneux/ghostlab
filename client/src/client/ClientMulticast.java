@@ -101,9 +101,9 @@ public class ClientMulticast {
 				}
 				case "SCORE": { // [SCORE username pppp xxx yyy+++]
 					String id = ClientUdp.getPseudo(paquet.getData());
-					String sp = new String(paquet.getData(), 16, 4, StandardCharsets.UTF_8);
-					String sx = new String(paquet.getData(), 21, 3, StandardCharsets.UTF_8);
-					String sy = new String(paquet.getData(), 25, 3, StandardCharsets.UTF_8);
+					String sp = new String(paquet.getData(), 15, 4, StandardCharsets.UTF_8);
+					String sx = new String(paquet.getData(), 20, 3, StandardCharsets.UTF_8);
+					String sy = new String(paquet.getData(), 24, 3, StandardCharsets.UTF_8);
 					int p = Integer.parseInt(sp);
 					int x = Integer.parseInt(sx);
 					int y = Integer.parseInt(sy);
@@ -129,7 +129,7 @@ public class ClientMulticast {
 				}
 				case "ENDGA": { // [ENDGA username pppp+++]
 					String id = ClientUdp.getPseudo(paquet.getData());
-					String sp = new String(paquet.getData(), 16, 4, StandardCharsets.UTF_8);
+					String sp = new String(paquet.getData(), 15, 4, StandardCharsets.UTF_8);
 					int p = Integer.parseInt(sp);
 					View.getInstance().endGameAndShowWinner(id, p);
 					break;

@@ -68,8 +68,8 @@ public class LabyDisplayerPanel extends JPanel {
     public void makeSelection(int gridXPos, int gridYPos) { // updates stored cursor position, and selects tiles from
                                                             // the player to the specified one.
         // TODO : check coord validity ?
-        int playerX = parentWindow.getPlayerModel().getXPos();
-        int playerY = parentWindow.getPlayerModel().getYPos();
+        int playerX = parentWindow.getPlayerModel().getX();
+        int playerY = parentWindow.getPlayerModel().getY();
         if (gridXPos != playerX && gridYPos != playerY) {
             // No straight line from each tiles
             return; // Nothing to do

@@ -71,33 +71,32 @@ public class Client {
     }
 
     public void sendMessToAll(String mi) {
-        c1.sendToServer("MALL? "+mi+"***");
+        c1.sendToServer("MALL? " + mi + "***");
     }
 
     public void move(int amount, int direction) {
         String a = String.valueOf(amount);
         if (a.length() == 1) {
             a = "00" + a;
-        }
-        else if (a.length() == 2) {
+        } else if (a.length() == 2) {
             a = "0" + a;
         }
 
-        switch(direction) {
+        switch (direction) {
             case PlayerModel.MV_DO:
-            c1.sendToServer("DOMOV "+a+"***");
-            break;
+                c1.sendToServer("DOMOV " + a + "***");
+                break;
             case PlayerModel.MV_UP:
-            c1.sendToServer("UPMOV "+a+"***");
-            break;
+                c1.sendToServer("UPMOV " + a + "***");
+                break;
             case PlayerModel.MV_LE:
-            c1.sendToServer("LEMOV "+a+"***");
-            break;
+                c1.sendToServer("LEMOV " + a + "***");
+                break;
             case PlayerModel.MV_RI:
-            c1.sendToServer("RIMOV "+a+"***");
-            break;
+                c1.sendToServer("RIMOV " + a + "***");
+                break;
             default:
-            break;
+                break;
         }
     }
 }
