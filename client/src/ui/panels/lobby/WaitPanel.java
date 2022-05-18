@@ -1,5 +1,5 @@
 package ui.panels.lobby;
-import java.awt.*;
+// import java.awt.*;
 
 import javax.swing.*;
 import client.Client;

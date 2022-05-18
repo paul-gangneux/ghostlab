@@ -1,23 +1,33 @@
 package ui.panels.chat;
 
-import java.awt.GridLayout;
+import javax.swing.*;
 
-import javax.swing.JPanel;
-
-import client.Client;
+import java.awt.*;
 import model.*;
-import ui.*;
 
 public class ChatWholePanel extends JPanel {
-    
-    private GridLayout gl;
 
-    private GamePanel parentWindow;
+    // private GamePanel parentWindow;
+    private JScrollPane jsp;
     private ChatHistoryPanel chp;
     private ChatInputPanel cip;
 
+    public ChatWholePanel(int w, int h) {
+        super();
+        // this.parentWindow = parentWindow;
+
+        chp = new ChatHistoryPanel();
+        cip = new ChatInputPanel();
+        jsp = new JScrollPane(chp);
+        jsp.setPreferredSize(new Dimension(w, h / 2));
+        jsp.setMaximumSize(new Dimension(w, h / 2));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        add(jsp, BorderLayout.PAGE_START);
+        add(cip, BorderLayout.PAGE_END);
+    }
+
     public void addMessage(MessageInfo mi) {
-        chp.addMessage(mi);
+        chp.addMessage(mi, jsp);
     }
 
     public ChatHistoryPanel getChatHistoryPanel() {
@@ -26,16 +36,6 @@ public class ChatWholePanel extends JPanel {
 
     public ChatInputPanel getChatInputPanel() {
         return cip;
-    }
-
-    public ChatWholePanel(GamePanel parentWindow) {
-        super();
-        this.parentWindow = parentWindow;
-        gl = new GridLayout(2, 1, 0, 0);
-        chp = new ChatHistoryPanel(this, parentWindow);
-        cip = new ChatInputPanel(this, parentWindow);
-        add(chp);
-        add(cip);
     }
 
 }

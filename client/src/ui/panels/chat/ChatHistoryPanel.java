@@ -1,57 +1,66 @@
 package ui.panels.chat;
 
-import java.awt.Component;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.util.ArrayList;
 
+import javax.swing.BoxLayout;
 import javax.swing.JPanel;
-import client.Client;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+
 import model.*;
-import ui.*;
+// import ui.*;
 
 public class ChatHistoryPanel extends JPanel {
 
-    private static final int CHAT_HISTORY_LENGTH = 50;
+    private static final int CHAT_HISTORY_LENGTH = 80;
 
-    private GamePanel parentWindow;
-    private GridLayout gl;
-    private ArrayList<MessageInfo> messageQueue;
-    private int chatPosition = 0;
+    private ArrayList<MessageLabel> messages;
 
-    private void clearList() {
-        for (Component c : getComponents()) {
-            remove(c);
-        }
+    // private GamePanel parentWindow;
+    // private GridLayout gl;
+    // private transient ArrayList<MessageInfo> messageQueue;
+
+    // private int chatPosition = 0;
+
+    // private ChatWholePanel cwp;
+
+    public ChatHistoryPanel() {
+        super();
+        setBackground(Color.WHITE);
+        // setForeground(Color.WHITE);
+        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+        messages = new ArrayList<>();
     }
+
+    // private void clearList() {
+    // for (Component c : getComponents()) {
+    // remove(c);
+    // }
+    // }
 
     public void dumpChatHistory() {
         System.out.println(getComponentCount());
     }
 
-    public void addMessage(MessageInfo msgInfo) {
-        messageQueue.add(msgInfo);
-        if (messageQueue.size() < CHAT_HISTORY_LENGTH) {
-            add(new MessageLabel(msgInfo));
+    public void addMessage(MessageInfo msgInfo, JScrollPane jsp) {
+        JScrollBar sb = jsp.getVerticalScrollBar();
+        boolean bottom = (!(sb.isVisible()) || (sb.getValue() == sb.getMaximum() - sb.getHeight()));
+
+        messages.add(new MessageLabel(msgInfo));
+
+        if (messages.size() > CHAT_HISTORY_LENGTH) {
+            remove(messages.get(0)); // remove from view
+            messages.remove(0); // remove from list
         }
-        else {
-            chatPosition++;
-            clearList();
-            for (int i = chatPosition; i < messageQueue.size(); i++) {
-                add(new MessageLabel(messageQueue.get(i))).setVisible(true);
-            }
+
+        add(messages.get(messages.size() - 1));
+
+        jsp.validate();
+        if (bottom) {
+            sb.setValue(sb.getMaximum() - sb.getHeight());
         }
         revalidate(); // recomputes the layout, effectively refreshing the chat
     }
 
-    private ChatWholePanel cwp;
-
-    public ChatHistoryPanel(ChatWholePanel cwp, GamePanel parentWindow) {
-        super();
-        this.cwp = cwp;
-        this.parentWindow = parentWindow;
-        gl = new GridLayout(CHAT_HISTORY_LENGTH, 1, 0, 0);
-        setLayout(gl);
-        messageQueue = new ArrayList<MessageInfo>();
-    }
-    
 }

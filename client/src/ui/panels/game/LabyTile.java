@@ -1,5 +1,6 @@
 package ui.panels.game;
 
+import java.awt.*;
 import java.awt.event.MouseEvent;
 
 import javax.swing.ImageIcon;
@@ -7,7 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
-import client.Client;
+import model.PlayerModel;
 
 public class LabyTile extends JPanel implements MouseInputListener {
 
@@ -29,13 +30,16 @@ public class LabyTile extends JPanel implements MouseInputListener {
     private int gridYPos;
 
     private LabyDisplayerPanel parentPanel;
-
     private TileType tileType;
-
     private JLabel icon;
+    private int tileSize;
 
-    public LabyTile(LabyDisplayerPanel ldp, int xpos, int ypos) {
-        setSize(60, 60);
+    public LabyTile(LabyDisplayerPanel ldp, int xpos, int ypos, int size) {
+        setLayout(new GridLayout(1,1));
+        setMinimumSize(new Dimension(10, 10));
+        tileSize = size;
+        setPreferredSize(new Dimension(size, size));
+        setMaximumSize(new Dimension(size, size));
         parentPanel = ldp;
         gridXPos = xpos;
         gridYPos = ypos;
@@ -115,7 +119,7 @@ public class LabyTile extends JPanel implements MouseInputListener {
                     break;
             }
         }
-        icon.setSize(60, 60);
+        icon.setSize(tileSize, tileSize);
         add(icon);
         revalidate();
     }
@@ -130,12 +134,12 @@ public class LabyTile extends JPanel implements MouseInputListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        // TODO Move To Tile Routine
+        PlayerModel.getCurrentPlayer().moveTo(gridXPos,  gridYPos);
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        System.out.println(String.format("Entered tile (%d, %d) of type " + tileType.name(), gridXPos,  gridYPos)); // TODO : Remove this for final version please
+        // System.out.println(String.format("Entered tile (%d, %d) of type " + tileType.name(), gridXPos,  gridYPos)); // TODO : Remove this for final version please
         parentPanel.makeSelection(gridXPos, gridYPos);
     }
 

@@ -1,10 +1,10 @@
 package ui;
 
+import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
-import java.awt.GridLayout;
+import java.awt.*;
 
-import client.Client;
 import model.*;
 import ui.panels.chat.ChatWholePanel;
 import ui.panels.game.LabyDisplayerPanel;
@@ -13,12 +13,12 @@ import ui.panels.game.LabyDisplayerPanel;
 
 public class GamePanel extends JPanel {
 
-    private Client client;
+    // private Client client;
 
-    private static final int DEFAULT_GAMEWINDOW_WIDTH = 1500;
-    private static final int DEFAULT_GAMEWINDOW_HEIGHT = 800;
+    public static final int DEFAULT_GAMEWINDOW_WIDTH = 1500;
+    public static final int DEFAULT_GAMEWINDOW_HEIGHT = 800;
 
-    private GridLayout gl;
+    // private GridLayout gl;
     private LabyDisplayerPanel ldp;
     private ChatWholePanel cwp;
 
@@ -28,16 +28,22 @@ public class GamePanel extends JPanel {
     public GamePanel(GameInfo gameinfo, PlayerModel playermodel) {
         this.gameinfo = gameinfo;
         this.playerModel = playermodel;
-        gl = new GridLayout(1, 2, 0, 0);
-        setLayout(gl);
-        ldp = new LabyDisplayerPanel(this, gameinfo);
-        add(ldp);
-        cwp = new ChatWholePanel(this);
-        add(cwp);
         setSize(DEFAULT_GAMEWINDOW_WIDTH, DEFAULT_GAMEWINDOW_HEIGHT);
+        // gl = new GridLayout(1, 2, 0, 0);
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        ldp = new LabyDisplayerPanel(this, gameinfo,
+                (DEFAULT_GAMEWINDOW_WIDTH * 2) / 3,
+                DEFAULT_GAMEWINDOW_HEIGHT);
+        // ldp.setAlignmentY(TOP_ALIGNMENT);
+
+        add(ldp, BorderLayout.CENTER);
+        cwp = new ChatWholePanel((DEFAULT_GAMEWINDOW_WIDTH) / 3, DEFAULT_GAMEWINDOW_HEIGHT);
+
+        add(cwp, BorderLayout.EAST);
+
         // setLocationRelativeTo(null); // centers the window
         // setResizable(false);
-        // setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE); 
+        // setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
     }
 
     public GameInfo getGameInfo() {
@@ -60,5 +66,4 @@ public class GamePanel extends JPanel {
         cwp.addMessage(mi);
     }
 
- 
 }
