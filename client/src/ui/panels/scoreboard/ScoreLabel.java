@@ -1,4 +1,4 @@
-package ui.panels;
+package ui.panels.scoreboard;
 
 import javax.swing.JLabel;
 import java.awt.Color;

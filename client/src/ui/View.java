@@ -95,7 +95,7 @@ public class View extends JFrame {
 
     public void incomingMessage(MessageInfo mi) {
         if (gamePanel != null)
-            gamePanel.getChatWholePanel().addMessage(mi);
+            gamePanel.addMessage(mi);
     }
 
     public void regError() {

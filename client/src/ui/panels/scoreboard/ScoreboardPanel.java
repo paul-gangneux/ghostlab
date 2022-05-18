@@ -1,4 +1,4 @@
-package ui.panels;
+package ui.panels.scoreboard;
 
 import java.awt.*;
 import java.util.ArrayList;

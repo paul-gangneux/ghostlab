@@ -6,7 +6,7 @@ import javax.swing.JPanel;
 import java.awt.*;
 
 import model.*;
-import ui.panels.chat.ChatWholePanel;
+import ui.panels.ChatAndScorePanel;
 import ui.panels.game.LabyDisplayerPanel;
 
 //import java.awt.GridLayout;
@@ -20,7 +20,7 @@ public class GamePanel extends JPanel {
 
     // private GridLayout gl;
     private LabyDisplayerPanel ldp;
-    private ChatWholePanel cwp;
+    private ChatAndScorePanel casp;
 
     private transient GameInfo gameinfo;
     private transient PlayerModel playerModel;
@@ -37,9 +37,9 @@ public class GamePanel extends JPanel {
         // ldp.setAlignmentY(TOP_ALIGNMENT);
 
         add(ldp, BorderLayout.CENTER);
-        cwp = new ChatWholePanel((DEFAULT_GAMEWINDOW_WIDTH) / 3, DEFAULT_GAMEWINDOW_HEIGHT);
+        casp = new ChatAndScorePanel(DEFAULT_GAMEWINDOW_WIDTH, DEFAULT_GAMEWINDOW_HEIGHT);
 
-        add(cwp, BorderLayout.EAST);
+        add(casp, BorderLayout.EAST);
 
         // setLocationRelativeTo(null); // centers the window
         // setResizable(false);
@@ -58,12 +58,12 @@ public class GamePanel extends JPanel {
         return ldp;
     }
 
-    public ChatWholePanel getChatWholePanel() {
-        return cwp;
+    public ChatAndScorePanel getChatAndScorePanel() {
+        return casp;
     }
 
     public void addMessage(MessageInfo mi) {
-        cwp.addMessage(mi);
+        casp.addMessage(mi);
     }
 
 }
