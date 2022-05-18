@@ -1,6 +1,7 @@
 package ui;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
@@ -83,6 +84,14 @@ public class View extends JFrame {
         });
     }
 
+    public void posit(PlayerModel pm){
+        //TODO use the player info 
+    }
+
+    public void move(PlayerModel pm){
+        //TODO move the player
+    }
+
     public void incomingMessage(MessageInfo mi) {
         if (gamePanel != null)
             gamePanel.getChatWholePanel().addMessage(mi);
@@ -101,6 +110,10 @@ public class View extends JFrame {
         // TODO: make sure game infos has been recieved
         gamePanel = new GamePanel(GameInfo.getCurrentGameInfo(), PlayerModel.getCurrentPlayer());
         switchPanel(gamePanel);
+    }
+
+    public void showPlayers(ArrayList<PlayerModel> pm){
+        //display what GPLYR do 
     }
 
     public void ghostMoved(int x, int y) {
