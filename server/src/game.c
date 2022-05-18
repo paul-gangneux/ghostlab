@@ -378,7 +378,7 @@ void* gameThread(void* arg) {
   struct pollfd pollfd = { .fd = game->pipe1[0], .events = POLLIN };
 
   while (1) {
-    poll(&pollfd, 1, 1000);
+    poll(&pollfd, 1, 5000);
 
     if (pollfd.revents & POLLIN) {
       char buf[3] = { 0, 0, 0 };

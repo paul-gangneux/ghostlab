@@ -170,11 +170,32 @@ public class View extends JFrame {
     }
 
     public void ghostMoved(int x, int y) {
-        // TODO
+        LabyTile[][] grid = gamePanel.getLabyDisplayerPanel().getGrid();
+        new Thread(() -> {
+            grid[y][x].setTile(TileType.VISIBLE_GHOST, false);
+            sleep(2000);
+            if  (grid[y][x].getType() == TileType.VISIBLE_GHOST)
+                grid[y][x].setTile(TileType.MEMORY_GHOST, false);
+            sleep(1000);
+            if (grid[y][x].getType() == TileType.MEMORY_GHOST)
+                grid[y][x].setTile(TileType.VISIBLE_EMPTY, false);
+        }).start();
     }
 
     public void ghostCaptured(String username, int points, int x, int y) {
-        // TODO
+        if (!username.equals(PlayerModel.getCurrentPlayer().getPseudo())) {
+            LabyTile[][] grid = gamePanel.getLabyDisplayerPanel().getGrid();
+            new Thread(() -> {
+                grid[y][x].setTile(TileType.VISIBLE_ENEMY_PLAYER, false);
+                sleep(1000);
+                if  (grid[y][x].getType() == TileType.VISIBLE_ENEMY_PLAYER)
+                    grid[y][x].setTile(TileType.MEMORY_ENEMY_PLAYER, false);
+                sleep(1000);
+                if (grid[y][x].getType() == TileType.MEMORY_ENEMY_PLAYER)
+                    grid[y][x].setTile(TileType.VISIBLE_EMPTY, false);
+            }).start();
+        }
+        //TODO: utiliser points
     }
 
     public void endGameAndShowWinner(String id, int p) {
@@ -189,4 +210,12 @@ public class View extends JFrame {
         gamePanel.getChatWholePanel().lastMsgFailed();
     }
 
+    private void sleep(int milis) {
+        try {
+            Thread.sleep(milis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
+        }
+    }
 }
