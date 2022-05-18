@@ -3,6 +3,7 @@ import java.awt.*;
 
 import javax.swing.*;
 import client.Client;
+import ui.View;
 
 public class WaitPanel extends JPanel {
     JButton readyButton;
@@ -10,6 +11,7 @@ public class WaitPanel extends JPanel {
 
     public WaitPanel() {
         super();
+        
         readyButton = new JButton("ready");
         readyButton.addActionListener( event -> {
             Client.getInstance().ready();
@@ -17,8 +19,10 @@ public class WaitPanel extends JPanel {
         });
         label = new JLabel("Waiting for players");
         // setSize(1000, 600);
-        setLayout(new FlowLayout());
+        setSize(View.getDefaultWidth(), View.getDefaultHeight());
+        // setLayout(new FlowLayout());
         add(readyButton);
         add(label);
+        setSize(1000, 600);
     }
 }

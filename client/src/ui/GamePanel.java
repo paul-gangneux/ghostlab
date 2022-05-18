@@ -15,20 +15,34 @@ public class GamePanel extends JPanel {
 
     private Client client;
 
-    private static final int DEFAULT_GAMEWINDOW_WIDTH = 1680;
-    private static final int DEFAULT_GAMEWINDOW_HEIGHT = 1050;
+    private static final int DEFAULT_GAMEWINDOW_WIDTH = 1500;
+    private static final int DEFAULT_GAMEWINDOW_HEIGHT = 800;
 
     private GridLayout gl;
     private LabyDisplayerPanel ldp;
     private ChatWholePanel cwp;
 
     private transient GameInfo gameinfo;
+    private transient PlayerModel playerModel;
+
+    public GamePanel(GameInfo gameinfo, PlayerModel playermodel) {
+        this.gameinfo = gameinfo;
+        this.playerModel = playermodel;
+        gl = new GridLayout(1, 2, 0, 0);
+        setLayout(gl);
+        ldp = new LabyDisplayerPanel(this, gameinfo);
+        add(ldp);
+        cwp = new ChatWholePanel(this);
+        add(cwp);
+        setSize(DEFAULT_GAMEWINDOW_WIDTH, DEFAULT_GAMEWINDOW_HEIGHT);
+        // setLocationRelativeTo(null); // centers the window
+        // setResizable(false);
+        // setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE); 
+    }
 
     public GameInfo getGameInfo() {
         return gameinfo;
     }
-
-    private transient PlayerModel playerModel;
 
     public PlayerModel getPlayerModel() {
         return playerModel;
@@ -46,18 +60,5 @@ public class GamePanel extends JPanel {
         cwp.addMessage(mi);
     }
 
-    public GamePanel(GameInfo gameinfo, PlayerModel playermodel) {
-        this.gameinfo = gameinfo;
-        this.playerModel = playermodel;
-        gl = new GridLayout(1, 2, 0, 0);
-        setLayout(gl);
-        ldp = new LabyDisplayerPanel(this, gameinfo);
-        add(ldp);
-        cwp = new ChatWholePanel(this);
-        add(cwp);
-        setSize(DEFAULT_GAMEWINDOW_WIDTH, DEFAULT_GAMEWINDOW_HEIGHT);
-        // setLocationRelativeTo(null); // centers the window
-        // setResizable(false);
-        // setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE); 
-    }
+ 
 }

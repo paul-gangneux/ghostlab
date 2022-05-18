@@ -12,19 +12,30 @@ import ui.panels.lobby.WaitPanel;
 
 // unique jframe
 public class View extends JFrame {
+
+    private static int defaultWidth;
+    private static int defaultHeight;
+
     JPanel mainPanel;
-    LobbyPanel lobbyp;
-    GamePanel gamep;
-    WaitPanel waitp;
+    LobbyPanel lobbyPanel;
+    GamePanel gamePanel;
+    WaitPanel waitPanel;
     static View view = null;
 
     private void switchPanel(JPanel newPanel) {
+        Point p = new Point(getLocationOnScreen());
+        Dimension oldDim = new Dimension(getSize());
+        
         getContentPane().remove(mainPanel);
         mainPanel = newPanel;
 
         EventQueue.invokeLater(() -> {
             getContentPane().add(mainPanel);
-            // pack();
+            setSize(mainPanel.getSize());
+            Dimension newDim = new Dimension(getSize());
+            p.x += (oldDim.width - newDim.width) / 2;
+            p.y += (oldDim.height - newDim.height) / 2;
+            setLocation(p);
             // repaint();
             revalidate();
         });
@@ -36,31 +47,45 @@ public class View extends JFrame {
         setLocationRelativeTo(null); // centers the window
         // setResizable(false);
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        lobbyp = new LobbyPanel();
-        mainPanel = lobbyp;
+        lobbyPanel = new LobbyPanel();
+        mainPanel = lobbyPanel;
         getContentPane().add(mainPanel);
         EventQueue.invokeLater(() -> setVisible(true));
     }
 
-    public static void initialize() {
+    public static void initialize(int width, int height) {
+        defaultHeight = height;
+        defaultWidth = width;
         if (view == null)
             view = new View();
     }
 
+    public static void initialize() {
+        initialize(1000, 600);
+    }
+
     public static View getInstance() {
-        initialize();
         return view;
+    }
+
+    public static int getDefaultHeight() {
+      return defaultHeight;
+    }
+    
+    public static int getDefaultWidth() {
+        return defaultWidth;
     }
 
     public void updateLobbyWindow(List<GameInfo> gameList) {
         EventQueue.invokeLater(() -> {
-            lobbyp.getGameListPanel().processGameList(gameList);
+            lobbyPanel.getGameListPanel().processGameList(gameList);
             revalidate();
         });
     }
 
     public void incomingMessage(MessageInfo mi) {
-        // TODO do it
+        if (gamePanel != null)
+            gamePanel.getChatWholePanel().addMessage(mi);
     }
 
     public void regError() {
@@ -68,14 +93,14 @@ public class View extends JFrame {
     }
 
     public void regOk() {
-        waitp = new WaitPanel();
-        switchPanel(waitp);
+        waitPanel = new WaitPanel();
+        switchPanel(waitPanel);
     }
 
     public void showGame() {
         // TODO: make sure game infos has been recieved
-        gamep = new GamePanel(GameInfo.getCurrentGameInfo(), PlayerModel.getCurrentPlayer());
-        switchPanel(gamep);
+        gamePanel = new GamePanel(GameInfo.getCurrentGameInfo(), PlayerModel.getCurrentPlayer());
+        switchPanel(gamePanel);
     }
 
     public void ghostMoved(int x, int y) {
