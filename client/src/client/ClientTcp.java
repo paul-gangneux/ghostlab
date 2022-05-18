@@ -288,8 +288,8 @@ public class ClientTcp extends Thread {
                     int y_pos = Integer.parseInt(getPosYOnMove(buf));
                     System.out.println(getPosXOnMove(buf)+" "+getPosYOnMove(buf) +" "+getPoints(buf));
                     PlayerModel pm = new PlayerModel(x_pos, y_pos);
-                    View.getInstance().move(pm);
                     pm.setScore(points);
+                    View.getInstance().move(pm);
                     break;
                 }
 
