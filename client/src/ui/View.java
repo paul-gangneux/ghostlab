@@ -59,6 +59,14 @@ public class View extends JFrame {
         });
     }
 
+    public void posit(PlayerModel pm){
+        //TODO use the player info 
+    }
+
+    public void move(PlayerModel pm){
+        //TODO move the player
+    }
+
     public void incomingMessage(MessageInfo mi) {
         // TODO do it
     }

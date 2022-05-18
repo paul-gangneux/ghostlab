@@ -9,7 +9,14 @@ public class PlayerModel {
 
     static PlayerModel playerModel = null;  
 
-    private PlayerModel(String username ) {
+    public PlayerModel(String username, int x, int y) {
+        this.name = username;
+        xpos = x;
+        ypos = y;
+        score = 0;
+    }
+
+    private PlayerModel(String username) {
         this.name = username;
         xpos = 0;
         ypos = 0;
