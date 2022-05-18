@@ -40,9 +40,15 @@ public class PlayerModel {
         ypos = y;
     }
 
-    private PlayerModel(int x, int y, int initScore) {
+    public PlayerModel(int x, int y, int initScore) {
         this(x, y);
         score = initScore;
+    }
+
+    public PlayerModel(String id,int x, int y, int initScore) {
+        this(x, y);
+        score = initScore;
+        name= id;
     }
 
     public static void initialize(String username) {

@@ -104,8 +104,43 @@ public class ClientTcp extends Thread {
             }
         }
         String pos = new String(buf, 11, n, StandardCharsets.UTF_8);
+        //fill the numbers with 0 to get a number of 3 digits
         if(pos.length()==1)pos="00"+pos;
         if(pos.length()==2)pos="0"+pos;
+        return pos;
+    }
+
+    public String getPoints(byte[] buf){
+        int n = 0;
+        for (int i = 0; i < 4; i++) {
+            if (buf[i + 16] != 0) {
+                n++;
+            } else {
+                break;
+            }
+        }
+        String pos = new String(buf, 16, n, StandardCharsets.UTF_8);
+        if(pos.length()==1)pos="000"+pos;
+        if(pos.length()==2)pos="00"+pos;
+        if(pos.length()==3)pos="0"+pos;
+
+        return pos;
+    }
+
+    public String getPointsOnGlis(byte[] buf){
+        int n = 0;
+        for (int i = 0; i < 4; i++) {
+            if (buf[i + 23] != 0) {
+                n++;
+            } else {
+                break;
+            }
+        }
+        String pos = new String(buf, 23, n, StandardCharsets.UTF_8);
+        if(pos.length()==1)pos="000"+pos;
+        if(pos.length()==2)pos="00"+pos;
+        if(pos.length()==3)pos="0"+pos;
+
         return pos;
     }
 
@@ -248,13 +283,39 @@ public class ClientTcp extends Thread {
                 }
 
                 case "MOVEF": { // [MOVEF xxx yyy pppp***]
-                    // TODO
+                    int points =Integer.parseInt(getPoints(buf));
+                    int x_pos = Integer.parseInt(getPosXOnMove(buf));
+                    int y_pos = Integer.parseInt(getPosYOnMove(buf));
+                    System.out.println(getPosXOnMove(buf)+" "+getPosYOnMove(buf) +" "+getPoints(buf));
+                    PlayerModel pm = new PlayerModel(x_pos, y_pos);
+                    View.getInstance().move(pm);
+                    pm.setScore(points);
                     break;
                 }
 
                 case "GLIS": { // [GLIS! m***]
                     // TODO : read all
-                    // [GPLYR username xxx yyy pppp***]
+                    int s = buf[6];
+                    ArrayList<PlayerModel> players  = new ArrayList<>();
+                    for (int i = 0; i < s; i++) {
+                        try {
+                            // expecting [GPLYR username xxx yyy pppp***]
+                            size = readMessage(istream, buf);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        keyword = getKeyword(buf);
+                        if (size != 12 || !keyword.equals("GPLYR")) {
+                            System.out.println("error at game info reading");
+                            break;
+                        }
+                        String id = ClientUdp.getPseudo(buf);
+                        int x_pos = Integer.parseInt(getPosX(buf));
+                        int y_pos = Integer.parseInt(getPosY(buf));
+                        int points = Integer.parseInt(getPointsOnGlis(buf));
+                        players.add(new PlayerModel(id, x_pos,y_pos,points));
+                    }
+                    View.getInstance().showPlayers(players);
                     break;
                 }
 

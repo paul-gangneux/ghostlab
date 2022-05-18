@@ -1,6 +1,7 @@
 package ui;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
@@ -84,6 +85,10 @@ public class View extends JFrame {
         // TODO: make sure game infos has been recieved
         gamep = new GamePanel(GameInfo.getCurrentGameInfo(), PlayerModel.getCurrentPlayer());
         switchPanel(gamep);
+    }
+
+    public void showPlayers(ArrayList<PlayerModel> pm){
+        //display what GPLYR do 
     }
 
     public void ghostMoved(int x, int y) {
