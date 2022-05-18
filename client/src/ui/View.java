@@ -9,6 +9,7 @@ import javax.swing.*;
 import model.GameInfo;
 import model.MessageInfo;
 import model.PlayerModel;
+import ui.panels.game.LabyTile.TileType;
 import ui.panels.lobby.WaitPanel;
 
 // unique jframe
@@ -113,7 +114,9 @@ public class View extends JFrame {
     }
 
     public void showPlayers(ArrayList<PlayerModel> pm){
-        //display what GPLYR do 
+        for (PlayerModel m : pm) {
+            gamePanel.getLabyDisplayerPanel().getGrid()[m.getYPos()][m.getXPos()].setTile(TileType.MEMORY_ENEMY_PLAYER, false);
+        }
     }
 
     public void ghostMoved(int x, int y) {
