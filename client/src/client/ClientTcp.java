@@ -236,9 +236,6 @@ public class ClientTcp extends Thread {
                         String playerid = ClientUdp.getPseudo(buf);
                         infoPlayers.add(playerid);
                     }
-
-                    // TODO: read all
-                    // [PLAYR username***]
                     break;
                 }
 
@@ -320,27 +317,27 @@ public class ClientTcp extends Thread {
                 }
 
                 case "MALL!": { // [MALL!***]
-                    // TODO
                     break;
                 }
 
                 case "SEND!": { // [SEND!***]
-                    // TODO
                     break;
                 }
 
                 case "NSEND": { // [NSEND***]
-                    // TODO
                     break;
                 }
 
                 case "GOBYE": { // [GOBYE***]
-                    // TODO
+                    try {
+                        server.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 }
 
                 case "DUNNO": { // [DUNNO***]
-                    // TODO
                     break;
                 }
 

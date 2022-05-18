@@ -113,6 +113,22 @@ public class ChatInputPanel extends JPanel {
                 }
 
             });
+            addKeyListener(new KeyListener() {
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        csb.sendChatMessage();
+                    }
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {}
+
+                @Override
+                public void keyTyped(KeyEvent e) {}
+
+            });
         }
     }
 

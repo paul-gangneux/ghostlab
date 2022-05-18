@@ -163,8 +163,10 @@ public class View extends JFrame {
         switchPanel(gamePanel);
     }
 
-    public void showPlayers(ArrayList<PlayerModel> pm) {
-        // display what GPLYR do
+    public void showPlayers(ArrayList<PlayerModel> pm){
+        for (PlayerModel m : pm) {
+            gamePanel.getLabyDisplayerPanel().getGrid()[m.getY()][m.getX()].setTile(TileType.MEMORY_ENEMY_PLAYER, false);
+        }
     }
 
     public void ghostMoved(int x, int y) {
