@@ -82,7 +82,7 @@ public class Client {
     }
 
     public void askPlayers(){
-        c1.sendToServer("GLIS?***");
+        ClientTcp.sendToServer("GLIS?***");
     }
 
     public void sendPrivateMess(String mi, String username) {
