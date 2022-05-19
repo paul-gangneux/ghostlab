@@ -69,8 +69,10 @@ public class ChatInputPanel extends JPanel {
                 remove(c);
             }
             for (PlayerModel player : PlayerModel.getAllPlayers()) {
-                ScopeMenuItem playerWhisper = new ScopeMenuItem(player.getPseudo(), ChatScope.OUTGOING_PRIVATE_MSG);
-                add(playerWhisper);
+                if (!player.getPseudo().equals(PlayerModel.getCurrentPlayer().getPseudo())) {
+                    ScopeMenuItem playerWhisper = new ScopeMenuItem(player.getPseudo(), ChatScope.OUTGOING_PRIVATE_MSG);
+                    add(playerWhisper);
+                }
             }
         }
     }
