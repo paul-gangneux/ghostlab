@@ -71,6 +71,13 @@ public class Client {
     public void askSize(int gameId) {
         byte[] msg = ("SIZE? i***").getBytes();
         msg[6] = (byte) gameId;
+        ClientTcp.sendToServer(msg);
+    }
+
+    public void askPlayerList(int gameId) {
+        byte[] msg = ("LIST? i***").getBytes();
+        msg[6] = (byte) gameId;
+        ClientTcp.sendToServer(msg);
     }
 
     public void askForGameList() {
@@ -134,5 +141,10 @@ public class Client {
 
     public void unReg() {
         ClientTcp.sendToServer("UNREG***");
+    }
+
+    public void updateGameInfos(int id) {
+        askSize(id);
+        askPlayerList(id);
     }
 }

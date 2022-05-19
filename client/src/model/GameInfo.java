@@ -51,7 +51,7 @@ public class GameInfo {
     }
 
     public String toString() {
-        return String.format("Game #%d            %d players", getID(), getPlayerCount());
+        return String.format("Game #%-3d            %3d players", getID(), getPlayerCount());
     }
 
     public static void setCurrentGameInfo(GameInfo gameInfo) {

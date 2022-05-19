@@ -286,7 +286,7 @@ public class ClientTcp {
                     // pour avoir en little-endian:
                     int h = (0xff & buf[8]) + (0xff & buf[9]) * 0x100;
                     int w = (0xff & buf[11]) + (0xff & buf[12]) * 0x100;
-                    View.showGameInfosForSelectedGame(id, h, w);
+                    View.getInstance().showGameInfosForSelectedGame(id, h, w);
                     break;
                 }
 
@@ -301,7 +301,7 @@ public class ClientTcp {
                         }
                         keyword = getKeyword(buf);
 
-                        if (size != 12 || !keyword.equals("PLAYR")) { // [PLAYR username***]
+                        if (size != 17 || !keyword.equals("PLAYR")) { // [PLAYR username***]
                             System.out.println("error at game info reading");
                             break;
                         }

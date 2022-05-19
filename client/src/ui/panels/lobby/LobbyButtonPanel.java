@@ -57,6 +57,7 @@ public class LobbyButtonPanel extends JPanel {
             setEnabled(true); // A good thing would be to prevent the button from being clicked if no game is
                               // selected
             addActionListener(event -> {
+                gjb.setEnabled(false);
                 Client.getInstance().askForGameList();
             });
         }
@@ -74,7 +75,7 @@ public class LobbyButtonPanel extends JPanel {
         setLayout(gl);
         gcb = new GameCreateButton();
         gjb = new GameJoinButton();
-        username = new JTextField("username");
+        username = new JTextField(PlayerModel.getCurrentPlayer().getPseudo());
         username.setVisible(true);
         add(username);
         add(gcb);
