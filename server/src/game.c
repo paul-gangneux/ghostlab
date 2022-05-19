@@ -74,6 +74,9 @@ game_t* newGame() {
   g->id = 0;
   g->nb_players = 0;
   g->nb_ghosts = random() % 5 + 3;
+  if (easy_mazes) {
+    g->nb_ghosts = 2;
+  }
   g->multicast_port[0] = '4';
   g->multicast_port[1] = '0';
   g->multicast_port[2] = '0';
@@ -432,6 +435,10 @@ void game_startIfAllReady(game_t* game) {
   thing->x < 0 || thing->x >= game->w ||\
   thing->y < 0 || thing->y >= game->h
 
+#define out_of_bounds_xy(game, x, y)\
+  x < 0 || x >= game->w ||\
+  y < 0 || y >= game->h
+
 // returns 1 if the player captured at least one ghost, else returns 0
 int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
   int capturedAGhost = 0;
@@ -475,6 +482,7 @@ int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
       if (game->ghosts[i].x == player->x && game->ghosts[i].y == player->y) {
         game->nb_ghosts--;
         game->ghosts[i] = game->ghosts[game->nb_ghosts];
+        i--; // aaa
         capturedAGhost = 1;
         player->score++;
 
@@ -573,15 +581,49 @@ void game_endIfNoGhost(game_t* game) {
   lock(game);
   if (game->nb_ghosts == 0) {
     playerList_forAll(game->playerList, send_end_message);
-  }
-  player_t* winner = playerList_getPlayerWithMaxScore(game->playerList);
-  if (winner != NULL) {
-    char buf[22];
-    memmove(buf, "ENDGA username pppp+++", 22);
-    memmove(buf + 6, winner->name, MAX_NAME);
-    mv_num4toBuf(buf, 15, winner->score);
-    // sends [ENDGA id p+++]
-    send_msg_multicast(game, buf, 22);
+    player_t* winner = playerList_getPlayerWithMaxScore(game->playerList);
+    if (winner != NULL) {
+      char buf[22];
+      memmove(buf, "ENDGA username pppp+++", 22);
+      memmove(buf + 6, winner->name, MAX_NAME);
+      mv_num4toBuf(buf, 15, winner->score);
+      // sends [ENDGA id p+++]
+      send_msg_multicast(game, buf, 22);
+    }
   }
   unlock(game);
+}
+
+#define maze_get(x, y) game->maze[(y) * game->w + (x)]
+
+// 012
+// 3 4
+// 567
+void game_getSurroundings(game_t* game, player_t* player, char* buf) {
+  int x = player->x;
+  int y = player->y;
+  if (!(out_of_bounds_xy(game, x, y - 1)))
+    buf[1] = maze_get(x, y - 1);
+
+  if (!(out_of_bounds_xy(game, x, y + 1)))
+    buf[6] = maze_get(x, y + 1);
+
+  if (!(out_of_bounds_xy(game, x + 1, y)))
+    buf[4] = maze_get(x + 1, y);
+
+  if (!(out_of_bounds_xy(game, x - 1, y)))
+    buf[3] = maze_get(x - 1, y);
+
+  if (!(out_of_bounds_xy(game, x - 1, y - 1)) && (buf[1] == '0' || buf[3] == '0'))
+    buf[0] = maze_get(x - 1, y - 1);
+
+  if (!(out_of_bounds_xy(game, x + 1, y + 1)) && (buf[4] == '0' || buf[6] == '0'))
+    buf[7] = maze_get(x + 1, y + 1);
+
+  if (!(out_of_bounds_xy(game, x + 1, y - 1)) && (buf[4] == '0' || buf[1] == '0'))
+    buf[2] = maze_get(x + 1, y - 1);
+
+  if (!(out_of_bounds_xy(game, x - 1, y + 1)) && (buf[3] == '0' || buf[6] == '0'))
+    buf[5] = maze_get(x - 1, y + 1);
+
 }

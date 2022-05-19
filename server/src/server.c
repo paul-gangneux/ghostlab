@@ -41,6 +41,7 @@
 int verbose;
 int very_verbose;
 int print_mazes;
+int easy_mazes;
 const char* multicast_ip_address;
 
 gameList_t* gameList;
@@ -62,6 +63,8 @@ void print_help(const char* progName) {
     "        Prints generated mazes.\n\n"
     "    -s\n"
     "        Sixes seed for random calculations at 0.\n\n"
+    "    -e\n"
+    "        Easy maze generation. Useful for tests.\n\n"
     "    -h\n"
     "        Displays help.\n"
     , progName);
@@ -75,11 +78,12 @@ int main(int argc, char* argv[]) {
   verbose = 0;
   very_verbose = 0;
   print_mazes = 0;
+  easy_mazes = 0;
 
   srandom(time(0));
 
   int opt;
-  while ((opt = getopt(argc, argv, "Vvhsmp:")) != -1) {
+  while ((opt = getopt(argc, argv, "Vvhsemp:")) != -1) {
     switch (opt) {
       case 'v':
         verbose = 1;
@@ -99,6 +103,9 @@ int main(int argc, char* argv[]) {
         break;
       case 's':
         srandom(0);
+        break;
+      case 'e':
+        easy_mazes = 1;
         break;
       case 'h':
         print_help(argv[0]);
@@ -467,6 +474,12 @@ void* interact_with_client(void* arg) {
     else if (comp_keyword(reqbuf, "RIMOV") && len == 12) {
       direction = MV_RIGHT;
     }
+    // expecting [LIGH?***]
+    else if (comp_keyword(reqbuf, "LIGH?") && len == 8) {
+      memmove(ansbuf, "LIGHT xxxxxxxx***", 17);
+      game_getSurroundings(game, player, ansbuf + 6);
+      send_msg(cli_fd, ansbuf, 17);
+    }
     // expecting [GLIS?***]
     else if (comp_keyword(reqbuf, "GLIS?") && len == 8) {
       // sends [GLIS! s***] and [GPLYR username xxx yyy pppp***]
@@ -571,6 +584,9 @@ void* interact_with_client(void* arg) {
 
     else if (!(check_tcp_message(reqbuf, len))) {
       printf("bad client request, discarding\n");
+    }
+    else if (comp_keyword(reqbuf, "LIGH?") && len == 8) {
+      // do nothing
     }
 
     // expecting anything

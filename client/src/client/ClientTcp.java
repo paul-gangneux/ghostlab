@@ -5,50 +5,100 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+import launcher.Launcher;
 // import java.util.Scanner;
 import model.GameInfo;
 import model.PlayerModel;
 import ui.View;
 
-public class ClientTcp extends Thread {
-    private Socket server;
-    // private Scanner key; // Scanner for input
-    BufferedReader istream;
-    PrintWriter ostream;
-    String ogameList; // we initialize the list of the games available with a string so we can parse
-                      // it later
+public class ClientTcp {
+    private static Socket server = null;
+    private static BufferedReader istream = null;
+    private static Thread thread = null;
+    private static final Object lock = new Object();
 
-    public ClientTcp(String ip, int portTcp) {
+    private ClientTcp() {
+    }
+
+    public static void setTcpSocket(String ip, int port) {
+        stopListening();
         try {
-            server = new Socket(ip, portTcp);
-            // key = new Scanner(System.in);
+            server = new Socket(ip, port);
         } catch (IOException e) {
-            e.printStackTrace();
+            if (Launcher.isVerbose())
+                e.printStackTrace();
             System.out.println("\nConnexion refusée. assurez-vous que le serveur a bien été lancé");
             System.exit(1);
         }
         try {
             istream = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            ostream = new PrintWriter(new OutputStreamWriter(server.getOutputStream()));
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
     }
 
-    public boolean checkRequest(String request) {
-        if (request.isEmpty() || request.equals("")) {
-            System.out.println("ERROR : empty request");
-            return false;
+    public static void startListening() {
+        if (thread != null) {
+            System.out.println("TCP: Already listening, aborting.");
+            return;
         }
-        if (!(request.endsWith("***"))) {
-            System.out.println("ERROR : bad fomulated request");
-            return false;
+        if (server == null) {
+            System.out.println("TCP: Attributes not initialized, aborting.");
+            return;
         }
-        return true;
+        thread = new Thread(ClientTcp::listens);
+        thread.start();
     }
 
-    public String getPosX(byte[] buf){
+    public static void stopListening() {
+        synchronized (lock) {
+            if (server != null) {
+                try {
+                    server.close();
+                } catch (IOException e) {
+                    if (Launcher.isVerbose()) {
+                        System.out.println("TCP: Socket already closed");
+                    }
+                }
+            }
+            server = null;
+        }
+        if (thread != null) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                thread.interrupt();
+                e.printStackTrace();
+            }
+            thread = null;
+        }
+        if (istream != null) {
+            try {
+                istream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                if (Launcher.isVerbose()) {
+                    System.out.println("TCP: istream already closed");
+                }
+            }
+            istream = null;
+        }
+    }
+
+    // private static boolean checkRequest(String request) {
+    // if (request.isEmpty() || request.equals("")) {
+    // System.out.println("ERROR : empty request");
+    // return false;
+    // }
+    // if (!(request.endsWith("***"))) {
+    // System.out.println("ERROR : bad fomulated request");
+    // return false;
+    // }
+    // return true;
+    // }
+
+    private static String getPosX(byte[] buf) {
         int n = 0;
         for (int i = 0; i < 3; i++) {
             if (buf[i + 15] != 0) {
@@ -58,13 +108,15 @@ public class ClientTcp extends Thread {
             }
         }
         String pos = new String(buf, 15, n, StandardCharsets.UTF_8);
-        if(pos.length()==1)pos="00"+pos;
-        if(pos.length()==2)pos="0"+pos;
+        if (pos.length() == 1)
+            pos = "00" + pos;
+        if (pos.length() == 2)
+            pos = "0" + pos;
         return pos;
 
     }
 
-    public String getPosY(byte[] buf){
+    private static String getPosY(byte[] buf) {
         int n = 0;
         for (int i = 0; i < 3; i++) {
             if (buf[i + 19] != 0) {
@@ -74,12 +126,14 @@ public class ClientTcp extends Thread {
             }
         }
         String pos = new String(buf, 19, n, StandardCharsets.UTF_8);
-        if(pos.length()==1)pos="00"+pos;
-        if(pos.length()==2)pos="0"+pos;
+        if (pos.length() == 1)
+            pos = "00" + pos;
+        if (pos.length() == 2)
+            pos = "0" + pos;
         return pos;
     }
 
-    public String getPosXOnMove(byte[] buf){
+    private static String getPosXOnMove(byte[] buf) {
         int n = 0;
         for (int i = 0; i < 3; i++) {
             if (buf[i + 6] != 0) {
@@ -89,12 +143,14 @@ public class ClientTcp extends Thread {
             }
         }
         String pos = new String(buf, 6, n, StandardCharsets.UTF_8);
-        if(pos.length()==1)pos="00"+pos;
-        if(pos.length()==2)pos="0"+pos;
+        if (pos.length() == 1)
+            pos = "00" + pos;
+        if (pos.length() == 2)
+            pos = "0" + pos;
         return pos;
     }
 
-    public String getPosYOnMove(byte[] buf){
+    private static String getPosYOnMove(byte[] buf) {
         int n = 0;
         for (int i = 0; i < 3; i++) {
             if (buf[i + 10] != 0) {
@@ -104,13 +160,15 @@ public class ClientTcp extends Thread {
             }
         }
         String pos = new String(buf, 10, n, StandardCharsets.UTF_8);
-        //fill the numbers with 0 to get a number of 3 digits
-        if(pos.length()==1)pos="00"+pos;
-        if(pos.length()==2)pos="0"+pos;
+        // fill the numbers with 0 to get a number of 3 digits
+        if (pos.length() == 1)
+            pos = "00" + pos;
+        if (pos.length() == 2)
+            pos = "0" + pos;
         return pos;
     }
 
-    public String getPoints(byte[] buf){
+    private static String getPoints(byte[] buf) {
         int n = 0;
         for (int i = 0; i < 4; i++) {
             if (buf[i + 14] != 0) {
@@ -120,14 +178,17 @@ public class ClientTcp extends Thread {
             }
         }
         String pos = new String(buf, 14, n, StandardCharsets.UTF_8);
-        if(pos.length()==1)pos="000"+pos;
-        if(pos.length()==2)pos="00"+pos;
-        if(pos.length()==3)pos="0"+pos;
+        if (pos.length() == 1)
+            pos = "000" + pos;
+        if (pos.length() == 2)
+            pos = "00" + pos;
+        if (pos.length() == 3)
+            pos = "0" + pos;
 
         return pos;
     }
 
-    public String getPointsOnGlis(byte[] buf){
+    private static String getPointsOnGlis(byte[] buf) {
         int n = 0;
         for (int i = 0; i < 4; i++) {
             if (buf[i + 23] != 0) {
@@ -137,31 +198,42 @@ public class ClientTcp extends Thread {
             }
         }
         String pos = new String(buf, 23, n, StandardCharsets.UTF_8);
-        if(pos.length()==1)pos="000"+pos;
-        if(pos.length()==2)pos="00"+pos;
-        if(pos.length()==3)pos="0"+pos;
+        if (pos.length() == 1)
+            pos = "000" + pos;
+        if (pos.length() == 2)
+            pos = "00" + pos;
+        if (pos.length() == 3)
+            pos = "0" + pos;
 
         return pos;
     }
 
-    @Override
-    public void run() {
+    private static void listens() {
+        if (Launcher.isVerbose())
+            System.out.println("TCP: starting communication");
         // boolean end = false;
         byte[] buf = new byte[128];
         // key = new Scanner(System.in);
-
-        while (true) {
+        boolean loops = true;
+        while (loops) {
 
             int size = 0;
             try {
                 size = readMessage(istream, buf);
             } catch (IOException e) {
                 e.printStackTrace();
+                break;
             }
+            if (size == 0) {
+                System.out.println("TCP: disconnected by server");
+                break;
+            }
+
             String keyword = getKeyword(buf);
 
-            // pour débugger, à supprimer plus tard
-            System.out.println(keyword);
+            if (Launcher.isVeryVerbose()) {
+                System.out.println(new String(buf, 0, size, StandardCharsets.UTF_8));
+            }
 
             switch (keyword) {
                 case "GAMES": // [GAMES n***]
@@ -235,6 +307,7 @@ public class ClientTcp extends Thread {
                         String playerid = ClientUdp.getPseudo(buf);
                         PlayerModel.getOtherPlayers().add(new PlayerModel(playerid));
                     }
+                    // TODO: do something with it
                     break;
                 }
 
@@ -263,8 +336,8 @@ public class ClientTcp extends Thread {
                     String id = ClientUdp.getPseudo(buf);
                     int x_pos = Integer.parseInt(getPosX(buf));
                     int y_pos = Integer.parseInt(getPosY(buf));
-                    System.out.println(id+" "+getPosX(buf)+" "+getPosY(buf));
-                    PlayerModel pm = new PlayerModel(id,x_pos, y_pos);
+                    // System.out.println(id+" "+getPosX(buf)+" "+getPosY(buf));
+                    PlayerModel pm = new PlayerModel(id, x_pos, y_pos);
                     View.getInstance().posit(pm);
                     break;
                 }
@@ -272,17 +345,18 @@ public class ClientTcp extends Thread {
                 case "MOVE!": { // [MOVE! xxx yyy***]
                     int x_pos = Integer.parseInt(getPosXOnMove(buf));
                     int y_pos = Integer.parseInt(getPosYOnMove(buf));
-                    System.out.println(getPosXOnMove(buf)+" "+getPosYOnMove(buf));
+                    // System.out.println(getPosXOnMove(buf)+" "+getPosYOnMove(buf));
                     PlayerModel pm = new PlayerModel(x_pos, y_pos);
                     View.getInstance().move(pm);
                     break;
                 }
 
                 case "MOVEF": { // [MOVEF xxx yyy pppp***]
-                    int points =Integer.parseInt(getPoints(buf));
+                    int points = Integer.parseInt(getPoints(buf));
                     int x_pos = Integer.parseInt(getPosXOnMove(buf));
                     int y_pos = Integer.parseInt(getPosYOnMove(buf));
-                    System.out.println(getPosXOnMove(buf)+" "+getPosYOnMove(buf) +" "+getPoints(buf));
+                    // System.out.println(getPosXOnMove(buf)+" "+getPosYOnMove(buf) +"
+                    // "+getPoints(buf));
                     PlayerModel pm = new PlayerModel(x_pos, y_pos);
                     pm.setScore(points);
                     View.getInstance().move(pm);
@@ -316,6 +390,12 @@ public class ClientTcp extends Thread {
                     break;
                 }
 
+                case "LIGHT": { // [LIGHT 12345678***]
+                    String lightValues = new String(buf,6, 8, StandardCharsets.UTF_8);
+                    View.getInstance().lightSurroundings(lightValues);
+                    break;
+                }
+
                 case "MALL!": { // [MALL!***]
                     break;
                 }
@@ -331,11 +411,7 @@ public class ClientTcp extends Thread {
                 }
 
                 case "GOBYE": { // [GOBYE***]
-                    try {
-                        server.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    loops = false;
                     break;
                 }
 
@@ -347,12 +423,21 @@ public class ClientTcp extends Thread {
                     System.out.println("message non compris");
                     break;
             }
-        }
 
+        }
+        try {
+            server.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (Launcher.isVerbose())
+            System.out.println("TCP: stopping communication");
+        ClientMulticast.stopListening();
+        View.getInstance().endGame();
     }
 
     // return true on success, false on failure
-    public boolean sendToServer(byte[] data) {
+    public static boolean sendToServer(byte[] data) {
         try {
             server.getOutputStream().write(data);
             return true;
@@ -363,7 +448,7 @@ public class ClientTcp extends Thread {
     }
 
     // return true on success, false on failure
-    public boolean sendToServer(String s) {
+    public static boolean sendToServer(String s) {
         try {
             server.getOutputStream().write(s.getBytes());
             return true;
@@ -375,7 +460,7 @@ public class ClientTcp extends Thread {
 
     // reads a single message ending with *** and stores it in buf.
     // returns the number of bytes read
-    public int readMessage(BufferedReader in, byte[] buf) throws IOException {
+    private static int readMessage(BufferedReader in, byte[] buf) throws IOException {
         int star = 0;
         int n = 0;
         int i = 0;
@@ -419,20 +504,20 @@ public class ClientTcp extends Thread {
     }
 
     // return the first five characters read from the inputstream in string format
-    public String getKeyword(byte[] buf) {
+    private static String getKeyword(byte[] buf) {
         byte[] keyBytes = new byte[5];
         for (int i = 0; i < 5; i++)
             keyBytes[i] = buf[i];
         return new String(keyBytes, StandardCharsets.UTF_8);
     }
 
-    // get the local port
-    public int getPort() {
-        return this.server.getLocalPort();
-    }
+    // // get the local port
+    // private int getPort() {
+    // return server.getLocalPort();
+    // }
 
-    // get the local inet adress
-    public InetAddress getAdress() {
-        return this.server.getLocalAddress();
-    }
+    // // get the local inet adress
+    // private InetAddress getAdress() {
+    // return server.getLocalAddress();
+    // }
 }

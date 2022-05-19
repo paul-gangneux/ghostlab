@@ -2,15 +2,15 @@ package ui.panels.lobby;
 
 import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
-import client.Client;
+// import client.Client;
 
-import java.awt.GridLayout;
-import java.awt.Color;
-import java.awt.Component;
+import java.awt.*;
+
 
 import model.GameInfo;
 import ui.LobbyPanel;
@@ -19,14 +19,14 @@ public class GameListPanel extends JPanel {
 
     private LobbyPanel parentWindow;
 
-    private GridLayout gl;
+    // private GridLayout gl;
     private transient GameInfo selectedGameInfo; // GameInfo of the selected game. Null if none is selected.
     
     public GameListPanel(LobbyPanel parentWindow) {
         super();
         this.parentWindow = parentWindow;
-        gl = new GridLayout(1, 1, 0, 5); // 1 row, 1 column, no horizontal shift, 5 px vertical shift
-        setLayout(gl);
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS)); // 1 row, 1 column, no horizontal shift, 5 px vertical shift
+        //setLayout(gl);
     }
 
     private void clearList() {
@@ -43,7 +43,7 @@ public class GameListPanel extends JPanel {
         // it is expected that the client will have a method to process the [OGAME m s***] requests in a row to produce this ArrayList
         // Do not call this method before initialisation of the GameListPanel
         clearList();
-        gl.setRows(gameList.size());
+        // gl.setRows(gameList.size());
         for (GameInfo gi : gameList) {
             JLabel jl = new JLabel(gi.toString());
             jl.setOpaque(true);

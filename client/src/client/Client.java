@@ -4,13 +4,17 @@ import model.PlayerModel;
 
 public class Client {
 
-    private ClientTcp c1;
-    private ClientUdp c2;
+    // private ClientTcp ClientTcp;
+    private ClientUdp c2 = null;
+    private String serverIp;
+    private int tcpPort;
 
     static Client client = null;
 
     private Client(String serverIp, int tcpPort) {
-        c1 = new ClientTcp(serverIp, tcpPort);
+        this.serverIp = serverIp;
+        this.tcpPort = tcpPort;
+        ClientTcp.setTcpSocket(serverIp, tcpPort);
         c2 = new ClientUdp();
     }
 
@@ -24,8 +28,13 @@ public class Client {
     }
 
     public void startInteraction() {
-        c1.start();
+        ClientTcp.startListening();
         c2.start();
+    }
+
+    public void resetTcpConnection() {
+        ClientTcp.setTcpSocket(serverIp, tcpPort);
+        ClientTcp.startListening();
     }
 
     public void joinGame(int gameId, String username) {
@@ -39,8 +48,7 @@ public class Client {
             }
         }
         msg[20] = (byte) gameId;
-        System.out.println("created " + username);
-        c1.sendToServer(msg);
+        ClientTcp.sendToServer(msg);
     }
 
     public void createGame(String username) {
@@ -53,12 +61,11 @@ public class Client {
                 msg[6 + i] = 0;
             }
         }
-        System.out.println("created " + username);
-        c1.sendToServer(msg);
+        ClientTcp.sendToServer(msg);
     }
 
     public void ready() {
-        c1.sendToServer("START***");
+        ClientTcp.sendToServer("START***");
     }
 
     public void askSize(int gameId) {
@@ -67,11 +74,11 @@ public class Client {
     }
 
     public void askForGameList() {
-        c1.sendToServer("GAME?***");
+        ClientTcp.sendToServer("GAME?***");
     }
 
     public void sendMessToAll(String mi) {
-        c1.sendToServer("MALL? " + mi + "***");
+        ClientTcp.sendToServer("MALL? " + mi + "***");
     }
 
     public void askPlayers(){
@@ -88,7 +95,7 @@ public class Client {
                 msg[6 + i] = 0;
             }
         }
-        c1.sendToServer(msg);
+        ClientTcp.sendToServer(msg);
     }
 
     public void move(int amount, int direction) {
@@ -101,19 +108,27 @@ public class Client {
 
         switch (direction) {
             case PlayerModel.MV_DO:
-                c1.sendToServer("DOMOV " + a + "***");
+                ClientTcp.sendToServer("DOMOV " + a + "***");
                 break;
             case PlayerModel.MV_UP:
-                c1.sendToServer("UPMOV " + a + "***");
+                ClientTcp.sendToServer("UPMOV " + a + "***");
                 break;
             case PlayerModel.MV_LE:
-                c1.sendToServer("LEMOV " + a + "***");
+                ClientTcp.sendToServer("LEMOV " + a + "***");
                 break;
             case PlayerModel.MV_RI:
-                c1.sendToServer("RIMOV " + a + "***");
+                ClientTcp.sendToServer("RIMOV " + a + "***");
                 break;
             default:
                 break;
         }
+    }
+
+    public void askForLight() {
+        ClientTcp.sendToServer("LIGH?***");
+    }
+
+    public void quitting() {
+        ClientTcp.sendToServer("IQUIT***");
     }
 }
