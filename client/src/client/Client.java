@@ -5,7 +5,7 @@ import model.PlayerModel;
 public class Client {
 
     // private ClientTcp ClientTcp;
-    private ClientUdp c2 = null;
+    private ClientUdp cliUdp = null;
     private String serverIp;
     private int tcpPort;
 
@@ -15,7 +15,7 @@ public class Client {
         this.serverIp = serverIp;
         this.tcpPort = tcpPort;
         ClientTcp.setTcpSocket(serverIp, tcpPort);
-        c2 = new ClientUdp();
+        cliUdp = new ClientUdp();
     }
 
     public static void initialize(String serverIp, int tcpPort) {
@@ -29,7 +29,7 @@ public class Client {
 
     public void startInteraction() {
         ClientTcp.startListening();
-        c2.start();
+        cliUdp.start();
     }
 
     public void resetTcpConnection() {
@@ -38,7 +38,7 @@ public class Client {
     }
 
     public void joinGame(int gameId, String username) {
-        byte[] msg = ("REGIS username " + c2.getPort() + " i***").getBytes();
+        byte[] msg = ("REGIS username " + cliUdp.getPort() + " i***").getBytes();
         int n = username.length();
         for (int i = 0; i < 8; i++) {
             if (i < n) {
@@ -52,7 +52,7 @@ public class Client {
     }
 
     public void createGame(String username) {
-        byte[] msg = ("NEWPL username " + c2.getPort() + "***").getBytes();
+        byte[] msg = ("NEWPL username " + cliUdp.getPort() + "***").getBytes();
         int n = username.length();
         for (int i = 0; i < 8; i++) {
             if (i < n) {

@@ -68,9 +68,10 @@ public class LabyDisplayerPanel extends JPanel {
         return coordPath.size() - 1; // We remove the starting tile (the one where the player is)
     }
 
-    public void makeSelection(int gridXPos, int gridYPos) { // updates stored cursor position, and selects tiles from
-                                                            // the player to the specified one.
-        // TODO : check coord validity ?
+    // updates stored cursor position, and selects tiles from
+    // the player to the specified one.
+    public void makeSelection(int gridXPos, int gridYPos) { 
+        // check coord validity ? nah
         int playerX = parentWindow.getPlayerModel().getX();
         int playerY = parentWindow.getPlayerModel().getY();
         if (gridXPos != playerX && gridYPos != playerY) {
