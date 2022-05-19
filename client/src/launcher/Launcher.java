@@ -69,7 +69,7 @@ public class Launcher {
             }
         }
         
-        PlayerModel.initialize("username");
+        PlayerModel.initialize("Player1");
         View.initialize();
         Client.initialize(serverIp, tcpPort);
         GameInfo.setCurrentGameInfo(new GameInfo(0, 0, 0, 0));

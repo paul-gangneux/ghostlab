@@ -2,9 +2,11 @@ package ui.panels.game;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -58,23 +60,27 @@ public class LabyTile extends JPanel implements MouseInputListener {
     }
 
     public static void initImages() {
-        images.put("empty", new ImageIcon("client/resources/empty_tile.png"));
-        images.put("empty_memory", new ImageIcon("client/resources/empty_tile_memory.png"));
-        images.put("empty_selected", new ImageIcon("client/resources/empty_tile_selected.png"));
-        images.put("unknown", new ImageIcon("client/resources/unknown_tile.png"));
-        images.put("unknown_selected", new ImageIcon("client/resources/unknown_tile_selected.png"));
-        images.put("wall", new ImageIcon("client/resources/wall.png"));
-        images.put("wall_selected", new ImageIcon("client/resources/wall_selected.png"));
-        images.put("main_char", new ImageIcon("client/resources/main_character_facing_left.png"));
-        images.put("main_char_selected", new ImageIcon("client/resources/main_character_facing_left_selected.png"));
-        images.put("enemy_char", new ImageIcon("client/resources/enemy_character_facing_left.png"));
-        images.put("enemy_char_memory", new ImageIcon("client/resources/enemy_character_facing_left_memory.png"));
-        images.put("enemy_char_selected", new ImageIcon("client/resources/enemy_character_facing_left_selected.png"));
-        images.put("ghost", new ImageIcon("client/resources/spotted_ghost.png"));
-        images.put("ghost_memory", new ImageIcon("client/resources/memory_ghost.png"));
-        images.put("ghost_memory_selected", new ImageIcon("client/resources/memory_ghost_selected.png"));
-        images.put("ghost_selected", new ImageIcon("client/resources/spotted_ghost_selected.png"));
-        images.put("error", new ImageIcon("client/resources/error.png"));
+        try {
+            images.put("empty", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/empty_tile.png"))));
+            images.put("empty_memory", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/empty_tile_memory.png"))));
+            images.put("empty_selected", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/empty_tile_selected.png"))));
+            images.put("unknown", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/unknown_tile.png"))));
+            images.put("unknown_selected", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/unknown_tile_selected.png"))));
+            images.put("wall", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/wall.png"))));
+            images.put("wall_selected", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/wall_selected.png"))));
+            images.put("main_char", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/main_character_facing_left.png"))));
+            images.put("main_char_selected", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/main_character_facing_left_selected.png"))));
+            images.put("enemy_char", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/enemy_character_facing_left.png"))));
+            images.put("enemy_char_memory", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/enemy_character_facing_left_memory.png"))));
+            images.put("enemy_char_selected", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/enemy_character_facing_left_selected.png"))));
+            images.put("ghost", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/spotted_ghost.png"))));
+            images.put("ghost_memory", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/memory_ghost.png"))));
+            images.put("ghost_memory_selected", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/memory_ghost_selected.png"))));
+            images.put("ghost_selected", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/spotted_ghost_selected.png"))));
+            images.put("error", new ImageIcon(ImageIO.read(LabyTile.class.getClassLoader().getResourceAsStream("resources/error.png"))));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void resizeImages(int size) {
