@@ -58,7 +58,7 @@ public class ChatInputPanel extends JPanel {
             // ScopeMenuItem teamScope = new ScopeMenuItem("TEAM", ChatScope.TEAM_MSG);
             // teamScope.setEnabled(client.hasTeam());
             // add(teamScope);
-            for (PlayerModel player : PlayerModel.getOtherPlayers()) {
+            for (PlayerModel player : PlayerModel.getAllPlayers()) {
                 ScopeMenuItem playerWhisper = new ScopeMenuItem(player.getPseudo(), ChatScope.OUTGOING_PRIVATE_MSG);
                 add(playerWhisper);
             }
@@ -68,7 +68,7 @@ public class ChatInputPanel extends JPanel {
             for (Component c : getComponents()) {
                 remove(c);
             }
-            for (PlayerModel player : PlayerModel.getOtherPlayers()) {
+            for (PlayerModel player : PlayerModel.getAllPlayers()) {
                 ScopeMenuItem playerWhisper = new ScopeMenuItem(player.getPseudo(), ChatScope.OUTGOING_PRIVATE_MSG);
                 add(playerWhisper);
             }
