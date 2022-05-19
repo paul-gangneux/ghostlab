@@ -1,6 +1,8 @@
 package ui.panels.lobby;
 // import java.awt.*;
 
+import java.awt.Color;
+
 import javax.swing.*;
 import client.Client;
 import ui.View;
@@ -38,6 +40,7 @@ public class WaitPanel extends JPanel {
         label.setFont(label.getFont().deriveFont(16f));
         readyButton.setFont(label.getFont().deriveFont(16f));
         quitButton.setFont(label.getFont().deriveFont(16f));
+        setBackground(Color.BLUE);
 
         add(label);
         add(readyButton);
