@@ -8,6 +8,7 @@ import javax.swing.*;
 
 import client.Client;
 import launcher.Launcher;
+import model.ChatScope;
 import model.GameInfo;
 import model.MessageInfo;
 import model.PlayerModel;
@@ -214,10 +215,11 @@ public class View extends JFrame {
             }).start();
         }
         PlayerModel pm = PlayerModel.getPlayerByName(username);
-        int nbCaptured = points - pm.getScore();
+        // int nbCaptured = points - pm.getScore();
         pm.setScore(points);
-        getInstance().gamePanel.getChatAndScorePanel().getScoreboardPanel().updateScores();
-        getInstance().gamePanel.getChatAndScorePanel().getGhostCounter().decrease(nbCaptured);
+        gamePanel.getChatAndScorePanel().getScoreboardPanel().updateScores();
+        gamePanel.getChatAndScorePanel().getGhostCounter().decrease(1); // there's 1 message per capture
+        gamePanel.addMessage(new MessageInfo(ChatScope.SERVER_MSG, null, username + " captured a ghost!"));
     }
 
     public void endGameAndShowWinner(String id, int p) {

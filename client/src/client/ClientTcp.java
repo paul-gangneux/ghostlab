@@ -434,6 +434,7 @@ public class ClientTcp {
         if (Launcher.isVerbose())
             System.out.println("TCP: stopping communication");
         ClientMulticast.stopListening();
+        PlayerModel.getAllPlayers().clear();
         View.getInstance().endGame();
     }
 

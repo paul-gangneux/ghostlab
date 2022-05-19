@@ -30,7 +30,7 @@ public class MessageLabel extends JLabel {
                 break;
             case GLOBAL_MSG:
                 setForeground(Color.BLACK);
-                setText(msginfo.getPlayerName() + " : " + msginfo.getContent());
+                setText("(" + msginfo.getPlayerName() + ") : " + msginfo.getContent());
                 break;
             case TEAM_MSG:
                 setForeground(Color.BLUE);
@@ -38,9 +38,9 @@ public class MessageLabel extends JLabel {
                 setText("(TEAM) " + msginfo.getPlayerName() + " : " + msginfo.getContent());
                 break;
             case SERVER_MSG:
-                setForeground(Color.GREEN);
+                setForeground(Color.BLUE);
                 setFont(getFont().deriveFont(Font.BOLD));
-                setText("(SERVER) " + msginfo.getContent());
+                setText(msginfo.getContent());
                 break;
             default:
                 break;
