@@ -1,6 +1,6 @@
 package ui.panels.game;
 
-import javax.swing.ImageIcon;
+// import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import model.GameInfo;
 import ui.GamePanel;
@@ -8,8 +8,8 @@ import ui.GamePanel;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+// import java.util.HashMap;
+// import java.util.Map;
 
 public class LabyDisplayerPanel extends JPanel {
 
