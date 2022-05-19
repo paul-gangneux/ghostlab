@@ -53,7 +53,7 @@ public class LabyTile extends JPanel implements MouseInputListener {
         icon = null;
     }
 
-    public void setTile(TileType type, boolean selected) {
+    public synchronized void setTile(TileType type, boolean selected) {
         clearTile();
         tileType = type;
         if (selected) {
