@@ -1,11 +1,12 @@
 package ui.panels;
 
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import client.Client;
 import model.MessageInfo;
 import ui.GhostCounter;
-import ui.QuitButton;
 import ui.panels.chat.ChatWholePanel;
 import ui.panels.scoreboard.ScoreboardPanel;
 
@@ -15,6 +16,17 @@ public class ChatAndScorePanel extends JPanel {
     private ScoreboardPanel sp;
     private GhostCounter gc;
     private QuitButton qb; // no getter because why would you want to access a Button ?
+
+    private class QuitButton extends JButton {
+    
+        public QuitButton() {
+            super();
+            setText("Quit Game");
+            addActionListener(e -> {
+                Client.getInstance().quitting();
+            });
+        }
+    }
 
     public ChatAndScorePanel(int width, int height) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
