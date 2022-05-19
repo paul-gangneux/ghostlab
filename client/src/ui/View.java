@@ -289,4 +289,10 @@ public class View extends JFrame {
     public static void showGameInfosForSelectedGame(int id, int h, int w) {
         //TODO
     }
+
+    public void backToLobby() {
+        lobbyPanel = new LobbyPanel();
+        switchPanel(lobbyPanel);
+        Client.getInstance().askForGameList();
+    }
 }

@@ -64,18 +64,19 @@ void player_endThread(player_t* player) {
 
 // free all subsequent player cells.
 // set pc->next to NULL to avoid this
-void freePlayerCell(playerCell_t* pc) {
+void freePlayerCell(playerCell_t* pc, int endThread) {
   if (pc == NULL) return;
   if (pc->next != NULL)
-    freePlayerCell(pc->next);
-  player_endThread(pc->player);
+    freePlayerCell(pc->next, endThread);
+  if (endThread)
+    player_endThread(pc->player);
   free(pc);
   pc = NULL;
 }
 
 void freePlayerList(playerList_t* pl) {
   if (pl == NULL) return;
-  freePlayerCell(pl->first);
+  freePlayerCell(pl->first, END_THREAD);
   free(pl);
   pl = NULL;
 }
@@ -89,33 +90,33 @@ void player_addToList(playerList_t* playerList, player_t* player) {
 }
 
 // returns 0 on failure, 1 on success
-int playerList_remove_aux(playerCell_t* pc, player_t* player) {
+int playerList_remove_aux(playerCell_t* pc, player_t* player, int endThread) {
   if (pc->next == NULL)
     return 0;
   if (pc->next->player == player) {
     playerCell_t* temp = pc->next;
     pc->next = pc->next->next;
     temp->next = NULL;
-    freePlayerCell(temp);
+    freePlayerCell(temp, endThread);
     return 1;
   }
-  return playerList_remove_aux(pc->next, player);
+  return playerList_remove_aux(pc->next, player, endThread);
 }
 
 // lock mutex before using
 // returns 1 on success, 0 on failure
-int playerList_remove(playerList_t* playerList, player_t* player) {
+int playerList_remove(playerList_t* playerList, player_t* player, int endThread) {
   if (playerList->first == NULL)
     return 0;
   if (playerList->first->player == player) {
     playerCell_t* pc = playerList->first;
     playerList->first = playerList->first->next;
     pc->next = NULL;
-    freePlayerCell(pc);
+    freePlayerCell(pc, endThread);
     playerList->length -= 1;
     return 1;
   }
-  if (playerList_remove_aux(playerList->first, player)) {
+  if (playerList_remove_aux(playerList->first, player, endThread)) {
     playerList->length -= 1;
     return 1;
   }

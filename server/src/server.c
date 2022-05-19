@@ -323,9 +323,11 @@ void* interact_with_client(void* arg) {
       }
       else {
         u_int8_t id_game = game->id;
-        game_removePlayer(game, player);
+        game_removePlayer(game, player, NO_END_THREAD);
         // game removed if no players are left in it
-        gameList_remove(gameList, game, RM_NOPLAYERS);
+        int removed = gameList_remove(gameList, game, RM_NOPLAYERS);
+        if (!removed)
+          game_startIfAllReady(game);
         isInGame = 0;
         memmove(ansbuf, "UNROK 0***", 10);
         ansbuf[6] = id_game;
@@ -599,7 +601,7 @@ void* interact_with_client(void* arg) {
   end:
 
   if (isInGame) {
-    game_removePlayer(game, player);
+    game_removePlayer(game, player, END_THREAD);
     // game removed if no players are left in it
     gameList_remove(gameList, game, RM_NOPLAYERS);
   }

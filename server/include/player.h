@@ -24,6 +24,9 @@ struct player {
   int score;
 };
 
+#define END_THREAD 1
+#define NO_END_THREAD 0
+
 #include "server.h"
 #include "communication.h"
 
@@ -41,7 +44,8 @@ void player_addToList(playerList_t* playerList, player_t* player);
 
 // lock mutex before using
 // returns 1 on success, 0 on failure
-int playerList_remove(playerList_t* playerList, player_t* player);
+// ends player thread is endThread != 0
+int playerList_remove(playerList_t* playerList, player_t* player, int endThread);
 
 int playerList_sendToCli(playerList_t* playerList, u_int8_t game_id, int cli_fd);
 

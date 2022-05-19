@@ -277,7 +277,7 @@ public class ClientTcp {
                 }
 
                 case "UNROK": { // [UNROK m***]
-                    // TODO
+                    View.getInstance().backToLobby();
                     break;
                 }
 
@@ -286,7 +286,6 @@ public class ClientTcp {
                     // pour avoir en little-endian:
                     int h = (0xff & buf[8]) + (0xff & buf[9]) * 0x100;
                     int w = (0xff & buf[11]) + (0xff & buf[12]) * 0x100;
-                    // TODO: change something else ?
                     View.showGameInfosForSelectedGame(id, h, w);
                     break;
                 }
@@ -340,6 +339,8 @@ public class ClientTcp {
                     // System.out.println(id+" "+getPosX(buf)+" "+getPosY(buf));
                     PlayerModel pm = new PlayerModel(id, x_pos, y_pos);
                     View.getInstance().posit(pm);
+                    Client.getInstance().askPlayers();
+                    Client.getInstance().askForLight();
                     break;
                 }
 
@@ -365,7 +366,6 @@ public class ClientTcp {
                 }
 
                 case "GLIS!": { // [GLIS! m***]
-                    // TODO : read all
                     int s = buf[6];
                     PlayerModel.getAllPlayers().clear();
                     for (int i = 0; i < s; i++) {

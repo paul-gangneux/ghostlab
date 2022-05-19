@@ -312,10 +312,11 @@ int game_addPlayer(gameList_t* gameList, u_int8_t game_id, player_t* player) {
   return i;
 }
 
-// remove player from game and asks for his thread to end
-void game_removePlayer(game_t* game, player_t* player) {
+// remove player from game
+// and asks for player thread to end if endThread != 0
+void game_removePlayer(game_t* game, player_t* player, int endThread) {
   lock(game);
-  if (playerList_remove(game->playerList, player))
+  if (playerList_remove(game->playerList, player, endThread))
     game->nb_players--;
   unlock(game);
 }
@@ -338,17 +339,18 @@ int gameList_remove_aux(gameCell_t* gc, game_t* game) {
 // use with option RM_NOPLAYERS to only remove if no players are in the game.
 // use with option RM_FORCE to remove no matter what
 // will free associated playerlist and ask player to disconnect
-void gameList_remove(gameList_t* gameList, game_t* game, int option) {
+// returns 1 if game has been deleted, 0 otherwise
+int gameList_remove(gameList_t* gameList, game_t* game, int option) {
   lock(gameList);
   if (option == RM_NOPLAYERS) {
     if (game->nb_players > 0) {
       unlock(gameList);
-      return;
+      return 0;
     }
   }
   if (gameList->first == NULL) {
     unlock(gameList);
-    return;
+    return 0;
   }
   if (gameList->first->game == game) {
     gameCell_t* gc = gameList->first;
@@ -357,11 +359,15 @@ void gameList_remove(gameList_t* gameList, game_t* game, int option) {
     freeGameCell(gc);
     gameList->length -= 1;
     unlock(gameList);
-    return;
+    return 1;
   }
-  if (gameList_remove_aux(gameList->first, game))
+  int ret = 0;
+  if (gameList_remove_aux(gameList->first, game)) {
     gameList->length -= 1;
+    ret = 1;
+  }
   unlock(gameList);
+  return ret;
 }
 
 // send the [LIST! m s***] and [PLAYR id***] messages to client.

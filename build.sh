@@ -5,10 +5,10 @@ DEBUG=false;
 
 while true; do
   case "$1" in
-    -c | -clean ) CLEAN=true; shift ;;
-    -s | -server ) SERVER=true; shift ;;
-    -cli | -client ) CLIENT=true; shift ;;
-    -d | -debug ) DEBUG=true; shift ;;
+    -C | --clean ) CLEAN=true; shift ;;
+    -s | --server ) SERVER=true; shift ;;
+    -c | --client ) CLIENT=true; shift ;;
+    -d | --debug ) DEBUG=true; shift ;;
     ?* ) echo $1 "not a valid option"; shift ;;
     * ) break;;
   esac

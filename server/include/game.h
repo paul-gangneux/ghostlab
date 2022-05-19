@@ -67,8 +67,9 @@ int gameList_add(gameList_t* gl, game_t* g);
 // will fail if there's another user with the same name in that game
 int game_addPlayer(gameList_t* gameList, u_int8_t game_id, player_t* player);
 
-// remove player from game and asks for his thread to end
-void game_removePlayer(game_t* game, player_t* player);
+// remove player from game
+// and asks for player thread to end if endThread != 0
+void game_removePlayer(game_t* game, player_t* player, int endThread);
 
 // returns NULL on failure
 game_t* game_get(gameList_t* gameList, u_int8_t id);
@@ -76,8 +77,9 @@ game_t* game_get(gameList_t* gameList, u_int8_t id);
 // removes game from gameList and free memory
 // use with option RM_NOPLAYERS to only remove if no players are in the game.
 // use with option RM_FORCE to remove no matter what
-// will free associated playerlist and disconnect players
-void gameList_remove(gameList_t* gameList, game_t* game, int option);
+// will free associated playerlist and ask player to disconnect
+// returns 1 if game has been deleted, 0 otherwise
+int gameList_remove(gameList_t* gameList, game_t* game, int option);
 
 // send the [LIST! m s***] and [PLAYR id***] messages to client.
 // returns -1 on failure, 0 on success

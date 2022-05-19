@@ -7,16 +7,25 @@ import ui.View;
 
 public class WaitPanel extends JPanel {
     JButton readyButton;
+    JButton quitButton;
     JLabel label;
 
     public WaitPanel() {
         super();
         
         readyButton = new JButton("ready");
+        quitButton = new JButton("quit");
+
         readyButton.addActionListener( event -> {
             Client.getInstance().ready();
             readyButton.setEnabled(false);
+            quitButton.setEnabled(false);
         });
+
+        quitButton.addActionListener( event -> {
+            Client.getInstance().unReg();
+        });
+        
         label = new JLabel("Waiting for players");
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         
@@ -24,11 +33,14 @@ public class WaitPanel extends JPanel {
 
         label.setAlignmentX(CENTER_ALIGNMENT);
         readyButton.setAlignmentX(CENTER_ALIGNMENT);
+        quitButton.setAlignmentX(CENTER_ALIGNMENT);
+
         label.setFont(label.getFont().deriveFont(16f));
         readyButton.setFont(label.getFont().deriveFont(16f));
+        quitButton.setFont(label.getFont().deriveFont(16f));
+
         add(label);
         add(readyButton);
-        
-        
+        add(quitButton);
     }
 }

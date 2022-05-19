@@ -131,4 +131,8 @@ public class Client {
     public void quitting() {
         ClientTcp.sendToServer("IQUIT***");
     }
+
+    public void unReg() {
+        ClientTcp.sendToServer("UNREG***");
+    }
 }
