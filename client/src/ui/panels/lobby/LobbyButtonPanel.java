@@ -19,7 +19,6 @@ public class LobbyButtonPanel extends JPanel {
     private GameCreateButton gcb;
     private GameJoinButton gjb;
     private JTextField username;
-    private JTextField udpPort;
 
     private class GameCreateButton extends JButton {
 
@@ -75,10 +74,8 @@ public class LobbyButtonPanel extends JPanel {
         setLayout(gl);
         gcb = new GameCreateButton();
         gjb = new GameJoinButton();
-        username = new JTextField("enter pseudo");
+        username = new JTextField("username");
         username.setVisible(true);
-        udpPort = new JTextField("enter port");
-        udpPort.setVisible(true);
         add(username);
         add(gcb);
         add(gjb);

@@ -1,7 +1,7 @@
 package ui.panels.scoreboard;
 
 import java.awt.*;
-import java.util.ArrayList;
+// import java.util.ArrayList;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 

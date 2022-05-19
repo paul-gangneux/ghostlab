@@ -1,6 +1,6 @@
 package ui.panels.game;
 
-import javax.swing.ImageIcon;
+// import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import model.GameInfo;
 import ui.GamePanel;
