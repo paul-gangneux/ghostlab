@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 
 import launcher.Launcher;
 // import java.util.Scanner;
@@ -286,12 +287,13 @@ public class ClientTcp {
                     int h = (0xff & buf[8]) + (0xff & buf[9]) * 0x100;
                     int w = (0xff & buf[11]) + (0xff & buf[12]) * 0x100;
                     // TODO: change something else ?
-                    GameInfo.setCurrentGameInfo(new GameInfo(id, 0, h, w));
+                    View.showGameInfosForSelectedGame(id, h, w);
                     break;
                 }
 
                 case "LIST!": { // [[LIST! m s***]
                     int num = buf[8];
+                    List<String> userList = new ArrayList<>();
                     for (int i = 0; i < num; i++) {
                         try {
                             size = readMessage(istream, buf);
@@ -300,15 +302,13 @@ public class ClientTcp {
                         }
                         keyword = getKeyword(buf);
 
-                        if (size != 12 || !keyword.equals("PLAYR")) {
+                        if (size != 12 || !keyword.equals("PLAYR")) { // [PLAYR username***]
                             System.out.println("error at game info reading");
                             break;
                         }
-                        String playerid = ClientUdp.getPseudo(buf);
-                        //PlayerModel.initAllPlayers();
-                        //PlayerModel.getAllPlayers().get(i).setPseudo(playerid)
+                        userList.add(ClientUdp.getPseudo(buf));
                     }
-                    // TODO: do something with it
+                    View.getInstance().showUserListForSectedGame(userList);
                     break;
                 }
 

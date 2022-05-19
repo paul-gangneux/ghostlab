@@ -168,9 +168,22 @@ public class View extends JFrame {
         switchPanel(gamePanel);
     }
 
-    public void showPlayers(){
+    public void showPlayers() {
+        LabyTile[][] grid = gamePanel.getLabyDisplayerPanel().getGrid();
         for (PlayerModel m : PlayerModel.getAllPlayers()) {
-            gamePanel.getLabyDisplayerPanel().getGrid()[m.getY()][m.getX()].setTile(TileType.MEMORY_ENEMY_PLAYER, false);
+            if (!m.getPseudo().equals(PlayerModel.getCurrentPlayer().getPseudo())) {
+                new Thread(() -> {
+                    int x = m.getX();
+                    int y = m.getY();
+                    grid[y][x].setTile(TileType.VISIBLE_ENEMY_PLAYER, false);
+                    sleep(2000);
+                    if (grid[y][x].getType() == TileType.VISIBLE_ENEMY_PLAYER)
+                        grid[y][x].setTile(TileType.MEMORY_ENEMY_PLAYER, false);
+                    sleep(1000);
+                    if (grid[y][x].getType() == TileType.MEMORY_ENEMY_PLAYER)
+                        grid[y][x].setTile(TileType.VISIBLE_EMPTY, false);
+                }).start();
+            }
         }
     }
 
@@ -267,5 +280,13 @@ public class View extends JFrame {
                 grid[y][x].setTile(TileType.VISIBLE_EMPTY, false);
             }
         }
+    }
+
+    public void showUserListForSectedGame(List<String> userList) {
+        //TODO
+    }
+
+    public static void showGameInfosForSelectedGame(int id, int h, int w) {
+        //TODO
     }
 }
