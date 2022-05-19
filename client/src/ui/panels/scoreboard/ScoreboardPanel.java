@@ -2,6 +2,7 @@ package ui.panels.scoreboard;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
@@ -20,17 +21,34 @@ public class ScoreboardPanel extends JPanel {
         scores = new ArrayList<>();
     }
 
-    public void initScoreboard() {
-        for (PlayerModel pm : PlayerModel.getOtherPlayers()) {
-            add(new ScoreLabel(pm));
-        }
-    }
+    public void updateScores() {
 
-    public void updateScore(PlayerModel pm) {
+        scores.clear();
+
+        for (Component c : getComponents()) {
+            remove(c);
+        }
+
+        for (PlayerModel pm : PlayerModel.getOtherPlayers()) {
+            ScoreLabel sl = new ScoreLabel(pm);
+            scores.add(sl);
+            add(sl);
+        }
+
+        scores.sort(new Comparator<ScoreLabel>() {
+
+            @Override
+            public int compare(ScoreLabel arg0, ScoreLabel arg1) {
+                return arg0.getPlayerModel().getScore() - arg1.getPlayerModel().getScore();
+            }
+            
+        });
 
         for (ScoreLabel sl : scores) {
             sl.refresh();
+            add(sl);
         }
-        revalidate(); // recomputes the layout, effectively refreshing the chat
+
+        revalidate();
     }
 }

@@ -163,8 +163,8 @@ public class View extends JFrame {
         switchPanel(gamePanel);
     }
 
-    public void showPlayers(ArrayList<PlayerModel> pm){
-        for (PlayerModel m : pm) {
+    public void showPlayers(){
+        for (PlayerModel m : PlayerModel.getOtherPlayers()) {
             gamePanel.getLabyDisplayerPanel().getGrid()[m.getY()][m.getX()].setTile(TileType.MEMORY_ENEMY_PLAYER, false);
         }
     }
@@ -200,6 +200,11 @@ public class View extends JFrame {
 
     public void endGameAndShowWinner(String id, int p) {
         // TODO
+    }
+
+    public void updatePlayerLists() {
+        gamePanel.getChatAndScorePanel().getScoreboardPanel().updateScores();
+        gamePanel.getChatAndScorePanel().getChatWholePanel().getChatInputPanel().updateDests();
     }
 
     public void privateMessageSuccess() {

@@ -3,6 +3,7 @@ package ui.panels;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
+import client.Client;
 import model.MessageInfo;
 import ui.panels.chat.ChatWholePanel;
 import ui.panels.scoreboard.ScoreboardPanel;
@@ -13,10 +14,10 @@ public class ChatAndScorePanel extends JPanel {
     ScoreboardPanel sp;
 
     public ChatAndScorePanel(int width, int height) {
+        Client.getInstance().askPlayers();
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         cwp = new ChatWholePanel((width) / 3, height);
         sp = new ScoreboardPanel();
-        sp.initScoreboard();
         add(cwp);
         add(sp);
     }

@@ -12,12 +12,16 @@ public class ScoreLabel extends JLabel {
 
     public ScoreLabel(PlayerModel pm) {
         this.pm = pm;
+        setForeground(Color.RED);
+        setFont(getFont().deriveFont(Font.BOLD));
         refresh();
     }
 
+    public PlayerModel getPlayerModel() {
+        return pm;
+    }
+
     public void refresh() {
-        setForeground(Color.RED);
-        setFont(getFont().deriveFont(Font.BOLD));
         setText(pm.getPseudo() + " : " + Integer.toString(pm.getScore()));
     }
 }

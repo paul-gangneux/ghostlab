@@ -63,6 +63,16 @@ public class ChatInputPanel extends JPanel {
                 add(playerWhisper);
             }
         }
+
+        public void updateMenu() {
+            for (Component c : getComponents()) {
+                remove(c);
+            }
+            for (PlayerModel player : PlayerModel.getOtherPlayers()) {
+                ScopeMenuItem playerWhisper = new ScopeMenuItem(player.getPseudo(), ChatScope.OUTGOING_PRIVATE_MSG);
+                add(playerWhisper);
+            }
+        }
     }
 
     private class ChatInputField extends JTextField {
@@ -182,5 +192,9 @@ public class ChatInputPanel extends JPanel {
 
     public MessageInfo getLastMessageInfo() {
       return lastPmInfo;
+    }
+
+    public void updateDests() {
+        sm.updateMenu();
     }
 }

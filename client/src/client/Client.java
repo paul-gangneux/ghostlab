@@ -74,6 +74,10 @@ public class Client {
         c1.sendToServer("MALL? " + mi + "***");
     }
 
+    public void askPlayers(){
+        c1.sendToServer("GLIS?***");
+    }
+
     public void sendPrivateMess(String mi, String username) {
         byte[] msg = ("SEND? username " + mi + "***").getBytes();
         int n = username.length();

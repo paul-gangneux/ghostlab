@@ -220,7 +220,6 @@ public class ClientTcp extends Thread {
 
                 case "LIST!": { // [[LIST! m s***]
                     int num = buf[8];
-                    ArrayList<String> infoPlayers = new ArrayList<>();
                     for (int i = 0; i < num; i++) {
                         try {
                             size = readMessage(istream, buf);
@@ -234,7 +233,7 @@ public class ClientTcp extends Thread {
                             break;
                         }
                         String playerid = ClientUdp.getPseudo(buf);
-                        infoPlayers.add(playerid);
+                        PlayerModel.getOtherPlayers().add(new PlayerModel(playerid));
                     }
                     break;
                 }
@@ -290,10 +289,9 @@ public class ClientTcp extends Thread {
                     break;
                 }
 
-                case "GLIS": { // [GLIS! m***]
+                case "GLIS!": { // [GLIS! m***]
                     // TODO : read all
                     int s = buf[6];
-                    ArrayList<PlayerModel> players  = new ArrayList<>();
                     for (int i = 0; i < s; i++) {
                         try {
                             // expecting [GPLYR username xxx yyy pppp***]
@@ -302,7 +300,7 @@ public class ClientTcp extends Thread {
                             e.printStackTrace();
                         }
                         keyword = getKeyword(buf);
-                        if (size != 12 || !keyword.equals("GPLYR")) {
+                        if (!keyword.equals("GPLYR")) { // size check
                             System.out.println("error at game info reading");
                             break;
                         }
@@ -310,9 +308,11 @@ public class ClientTcp extends Thread {
                         int x_pos = Integer.parseInt(getPosX(buf));
                         int y_pos = Integer.parseInt(getPosY(buf));
                         int points = Integer.parseInt(getPointsOnGlis(buf));
-                        players.add(new PlayerModel(id, x_pos,y_pos,points));
+                        PlayerModel.getOtherPlayers().clear(); // avoids duplicates and completely refreshes the list
+                        PlayerModel.getOtherPlayers().add(new PlayerModel(id, x_pos,y_pos,points));
+                        View.getInstance().updatePlayerLists();
                     }
-                    View.getInstance().showPlayers(players);
+                    View.getInstance().showPlayers();
                     break;
                 }
 

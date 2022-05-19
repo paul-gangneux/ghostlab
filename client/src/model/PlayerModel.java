@@ -32,7 +32,7 @@ public class PlayerModel {
         score = 0;
     }
 
-    private PlayerModel(String username) {
+    public PlayerModel(String username) {
         this.name = username;
         x = 0;
         y = 0;
