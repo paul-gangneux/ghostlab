@@ -305,7 +305,8 @@ public class ClientTcp {
                             break;
                         }
                         String playerid = ClientUdp.getPseudo(buf);
-                        PlayerModel.getOtherPlayers().add(new PlayerModel(playerid));
+                        //PlayerModel.initAllPlayers();
+                        //PlayerModel.getAllPlayers().get(i).setPseudo(playerid)
                     }
                     // TODO: do something with it
                     break;
@@ -366,6 +367,7 @@ public class ClientTcp {
                 case "GLIS!": { // [GLIS! m***]
                     // TODO : read all
                     int s = buf[6];
+                    PlayerModel.getAllPlayers().clear();
                     for (int i = 0; i < s; i++) {
                         try {
                             // expecting [GPLYR username xxx yyy pppp***]
@@ -382,10 +384,9 @@ public class ClientTcp {
                         int x_pos = Integer.parseInt(getPosX(buf));
                         int y_pos = Integer.parseInt(getPosY(buf));
                         int points = Integer.parseInt(getPointsOnGlis(buf));
-                        PlayerModel.getOtherPlayers().clear(); // avoids duplicates and completely refreshes the list
-                        PlayerModel.getOtherPlayers().add(new PlayerModel(id, x_pos,y_pos,points));
-                        View.getInstance().updatePlayerLists();
+                        PlayerModel.getAllPlayers().add(new PlayerModel(id, x_pos, y_pos, points));
                     }
+                    View.getInstance().updatePlayerLists();
                     View.getInstance().showPlayers();
                     break;
                 }

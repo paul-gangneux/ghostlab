@@ -6,7 +6,7 @@ import client.Client;
 
 public class PlayerModel {
 
-    static ArrayList<PlayerModel> otherPlayers = new ArrayList<>();
+    static ArrayList<PlayerModel> allPlayers = new ArrayList<>();
 
     // private String name = "default"; à faire ?
     private String name;
@@ -41,11 +41,11 @@ public class PlayerModel {
 
     public static void addPlayer(PlayerModel pm) {
         // Watch out, no duplicate check is performed here.
-        otherPlayers.add(pm);
+        allPlayers.add(pm);
     }
 
-    public static ArrayList<PlayerModel> getOtherPlayers() {
-        return otherPlayers;
+    public static ArrayList<PlayerModel> getAllPlayers() {
+        return allPlayers;
     }
 
     public void setName(String name) {
@@ -58,6 +58,15 @@ public class PlayerModel {
 
     public static boolean isMoving() {
       return isMoving;
+    }
+
+    public static PlayerModel getPlayerByName(String username) {
+        for (PlayerModel pm : PlayerModel.getAllPlayers()) {
+            if (pm.getPseudo().equals(username)) {
+                return pm;
+            }
+        }
+        return null;
     }
 
     public String getPseudo() {

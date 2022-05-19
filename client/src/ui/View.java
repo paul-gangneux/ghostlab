@@ -1,7 +1,7 @@
 package ui;
 
 import java.awt.*;
-import java.util.ArrayList;
+// import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
@@ -169,7 +169,7 @@ public class View extends JFrame {
     }
 
     public void showPlayers(){
-        for (PlayerModel m : PlayerModel.getOtherPlayers()) {
+        for (PlayerModel m : PlayerModel.getAllPlayers()) {
             gamePanel.getLabyDisplayerPanel().getGrid()[m.getY()][m.getX()].setTile(TileType.MEMORY_ENEMY_PLAYER, false);
         }
     }
@@ -200,7 +200,9 @@ public class View extends JFrame {
                     grid[y][x].setTile(TileType.VISIBLE_EMPTY, false);
             }).start();
         }
-        // TODO: utiliser points
+        PlayerModel pm = PlayerModel.getPlayerByName(username);
+        pm.setScore(points);
+        getInstance().gamePanel.getChatAndScorePanel().getScoreboardPanel().updateScores();
     }
 
     public void endGameAndShowWinner(String id, int p) {

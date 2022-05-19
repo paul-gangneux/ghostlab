@@ -8,8 +8,6 @@ import ui.GamePanel;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-// import java.util.HashMap;
-// import java.util.Map;
 
 public class LabyDisplayerPanel extends JPanel {
 
