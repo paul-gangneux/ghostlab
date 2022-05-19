@@ -60,12 +60,9 @@ public class ChatInputPanel extends JPanel {
             // add(teamScope);
             for (PlayerModel player : PlayerModel.getAllPlayers()) {
                 ScopeMenuItem playerWhisper = new ScopeMenuItem(player.getPseudo(), ChatScope.OUTGOING_PRIVATE_MSG);
-                if(player.getPseudo().equals(PlayerModel.getCurrentPlayer().getPseudo())){
-
-                }else{
+                if (!player.getPseudo().equals(PlayerModel.getCurrentPlayer().getPseudo())) {
                     add(playerWhisper);
                 }
-
             }
         }
 
@@ -198,7 +195,7 @@ public class ChatInputPanel extends JPanel {
     }
 
     public MessageInfo getLastMessageInfo() {
-      return lastPmInfo;
+        return lastPmInfo;
     }
 
     public void updateDests() {
