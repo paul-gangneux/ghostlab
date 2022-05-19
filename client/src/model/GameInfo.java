@@ -38,6 +38,10 @@ public class GameInfo {
         return labywidth;
     }
 
+    public int getNbGhosts() {
+        return nbGhosts;
+    }
+
     public void setId(int gameID) {
       this.gameID = gameID;
     }

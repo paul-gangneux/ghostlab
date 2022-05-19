@@ -11,8 +11,7 @@ public class ScoreboardPanel extends JPanel {
 
     public ScoreboardPanel() {
         super();
-        setBackground(Color.WHITE);
-        // setForeground(Color.WHITE);
+        setBackground(Color.BLACK);
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
     }
 

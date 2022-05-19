@@ -214,8 +214,10 @@ public class View extends JFrame {
             }).start();
         }
         PlayerModel pm = PlayerModel.getPlayerByName(username);
+        int nbCaptured = points - pm.getScore();
         pm.setScore(points);
         getInstance().gamePanel.getChatAndScorePanel().getScoreboardPanel().updateScores();
+        getInstance().gamePanel.getChatAndScorePanel().getGhostCounter().decrease(nbCaptured);
     }
 
     public void endGameAndShowWinner(String id, int p) {
