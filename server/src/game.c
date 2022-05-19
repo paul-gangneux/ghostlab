@@ -74,6 +74,9 @@ game_t* newGame() {
   g->id = 0;
   g->nb_players = 0;
   g->nb_ghosts = random() % 5 + 3;
+  if (easy_mazes) {
+    g->nb_ghosts = 2;
+  }
   g->multicast_port[0] = '4';
   g->multicast_port[1] = '0';
   g->multicast_port[2] = '0';
@@ -475,6 +478,7 @@ int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
       if (game->ghosts[i].x == player->x && game->ghosts[i].y == player->y) {
         game->nb_ghosts--;
         game->ghosts[i] = game->ghosts[game->nb_ghosts];
+        i--; // aaa
         capturedAGhost = 1;
         player->score++;
 
@@ -482,6 +486,7 @@ int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
         mv_num3toBuf(buf, 20, player->x);
         mv_num3toBuf(buf, 24, player->y);
         send_msg_multicast(game, buf, 30);
+        printf("ghost %d - i %d\n", game->nb_ghosts, i);
       }
     }
     unlock(game);
@@ -573,15 +578,15 @@ void game_endIfNoGhost(game_t* game) {
   lock(game);
   if (game->nb_ghosts == 0) {
     playerList_forAll(game->playerList, send_end_message);
-  }
-  player_t* winner = playerList_getPlayerWithMaxScore(game->playerList);
-  if (winner != NULL) {
-    char buf[22];
-    memmove(buf, "ENDGA username pppp+++", 22);
-    memmove(buf + 6, winner->name, MAX_NAME);
-    mv_num4toBuf(buf, 15, winner->score);
-    // sends [ENDGA id p+++]
-    send_msg_multicast(game, buf, 22);
+    player_t* winner = playerList_getPlayerWithMaxScore(game->playerList);
+    if (winner != NULL) {
+      char buf[22];
+      memmove(buf, "ENDGA username pppp+++", 22);
+      memmove(buf + 6, winner->name, MAX_NAME);
+      mv_num4toBuf(buf, 15, winner->score);
+      // sends [ENDGA id p+++]
+      send_msg_multicast(game, buf, 22);
+    }
   }
   unlock(game);
 }

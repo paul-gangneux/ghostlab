@@ -127,6 +127,7 @@ public class LabyTile extends JPanel implements MouseInputListener {
         icon.setSize(tileSize, tileSize);
         add(icon);
         EventQueue.invokeLater(() -> {
+            repaint();
             revalidate();
         });
     }

@@ -9,6 +9,8 @@ public class Launcher {
 
     private static boolean verbose = false;
     private static boolean veryVerbose = false;
+    private static boolean quit = false;
+    public static final Object waitObj = new Object();
 
     private static final String HELP_TEXT = 
         "usage:\n" +
@@ -70,6 +72,33 @@ public class Launcher {
         Client.initialize(serverIp, tcpPort);
         GameInfo.setCurrentGameInfo(new GameInfo(0, 0, 0, 0));
         Client.getInstance().startInteraction();
+
+        loops();
+
+        // exiting program
+    }
+
+    public static void loops() {
+
+        while (!quit) {
+            if (verbose)
+                System.out.println("loops");
+            try {
+                if (verbose)
+                    System.out.println("waiting");
+                synchronized(waitObj) {
+                    waitObj.wait();
+                }
+                if (verbose)
+                    System.out.println("notified");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
+            }
+            if (!quit) {
+                Client.getInstance().resetTcpConnection();
+            }
+        }
     }
 
     public static void setVerbose(boolean v) {

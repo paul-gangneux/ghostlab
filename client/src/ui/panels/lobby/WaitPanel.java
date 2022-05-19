@@ -18,11 +18,17 @@ public class WaitPanel extends JPanel {
             readyButton.setEnabled(false);
         });
         label = new JLabel("Waiting for players");
-        // setSize(1000, 600);
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        
         setSize(View.getDefaultWidth(), View.getDefaultHeight());
-        // setLayout(new FlowLayout());
-        add(readyButton);
+
+        label.setAlignmentX(CENTER_ALIGNMENT);
+        readyButton.setAlignmentX(CENTER_ALIGNMENT);
+        label.setFont(label.getFont().deriveFont(16f));
+        readyButton.setFont(label.getFont().deriveFont(16f));
         add(label);
-        setSize(1000, 600);
+        add(readyButton);
+        
+        
     }
 }

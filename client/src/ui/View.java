@@ -6,9 +6,12 @@ import java.util.List;
 
 import javax.swing.*;
 
+// import client.Client;
+import launcher.Launcher;
 import model.GameInfo;
 import model.MessageInfo;
 import model.PlayerModel;
+import ui.panels.game.EndGamePanel;
 import ui.panels.game.LabyTile;
 import ui.panels.game.LabyTile.TileType;
 import ui.panels.lobby.WaitPanel;
@@ -90,6 +93,7 @@ public class View extends JFrame {
         PlayerModel curr = PlayerModel.getCurrentPlayer();
         curr.setX(pm.getX());
         curr.setY(pm.getY());
+        curr.setName(pm.getPseudo());
         gamePanel.getLabyDisplayerPanel().getGrid()[pm.getY()][pm.getX()]
                 .setTile(TileType.MAIN_PLAYER, false);
         PlayerModel.setMoving(false);
@@ -199,7 +203,7 @@ public class View extends JFrame {
     }
 
     public void endGameAndShowWinner(String id, int p) {
-        // TODO
+        switchPanel(new EndGamePanel(id, p));
     }
 
     public void privateMessageSuccess() {
@@ -216,6 +220,14 @@ public class View extends JFrame {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             e.printStackTrace();
+        }
+    }
+
+    public void endGame() {
+        lobbyPanel = new LobbyPanel();
+        switchPanel(lobbyPanel);
+        synchronized (Launcher.waitObj) {
+            Launcher.waitObj.notifyAll();
         }
     }
 }

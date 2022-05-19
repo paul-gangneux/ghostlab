@@ -86,7 +86,9 @@ public class ClientMulticast {
 			try {
 				sock.receive(paquet);
 			} catch (IOException e) {
-				e.printStackTrace();
+				if (Launcher.isVerbose()) {
+					System.out.println("Multicast socket closed, quitting");
+				}
 				break;
 			}
 			String keyword = new String(paquet.getData(), 0, 5, StandardCharsets.UTF_8);
@@ -144,7 +146,13 @@ public class ClientMulticast {
 		}
 
 		synchronized (lock) {
-			sock.close();
+			if (sock != null) {
+				try {
+					sock.receive(paquet);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 			sock = null;
 		}
 

@@ -133,6 +133,14 @@ void maze_print(char* str, u_int16_t w, u_int16_t h) {
 // memory is allocated here, can be 
 // freed with a free()
 char* maze_generate(u_int16_t* str_w, u_int16_t* str_h) {
+  if (easy_mazes) {
+    *str_w = 5;
+    *str_h = 7;
+    char* easy_lab = (char*) malloc((*str_w) * (*str_h) * sizeof(char));
+    memset(easy_lab, '0', (*str_w) * (*str_h) * sizeof(char));
+    return easy_lab;
+  }
+
   int w = random() % 15 + 5;
   int h = random() % 10 + 5;
 
