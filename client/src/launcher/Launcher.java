@@ -4,6 +4,7 @@ import ui.*;
 import client.*;
 import model.GameInfo;
 // import model.PlayerModel;
+import model.PlayerModel;
 
 public class Launcher {
 
@@ -67,7 +68,8 @@ public class Launcher {
                 }
             }
         }
-
+        
+        PlayerModel.initialize("username");
         View.initialize();
         Client.initialize(serverIp, tcpPort);
         GameInfo.setCurrentGameInfo(new GameInfo(0, 0, 0, 0));

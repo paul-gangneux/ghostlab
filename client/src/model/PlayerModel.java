@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import client.Client;
 
@@ -44,7 +45,7 @@ public class PlayerModel {
         allPlayers.add(pm);
     }
 
-    public static ArrayList<PlayerModel> getAllPlayers() {
+    public static List<PlayerModel> getAllPlayers() {
         return allPlayers;
     }
 
@@ -53,11 +54,11 @@ public class PlayerModel {
     }
 
     public static void setMoving(boolean isMoving) {
-      PlayerModel.isMoving = isMoving;
+        PlayerModel.isMoving = isMoving;
     }
 
     public static boolean isMoving() {
-      return isMoving;
+        return isMoving;
     }
 
     public static PlayerModel getPlayerByName(String username) {
@@ -74,11 +75,11 @@ public class PlayerModel {
     }
 
     public int getDesiredX() {
-      return desiredX;
+        return desiredX;
     }
 
     public int getDesiredY() {
-      return desiredY;
+        return desiredY;
     }
 
     public static PlayerModel getCurrentPlayer() {
@@ -119,19 +120,19 @@ public class PlayerModel {
     }
 
     public synchronized void setX(int value) {
-        x = value; // TODO : check validity
+        x = value;
     }
 
     public synchronized void setY(int value) {
-        y = value; // TODO : check validity
+        y = value;
     }
 
     public synchronized void setScore(int value) {
-        score = value; // TODO : check validity
+        score = value;
     }
 
     public void moveTo(int gridx, int gridy) {
-        
+
         int direction = 0;
         int amount = 0;
         if (gridx == x) {
@@ -154,7 +155,7 @@ public class PlayerModel {
             return;
         }
         if (amount > 0) {
-            synchronized(currentPlayer) {
+            synchronized (currentPlayer) {
                 if (isMoving)
                     return;
                 setMoving(true);

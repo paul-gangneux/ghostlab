@@ -87,6 +87,7 @@ public class View extends JFrame {
             lobbyPanel.getGameListPanel().processGameList(gameList);
             revalidate();
         });
+        lobbyPanel.resetGameInfoPanel();
     }
 
     public void posit(PlayerModel pm) {
@@ -154,7 +155,7 @@ public class View extends JFrame {
     }
 
     public void regError() {
-        // TODO : show error msg
+        lobbyPanel.regError();
     }
 
     public void regOk() {
@@ -284,11 +285,11 @@ public class View extends JFrame {
     }
 
     public void showUserListForSectedGame(List<String> userList) {
-        //TODO
+        lobbyPanel.updateUserList(userList);
     }
 
-    public static void showGameInfosForSelectedGame(int id, int h, int w) {
-        //TODO
+    public void showGameInfosForSelectedGame(int id, int h, int w) {
+        lobbyPanel.updateGameInfos(id, w, h);
     }
 
     public void backToLobby() {

@@ -11,6 +11,8 @@ import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 import javax.swing.event.MouseInputListener;
 
+import client.Client;
+
 // import client.Client;
 
 import java.awt.*;
@@ -74,7 +76,8 @@ public class GameListPanel extends JPanel {
                     setForeground(Color.WHITE);
                     setBackground(Color.BLUE);
                     selectedGameInfo = gameInfo;
-                    parentWindow.allowGameJoin();
+                    parentWindow.allowGameJoin(); 
+                    Client.getInstance().updateGameInfos(gameInfo.getID());
                 }
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent e) {      

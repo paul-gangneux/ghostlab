@@ -251,7 +251,7 @@ void* interact_with_client(void* arg) {
         send_str_and_check_error(cli_fd, "DUNNO***");
       }
       else if (!username_isValid(username)) {
-        send_str_and_check_error(cli_fd, "DUNNO***");
+        send_str_and_check_error(cli_fd, "REGNO***");
       }
       else {
         update_player_infos(player, reqbuf);
@@ -267,7 +267,7 @@ void* interact_with_client(void* arg) {
         if (n == -1) {
           gameList_remove(gameList, game, RM_FORCE);
           game = NULL;
-          send_str_and_check_error(cli_fd, "DUNNO***");
+          send_str_and_check_error(cli_fd, "REGNO***");
         }
         else {
           isInGame = 1;
@@ -289,7 +289,7 @@ void* interact_with_client(void* arg) {
         send_str_and_check_error(cli_fd, "DUNNO***");
       }
       else if (!username_isValid(username)) {
-        send_str_and_check_error(cli_fd, "DUNNO***");
+        send_str_and_check_error(cli_fd, "REGNO***");
       }
       else {
         update_player_infos(player, reqbuf);
@@ -297,13 +297,13 @@ void* interact_with_client(void* arg) {
 
         game = game_get(gameList, id);
         if (game == NULL) {
-          send_str_and_check_error(cli_fd, "DUNNO***");
+          send_str_and_check_error(cli_fd, "REGNO***");
         }
 
         else {
           n = game_addPlayer(gameList, id, player);
           if (n == -1) {
-            send_str_and_check_error(cli_fd, "DUNNO***");
+            send_str_and_check_error(cli_fd, "REGNO***");
             game = NULL;
           }
           else {
