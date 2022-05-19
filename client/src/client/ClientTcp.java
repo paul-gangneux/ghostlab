@@ -232,7 +232,7 @@ public class ClientTcp {
             String keyword = getKeyword(buf);
 
             if (Launcher.isVeryVerbose()) {
-                System.out.println(new String(buf, StandardCharsets.UTF_8));
+                System.out.println(new String(buf, 0, size, StandardCharsets.UTF_8));
             }
 
             switch (keyword) {
@@ -386,6 +386,12 @@ public class ClientTcp {
                         players.add(new PlayerModel(id, x_pos, y_pos, points));
                     }
                     View.getInstance().showPlayers(players);
+                    break;
+                }
+
+                case "LIGHT": { // [LIGHT 12345678***]
+                    String lightValues = new String(buf,6, 8, StandardCharsets.UTF_8);
+                    View.getInstance().lightSurroundings(lightValues);
                     break;
                 }
 

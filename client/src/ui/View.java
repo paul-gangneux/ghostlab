@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.swing.*;
 
-// import client.Client;
+import client.Client;
 import launcher.Launcher;
 import model.GameInfo;
 import model.MessageInfo;
@@ -128,8 +128,8 @@ public class View extends JFrame {
                 y += dy;
                 // error++;
                 // if (error >= 1000) {
-                //     System.out.println("Error: at View.move");
-                //     break;
+                // System.out.println("Error: at View.move");
+                // break;
                 // }
             }
 
@@ -145,6 +145,7 @@ public class View extends JFrame {
         curr.setScore(newPos.getScore());
         grid[newPos.getY()][newPos.getX()].setTile(TileType.MAIN_PLAYER, false);
         PlayerModel.setMoving(false);
+        Client.getInstance().askForLight();
     }
 
     public void incomingMessage(MessageInfo mi) {
@@ -167,9 +168,10 @@ public class View extends JFrame {
         switchPanel(gamePanel);
     }
 
-    public void showPlayers(ArrayList<PlayerModel> pm){
+    public void showPlayers(ArrayList<PlayerModel> pm) {
         for (PlayerModel m : pm) {
-            gamePanel.getLabyDisplayerPanel().getGrid()[m.getY()][m.getX()].setTile(TileType.MEMORY_ENEMY_PLAYER, false);
+            gamePanel.getLabyDisplayerPanel().getGrid()[m.getY()][m.getX()].setTile(TileType.MEMORY_ENEMY_PLAYER,
+                    false);
         }
     }
 
@@ -178,7 +180,7 @@ public class View extends JFrame {
         new Thread(() -> {
             grid[y][x].setTile(TileType.VISIBLE_GHOST, false);
             sleep(2000);
-            if  (grid[y][x].getType() == TileType.VISIBLE_GHOST)
+            if (grid[y][x].getType() == TileType.VISIBLE_GHOST)
                 grid[y][x].setTile(TileType.MEMORY_GHOST, false);
             sleep(1000);
             if (grid[y][x].getType() == TileType.MEMORY_GHOST)
@@ -192,14 +194,14 @@ public class View extends JFrame {
             new Thread(() -> {
                 grid[y][x].setTile(TileType.VISIBLE_ENEMY_PLAYER, false);
                 sleep(1000);
-                if  (grid[y][x].getType() == TileType.VISIBLE_ENEMY_PLAYER)
+                if (grid[y][x].getType() == TileType.VISIBLE_ENEMY_PLAYER)
                     grid[y][x].setTile(TileType.MEMORY_ENEMY_PLAYER, false);
                 sleep(1000);
                 if (grid[y][x].getType() == TileType.MEMORY_ENEMY_PLAYER)
                     grid[y][x].setTile(TileType.VISIBLE_EMPTY, false);
             }).start();
         }
-        //TODO: utiliser points
+        // TODO: utiliser points
     }
 
     public void endGameAndShowWinner(String id, int p) {
@@ -228,6 +230,36 @@ public class View extends JFrame {
         switchPanel(lobbyPanel);
         synchronized (Launcher.waitObj) {
             Launcher.waitObj.notifyAll();
+        }
+    }
+
+    // 012
+    // 3 4
+    // 567
+    public void lightSurroundings(String lightValues) {
+        int x = PlayerModel.getCurrentPlayer().getX();
+        int y = PlayerModel.getCurrentPlayer().getY();
+        LabyTile[][] grid = gamePanel.getLabyDisplayerPanel().getGrid();
+        setTyleAccordingToCharAtInd(grid, lightValues, x - 1, y - 1, 0);
+        setTyleAccordingToCharAtInd(grid, lightValues, x, y - 1, 1);
+        setTyleAccordingToCharAtInd(grid, lightValues, x + 1, y - 1, 2);
+        setTyleAccordingToCharAtInd(grid, lightValues, x - 1, y, 3);
+        setTyleAccordingToCharAtInd(grid, lightValues, x + 1, y, 4);
+        setTyleAccordingToCharAtInd(grid, lightValues, x - 1, y + 1, 5);
+        setTyleAccordingToCharAtInd(grid, lightValues, x, y + 1, 6);
+        setTyleAccordingToCharAtInd(grid, lightValues, x + 1, y + 1, 7);
+
+    }
+
+    private void setTyleAccordingToCharAtInd(LabyTile[][] grid, String val, int x, int y, int ind) {
+        if (val.charAt(ind) == '1') {
+            if (grid[y][x].getType() == TileType.UNKNOWN) {
+                grid[y][x].setTile(TileType.WALL, false);
+            }
+        } else if (val.charAt(ind) == '0') {
+            if (grid[y][x].getType() == TileType.UNKNOWN) {
+                grid[y][x].setTile(TileType.VISIBLE_EMPTY, false);
+            }
         }
     }
 }

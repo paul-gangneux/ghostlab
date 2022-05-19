@@ -105,4 +105,6 @@ int game_sendMessageToOnePlayer(game_t* game, char destId[8], char* buf, int len
 
 void game_endIfNoGhost(game_t* game);
 
+void game_getSurroundings(game_t* game, player_t* player, char* buf);
+
 #endif

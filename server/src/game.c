@@ -435,6 +435,10 @@ void game_startIfAllReady(game_t* game) {
   thing->x < 0 || thing->x >= game->w ||\
   thing->y < 0 || thing->y >= game->h
 
+#define out_of_bounds_xy(game, x, y)\
+  x < 0 || x >= game->w ||\
+  y < 0 || y >= game->h
+
 // returns 1 if the player captured at least one ghost, else returns 0
 int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
   int capturedAGhost = 0;
@@ -486,7 +490,6 @@ int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
         mv_num3toBuf(buf, 20, player->x);
         mv_num3toBuf(buf, 24, player->y);
         send_msg_multicast(game, buf, 30);
-        printf("ghost %d - i %d\n", game->nb_ghosts, i);
       }
     }
     unlock(game);
@@ -589,4 +592,38 @@ void game_endIfNoGhost(game_t* game) {
     }
   }
   unlock(game);
+}
+
+#define maze_get(x, y) game->maze[(y) * game->w + (x)]
+
+// 012
+// 3 4
+// 567
+void game_getSurroundings(game_t* game, player_t* player, char* buf) {
+  int x = player->x;
+  int y = player->y;
+  if (!(out_of_bounds_xy(game, x, y - 1)))
+    buf[1] = maze_get(x, y - 1);
+
+  if (!(out_of_bounds_xy(game, x, y + 1)))
+    buf[6] = maze_get(x, y + 1);
+
+  if (!(out_of_bounds_xy(game, x + 1, y)))
+    buf[4] = maze_get(x + 1, y);
+
+  if (!(out_of_bounds_xy(game, x - 1, y)))
+    buf[3] = maze_get(x - 1, y);
+
+  if (!(out_of_bounds_xy(game, x - 1, y - 1)) && (buf[1] == '0' || buf[3] == '0'))
+    buf[0] = maze_get(x - 1, y - 1);
+
+  if (!(out_of_bounds_xy(game, x + 1, y + 1)) && (buf[4] == '0' || buf[6] == '0'))
+    buf[7] = maze_get(x + 1, y + 1);
+
+  if (!(out_of_bounds_xy(game, x + 1, y - 1)) && (buf[4] == '0' || buf[1] == '0'))
+    buf[2] = maze_get(x + 1, y - 1);
+
+  if (!(out_of_bounds_xy(game, x - 1, y + 1)) && (buf[3] == '0' || buf[6] == '0'))
+    buf[5] = maze_get(x - 1, y + 1);
+
 }

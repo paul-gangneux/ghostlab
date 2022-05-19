@@ -1,5 +1,6 @@
 package ui.panels.game;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import model.GameInfo;
 import ui.GamePanel;
@@ -7,6 +8,8 @@ import ui.GamePanel;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LabyDisplayerPanel extends JPanel {
 
@@ -27,7 +30,7 @@ public class LabyDisplayerPanel extends JPanel {
         coordPath = new ArrayList<>();
         int labyHeight = gameinfo.getLabyHeight();
         int labyWidth = gameinfo.getLabyWidth();
-        gl = new GridLayout(labyHeight, labyWidth, 1, 1); // 1 px horizontal shift, 1 px vertical shift
+        gl = new GridLayout(labyHeight, labyWidth, 0, 0); // 0 px horizontal shift, 0 px vertical shift
 
         int size1 = maxHeight / labyHeight;
         int size2 = maxWidth / labyWidth;
@@ -36,6 +39,8 @@ public class LabyDisplayerPanel extends JPanel {
         setPreferredSize(new Dimension(tileSize * labyWidth, tileSize * labyHeight));
         setMaximumSize(new Dimension(tileSize * labyWidth, tileSize * labyHeight));
         setLayout(gl);
+        LabyTile.initImages();
+        LabyTile.resizeImages(tileSize);
         labyGrid = new LabyTile[labyHeight][labyWidth];
         for (int i = 0; i < labyHeight; i++) {
             for (int j = 0; j < labyWidth; j++) {

@@ -474,6 +474,12 @@ void* interact_with_client(void* arg) {
     else if (comp_keyword(reqbuf, "RIMOV") && len == 12) {
       direction = MV_RIGHT;
     }
+    // expecting [LIGH?***]
+    else if (comp_keyword(reqbuf, "LIGH?") && len == 8) {
+      memmove(ansbuf, "LIGHT xxxxxxxx***", 17);
+      game_getSurroundings(game, player, ansbuf + 6);
+      send_msg(cli_fd, ansbuf, 17);
+    }
     // expecting [GLIS?***]
     else if (comp_keyword(reqbuf, "GLIS?") && len == 8) {
       // sends [GLIS! s***] and [GPLYR username xxx yyy pppp***]
@@ -578,6 +584,9 @@ void* interact_with_client(void* arg) {
 
     else if (!(check_tcp_message(reqbuf, len))) {
       printf("bad client request, discarding\n");
+    }
+    else if (comp_keyword(reqbuf, "LIGH?") && len == 8) {
+      // do nothing
     }
 
     // expecting anything

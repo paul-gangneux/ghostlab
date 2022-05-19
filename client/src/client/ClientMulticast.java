@@ -85,7 +85,7 @@ public class ClientMulticast {
 		while (true) {
 			try {
 				sock.receive(paquet);
-			} catch (IOException e) {
+			} catch (IOException | NullPointerException e) {
 				if (Launcher.isVerbose()) {
 					System.out.println("Multicast socket closed, quitting");
 				}

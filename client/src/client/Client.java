@@ -120,6 +120,10 @@ public class Client {
         }
     }
 
+    public void askForLight() {
+        ClientTcp.sendToServer("LIGH?***");
+    }
+
     public void quitting() {
         ClientTcp.sendToServer("IQUIT***");
     }
