@@ -163,7 +163,6 @@ public class View extends JFrame {
     }
 
     public void showGame() {
-        // TODO: make sure game infos has been recieved
         gamePanel = new GamePanel(GameInfo.getCurrentGameInfo(), PlayerModel.getCurrentPlayer());
         switchPanel(gamePanel);
     }

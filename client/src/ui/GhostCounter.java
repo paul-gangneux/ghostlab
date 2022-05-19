@@ -7,7 +7,7 @@ import model.GameInfo;
 public class GhostCounter extends JLabel {
 
     private int ghostsLeft;
-    private Object lock = new Object();
+    private transient Object lock = new Object();
     
     public GhostCounter() {
         super();
