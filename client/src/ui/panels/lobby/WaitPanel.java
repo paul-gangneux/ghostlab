@@ -38,8 +38,8 @@ public class WaitPanel extends JPanel {
         quitButton.setAlignmentX(CENTER_ALIGNMENT);
 
         label.setFont(label.getFont().deriveFont(16f));
-        readyButton.setFont(label.getFont().deriveFont(16f));
-        quitButton.setFont(label.getFont().deriveFont(16f));
+        readyButton.setFont(readyButton.getFont().deriveFont(16f));
+        quitButton.setFont(quitButton.getFont().deriveFont(16f));
         // setBackground(Color.BLUE);
 
         add(label);

@@ -16,7 +16,8 @@ public class ScoreboardPanel extends JPanel {
     private class ScoreLabel extends JLabel {
 
         public ScoreLabel(PlayerModel pm) {
-            setForeground(Color.RED);
+            setForeground(Color.PINK);
+            setFont(getFont().deriveFont(14));
             setFont(getFont().deriveFont(Font.BOLD));
             updateText(pm);
         }
