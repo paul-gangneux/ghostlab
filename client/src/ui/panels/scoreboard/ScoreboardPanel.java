@@ -25,6 +25,7 @@ public class ScoreboardPanel extends JPanel {
         public void updateText(PlayerModel pm) {
             EventQueue.invokeLater(() -> {
                 setText(pm.getPseudo() + " :       " + Integer.toString(pm.getScore()) + "     ");
+                repaint();
                 revalidate();
             });
         }

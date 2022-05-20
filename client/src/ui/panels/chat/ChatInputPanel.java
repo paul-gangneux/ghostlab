@@ -21,6 +21,8 @@ public class ChatInputPanel extends JPanel {
     private transient MessageInfo lastPmInfo;
     // private ChatWholePanel cwp;
 
+    public static final int CHAT_MESSAGE_MAX_LENGTH = 80;
+
     private class ScopeMenu extends JMenu {
         /*
          * Menu bar to choose the scope of the message
@@ -83,8 +85,6 @@ public class ChatInputPanel extends JPanel {
         /*
          * Actual input box for the message
          */
-
-        private static final int CHAT_MESSAGE_MAX_LENGTH = 80;
 
         private void updateChatValidity() {
             // System.out.println(getText());
@@ -161,21 +161,23 @@ public class ChatInputPanel extends JPanel {
         }
 
         private void sendChatMessage() {
-            // Send the actual message... Use cif.getText()
-            MessageInfo mi = new MessageInfo(sm.scope,
-                    (sm.scope == ChatScope.OUTGOING_PRIVATE_MSG) ? sm.destName : null,
-                    cif.getText());
-            // See MessageInfo comments for more info on this ternary
+            if (cif.getText().length() > 0 && cif.getText().length() <= CHAT_MESSAGE_MAX_LENGTH) {
+                // Send the actual message... Use cif.getText()
+                MessageInfo mi = new MessageInfo(sm.scope,
+                        (sm.scope == ChatScope.OUTGOING_PRIVATE_MSG) ? sm.destName : null,
+                        cif.getText());
+                // See MessageInfo comments for more info on this ternary
 
-            if (mi.getScope() == ChatScope.GLOBAL_MSG) {
-                Client.getInstance().sendMessToAll(mi.getContent());
-            } else if (mi.getScope() == ChatScope.OUTGOING_PRIVATE_MSG) {
-                lastPmInfo = mi;
-                Client.getInstance().sendPrivateMess(mi.getContent(), mi.getPlayerName());
+                if (mi.getScope() == ChatScope.GLOBAL_MSG) {
+                    Client.getInstance().sendMessToAll(mi.getContent());
+                } else if (mi.getScope() == ChatScope.OUTGOING_PRIVATE_MSG) {
+                    lastPmInfo = mi;
+                    Client.getInstance().sendPrivateMess(mi.getContent(), mi.getPlayerName());
+                }
+                // We then reset the textfield
+                cif.setText("");
+                cif.setForeground(Color.GRAY);
             }
-            // We then reset the textfield
-            cif.setText("");
-            cif.setForeground(Color.GRAY);
         }
 
     }

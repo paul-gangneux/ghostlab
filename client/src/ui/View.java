@@ -43,7 +43,7 @@ public class View extends JFrame {
             p.x += (oldDim.width - newDim.width) / 2;
             p.y += (oldDim.height - newDim.height) / 2;
             setLocation(p);
-            // repaint();
+            repaint();
             revalidate();
         });
     }
@@ -86,7 +86,7 @@ public class View extends JFrame {
     public void updateLobbyWindow(List<GameInfo> gameList) {
         EventQueue.invokeLater(() -> {
             lobbyPanel.getGameListPanel().processGameList(gameList);
-            revalidate();
+            // revalidate();
         });
         lobbyPanel.resetGameInfoPanel();
     }

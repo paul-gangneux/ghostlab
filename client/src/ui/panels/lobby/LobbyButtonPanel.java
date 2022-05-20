@@ -27,6 +27,8 @@ public class LobbyButtonPanel extends JPanel {
     private NameTextField username;
     private JLabel badNameLabel;
 
+    private boolean triedToJoin; // else it's tried to create
+
     private class NameTextField extends JTextField {
 
         NameTextField(String text) {
@@ -44,8 +46,7 @@ public class LobbyButtonPanel extends JPanel {
                         EventQueue.invokeLater(() -> {
                             setText(getText().substring(0, 8));
                         });
-                    }
-                    else if (!getText().matches("[a-zA-Z0-9]+")) {
+                    } else if (!getText().matches("[a-zA-Z0-9]+")) {
                         EventQueue.invokeLater(() -> {
                             badNameLabel.setText(" user name must be alphanumeric");
                         });
@@ -62,7 +63,7 @@ public class LobbyButtonPanel extends JPanel {
                         EventQueue.invokeLater(() -> {
                             badNameLabel.setText(" user name can't be empty");
                         });
-                    }else if (!getText().matches("[a-zA-Z0-9]+")) {
+                    } else if (!getText().matches("[a-zA-Z0-9]+")) {
                         EventQueue.invokeLater(() -> {
                             badNameLabel.setText(" user name must be alphanumeric");
                         });
@@ -75,7 +76,6 @@ public class LobbyButtonPanel extends JPanel {
 
             });
         }
-
     }
 
     private class GameCreateButton extends JButton {
@@ -86,6 +86,7 @@ public class LobbyButtonPanel extends JPanel {
             setText("Create game");
             setEnabled(true);
             addActionListener(event -> {
+                triedToJoin = false;
                 PlayerModel.getCurrentPlayer().setName(username.getText());
                 Client.getInstance().createGame(username.getText());
             });
@@ -101,6 +102,7 @@ public class LobbyButtonPanel extends JPanel {
             setEnabled(false); // A good thing would be to prevent the button from being clicked if no game is
                                // selected
             addActionListener(event -> {
+                triedToJoin = true;
                 PlayerModel.getCurrentPlayer().setName(username.getText());
                 Client.getInstance().joinGame(
                         parentWindow.getGameListPanel().getSelectedGameInfo().getID(),
@@ -130,13 +132,14 @@ public class LobbyButtonPanel extends JPanel {
 
     public LobbyButtonPanel(LobbyPanel parentWindow) {
         super();
+        triedToJoin = false;
         this.parentWindow = parentWindow;
         gl = new GridLayout(0, 1); // 1 row, 2 columns for the two buttons, 5 px horizontal shift, no vertical
-                                         // shift
+                                   // shift
         setLayout(gl);
         gcb = new GameCreateButton();
         gjb = new GameJoinButton();
-        
+
         username = new NameTextField(PlayerModel.getCurrentPlayer().getPseudo());
         badNameLabel = new JLabel("");
         badNameLabel.setForeground(Color.RED);
@@ -149,13 +152,21 @@ public class LobbyButtonPanel extends JPanel {
         aLabel.setFont(aLabel.getFont().deriveFont(14f));
         aPanel.add(aLabel);
         aPanel.add(username);
-        //aPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
+        // aPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
         add(aPanel);
-        //add(username);
+        // add(username);
         add(badNameLabel);
         add(gcb);
         add(gjb);
         add(new RefreshButton());
+    }
+
+    public boolean hasTriedToJoin() {
+        return triedToJoin;
+    }
+
+    public boolean errorWithUsername() {
+        return (!badNameLabel.getText().equals(""));
     }
 
 }

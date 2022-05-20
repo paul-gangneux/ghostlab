@@ -84,6 +84,7 @@ public class LobbyPanel extends JPanel {
             gameInfoLabel.setText(bld.toString());
         }
         EventQueue.invokeLater(() -> {
+            repaint();
             revalidate();
         });
     }
@@ -112,14 +113,28 @@ public class LobbyPanel extends JPanel {
         gameInfoLabel.setForeground(Color.BLACK);
         gameInfoLabel.setText("<html></html>");
         EventQueue.invokeLater(() -> {
+            repaint();
             revalidate();
         });
     }
 
     public void regError() {
         gameInfoLabel.setForeground(Color.RED);
-        gameInfoLabel.setText("<html>ERROR: cannot join game</html>");
+
+        String errmsg;
+        if (lbp.hasTriedToJoin()) {
+            errmsg = "<html>ERROR: Cannot join game<br>";
+        } else {
+            errmsg = "<html>ERROR: Cannot create game<br>";
+        }
+        if (lbp.errorWithUsername()) {
+            errmsg += "<br>Bad username.</html>";
+        } else {
+            errmsg += "<br>Maybe your username is already taken,<br>or the game is no longer available.</html>";
+        }
+        gameInfoLabel.setText(errmsg);
         EventQueue.invokeLater(() -> {
+            repaint();
             revalidate();
         });
     }

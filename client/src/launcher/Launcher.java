@@ -25,7 +25,7 @@ public class Launcher {
         "           Very verbose mode. Prints all circulating network messages\n"+
         "           on STDOUT\n\n" +
         "       -a address\n" +
-        "           Uses the parameter as adress to connect to the server.\n" +
+        "           Uses the parameter as address to connect to the server.\n" +
         "           Default adress is localhost.\n\n" +
         "       -p port\n" +
         "           Uses the parameter as TCP port to connect to the server.\n" +

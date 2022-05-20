@@ -60,6 +60,7 @@ public class ChatHistoryPanel extends JPanel {
         if (bottom) {
             sb.setValue(sb.getMaximum() - sb.getHeight());
         }
+        repaint();
         revalidate(); // recomputes the layout, effectively refreshing the chat
     }
 

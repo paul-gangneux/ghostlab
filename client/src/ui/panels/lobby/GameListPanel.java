@@ -128,6 +128,7 @@ public class GameListPanel extends JPanel {
         for (GameLabel gl : labelList) {
             add(gl);
         }
+        repaint();
         revalidate();
     }
 
