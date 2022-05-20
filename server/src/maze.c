@@ -107,23 +107,23 @@ void genPath(cell* cells, int w, int h) {
 
 void maze_print(char* str, u_int16_t w, u_int16_t h) {
   for (int i = 0; i < w + 2; i++) {
-    printf("█");
+    printf("██");
   }
   printf("\n");
   for (int j = 0; j < h; j++) {
-    printf("█");
+    printf("██");
     for (int i = 0; i < w; i++) {
       if (str[j * w + i] == '1') {
-        printf("█");
+        printf("██");
       }
       else {
-        printf(" ");
+        printf("  ");
       }
     }
-    printf("█\n");
+    printf("██\n");
   }
   for (int i = 0; i < w + 2; i++) {
-    printf("█");
+    printf("██");
   }
   printf("\n\n");
 }
