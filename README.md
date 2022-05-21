@@ -22,3 +22,21 @@ Le client se lance en exécutant l'archive jar `client.jar` à la racine :
 ou `java -jar client.jar [-a <adresse IP ou nom de machine>] [-p <port>]`
 
 L'adresse par défaut est `localhost` (`127.0.0.1`) et le port par défaut est `4242`.
+
+L'option `-h` détaille les options disponibles.
+
+### Utilisation
+
+Une fois le serveur lancé, il tourne jusqu'à son interruption par un signal (ctrl+c sur terminal).
+
+Le client doit être lancé après le serveur. une fois le client lancé, les interactions se font avec la souris, sauf pour entrer du texte dans des champs.
+
+### Architecture
+
+Le serveur a été fait en C, chaque joueur et chaque jeu a sa structure associée. Un thread s'occupe d'accépter les connexions client, il y a un thread par client, et un thread par partie commencée qui s'occupera de bouger les fantômes à intervalles réguliers.
+
+`server.c` contient la fonction main, `communication.c` s'occupe de gérer les fonctions de récéption / envoi de message, `maze.c` génère un labyrinthe, `game.c` et `player.c` possèdent les fonctions manipulant les structures du même nom.
+
+Le client a été fait en Java. Il y a un Thread par socket de communication (un pour l'écoute TCP, un pour l'écoute UDP, et un pour l'écoute Multicast), et un thread pricipal depuis lequel seront envoyé les requêtes TCP.
+
+le package `launcher` contient la classe principale qui lance le programme, les fonctions de communication réseau sont dans le package `client`, le package `model` contient des classes utiles pour modéliser le jeu, et le package `ui` contient tout ce qui est lié à l'interface graphique, notemment `View.java` qui est la classe principale de l'ig.
