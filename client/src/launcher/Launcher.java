@@ -11,6 +11,7 @@ public class Launcher {
     private static boolean verbose = false;
     private static boolean veryVerbose = false;
     private static boolean quit = false;
+    private static boolean notInverseXY = false;
     public static final Object waitObj = new Object();
 
     private static final String HELP_TEXT = 
@@ -30,6 +31,8 @@ public class Launcher {
         "       -p port\n" +
         "           Uses the parameter as TCP port to connect to the server.\n" +
         "           Default port is 4242.\n\n" +
+        "       -i\n" +
+        "           Does not inverse X and Y pos when sending / receiving messages\n\n" +
         "       -t delay\n" +
         "           Sets time it takes (in seconds) for ghost images to fade\n" +
         "           out from the game view. default is 4.\n\n" +
@@ -49,6 +52,9 @@ public class Launcher {
                 }
                 if (args[i].contains("V")) {
                     setVeryVerbose(true);
+                }
+                if (args[i].contains("i")) {
+                    setNotInverseXY(true);
                 }
                 if (args[i].contains("a")) {
                     try {
@@ -138,5 +144,13 @@ public class Launcher {
 
     public static boolean isVeryVerbose() {
         return veryVerbose;
+    }
+
+    public static void setNotInverseXY(boolean v) {
+        notInverseXY = v;
+    }
+
+    public static boolean shouldNotInverseXY() {
+        return notInverseXY;
     }
 }

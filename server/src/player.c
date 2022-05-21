@@ -156,13 +156,24 @@ int playerList_sendToCli_AllInfos(playerList_t* playerList, int cli_fd) {
   while (pc != NULL) {
     memmove(buf + 6, pc->player->name, 8);
 
-    buf[15] = nb_to_char(pc->player->x, 100);
-    buf[16] = nb_to_char(pc->player->x, 10);
-    buf[17] = nb_to_char(pc->player->x, 1);
+    if (not_inverse_xy) {
+      buf[15] = nb_to_char(pc->player->x, 100);
+      buf[16] = nb_to_char(pc->player->x, 10);
+      buf[17] = nb_to_char(pc->player->x, 1);
 
-    buf[19] = nb_to_char(pc->player->y, 100);
-    buf[20] = nb_to_char(pc->player->y, 10);
-    buf[21] = nb_to_char(pc->player->y, 1);
+      buf[19] = nb_to_char(pc->player->y, 100);
+      buf[20] = nb_to_char(pc->player->y, 10);
+      buf[21] = nb_to_char(pc->player->y, 1);
+    }
+    else {
+      buf[15] = nb_to_char(pc->player->y, 100);
+      buf[16] = nb_to_char(pc->player->y, 10);
+      buf[17] = nb_to_char(pc->player->y, 1);
+
+      buf[19] = nb_to_char(pc->player->x, 100);
+      buf[20] = nb_to_char(pc->player->x, 10);
+      buf[21] = nb_to_char(pc->player->x, 1);
+    }
 
     buf[23] = nb_to_char(pc->player->score, 1000);
     buf[24] = nb_to_char(pc->player->score, 100);

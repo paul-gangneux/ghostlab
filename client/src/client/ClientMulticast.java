@@ -103,8 +103,15 @@ public class ClientMulticast {
 				case "GHOST": { // [GHOST xxx yyy+++]
 					String sx = new String(paquet.getData(), 6, 3, StandardCharsets.UTF_8);
 					String sy = new String(paquet.getData(), 10, 3, StandardCharsets.UTF_8);
-					int x = Integer.parseInt(sx);
-					int y = Integer.parseInt(sy);
+					int x;
+					int y;
+					if (Launcher.shouldNotInverseXY()) {
+						x = Integer.parseInt(sx);
+						y = Integer.parseInt(sy);
+					} else {
+						y = Integer.parseInt(sx);
+						x = Integer.parseInt(sy);
+					}
 					View.getInstance().ghostMoved(x, y);
 					break;
 				}
@@ -114,8 +121,15 @@ public class ClientMulticast {
 					String sx = new String(paquet.getData(), 20, 3, StandardCharsets.UTF_8);
 					String sy = new String(paquet.getData(), 24, 3, StandardCharsets.UTF_8);
 					int p = Integer.parseInt(sp);
-					int x = Integer.parseInt(sx);
-					int y = Integer.parseInt(sy);
+					int x;
+					int y;
+					if (Launcher.shouldNotInverseXY()) {
+						x = Integer.parseInt(sx);
+						y = Integer.parseInt(sy);
+					} else {
+						y = Integer.parseInt(sx);
+						x = Integer.parseInt(sy);
+					}
 					View.getInstance().ghostCaptured(id, p, x, y);
 					break;
 				}

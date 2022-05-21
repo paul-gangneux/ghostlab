@@ -38,6 +38,7 @@ extern int very_verbose;
 extern int print_mazes;
 extern int easy_mazes;
 extern int ghost_delay;
+extern int not_inverse_xy;
 
 extern const char* multicast_ip_address;
 

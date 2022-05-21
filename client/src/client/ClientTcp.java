@@ -233,7 +233,7 @@ public class ClientTcp {
             String keyword = getKeyword(buf);
 
             if (Launcher.isVeryVerbose()) {
-                System.out.println("<- "+new String(buf, 0, size, StandardCharsets.UTF_8));
+                System.out.println("<- " + new String(buf, 0, size, StandardCharsets.UTF_8));
             }
 
             switch (keyword) {
@@ -334,9 +334,15 @@ public class ClientTcp {
 
                 case "POSIT": { // [POSIT username xxx yyy***]
                     String id = ClientUdp.getPseudo(buf);
-                    int x_pos = Integer.parseInt(getPosX(buf));
-                    int y_pos = Integer.parseInt(getPosY(buf));
-                    // System.out.println(id+" "+getPosX(buf)+" "+getPosY(buf));
+                    int x_pos;
+                    int y_pos;
+                    if (Launcher.shouldNotInverseXY()) {
+                        x_pos = Integer.parseInt(getPosX(buf));
+                        y_pos = Integer.parseInt(getPosY(buf));
+                    } else {
+                        y_pos = Integer.parseInt(getPosX(buf));
+                        x_pos = Integer.parseInt(getPosY(buf));
+                    }
                     PlayerModel pm = new PlayerModel(id, x_pos, y_pos);
                     View.getInstance().posit(pm);
                     Client.getInstance().askPlayers();
@@ -345,8 +351,15 @@ public class ClientTcp {
                 }
 
                 case "MOVE!": { // [MOVE! xxx yyy***]
-                    int x_pos = Integer.parseInt(getPosXOnMove(buf));
-                    int y_pos = Integer.parseInt(getPosYOnMove(buf));
+                    int x_pos;
+                    int y_pos;
+                    if (Launcher.shouldNotInverseXY()) {
+                        x_pos = Integer.parseInt(getPosXOnMove(buf));
+                        y_pos = Integer.parseInt(getPosYOnMove(buf));
+                    } else {
+                        y_pos = Integer.parseInt(getPosXOnMove(buf));
+                        x_pos = Integer.parseInt(getPosYOnMove(buf));
+                    }
                     // System.out.println(getPosXOnMove(buf)+" "+getPosYOnMove(buf));
                     PlayerModel pm = new PlayerModel(x_pos, y_pos);
                     View.getInstance().move(pm);
@@ -355,8 +368,15 @@ public class ClientTcp {
 
                 case "MOVEF": { // [MOVEF xxx yyy pppp***]
                     int points = Integer.parseInt(getPoints(buf));
-                    int x_pos = Integer.parseInt(getPosXOnMove(buf));
-                    int y_pos = Integer.parseInt(getPosYOnMove(buf));
+                    int x_pos;
+                    int y_pos;
+                    if (Launcher.shouldNotInverseXY()) {
+                        x_pos = Integer.parseInt(getPosXOnMove(buf));
+                        y_pos = Integer.parseInt(getPosYOnMove(buf));
+                    } else {
+                        y_pos = Integer.parseInt(getPosXOnMove(buf));
+                        x_pos = Integer.parseInt(getPosYOnMove(buf));
+                    }
                     // System.out.println(getPosXOnMove(buf)+" "+getPosYOnMove(buf) +"
                     // "+getPoints(buf));
                     PlayerModel pm = new PlayerModel(x_pos, y_pos);
@@ -381,8 +401,15 @@ public class ClientTcp {
                             break;
                         }
                         String id = ClientUdp.getPseudo(buf);
-                        int x_pos = Integer.parseInt(getPosX(buf));
-                        int y_pos = Integer.parseInt(getPosY(buf));
+                        int x_pos;
+                        int y_pos;
+                        if (Launcher.shouldNotInverseXY()) {
+                            x_pos = Integer.parseInt(getPosX(buf));
+                            y_pos = Integer.parseInt(getPosY(buf));
+                        } else {
+                            y_pos = Integer.parseInt(getPosX(buf));
+                            x_pos = Integer.parseInt(getPosY(buf));
+                        }
                         int points = Integer.parseInt(getPointsOnGlis(buf));
                         PlayerModel.getAllPlayers().add(new PlayerModel(id, x_pos, y_pos, points));
                     }
@@ -392,7 +419,7 @@ public class ClientTcp {
                 }
 
                 case "LIGHT": { // [LIGHT 12345678***]
-                    String lightValues = new String(buf,6, 8, StandardCharsets.UTF_8);
+                    String lightValues = new String(buf, 6, 8, StandardCharsets.UTF_8);
                     View.getInstance().lightSurroundings(lightValues);
                     break;
                 }
@@ -443,7 +470,7 @@ public class ClientTcp {
         try {
             server.getOutputStream().write(data);
             if (Launcher.isVeryVerbose()) {
-                System.out.println("-> "+new String(data, 0, data.length, StandardCharsets.UTF_8));
+                System.out.println("-> " + new String(data, 0, data.length, StandardCharsets.UTF_8));
             }
             return true;
         } catch (IOException e) {
@@ -457,7 +484,7 @@ public class ClientTcp {
         try {
             server.getOutputStream().write(s.getBytes());
             if (Launcher.isVeryVerbose()) {
-                System.out.println("-> "+s);
+                System.out.println("-> " + s);
             }
             return true;
         } catch (IOException e) {

@@ -55,13 +55,24 @@ int send_welcome_msg(player_t* player, game_t* game, char* ansbuf) {
   memmove(ansbuf, "POSIT username xxx yyy***", 25);
   memmove(ansbuf + 6, player->name, 8);
 
-  ansbuf[15] = nb_to_char(player->x, 100);
-  ansbuf[16] = nb_to_char(player->x, 10);
-  ansbuf[17] = nb_to_char(player->x, 1);
+  if (not_inverse_xy) {
+    ansbuf[15] = nb_to_char(player->x, 100);
+    ansbuf[16] = nb_to_char(player->x, 10);
+    ansbuf[17] = nb_to_char(player->x, 1);
 
-  ansbuf[19] = nb_to_char(player->y, 100);
-  ansbuf[20] = nb_to_char(player->y, 10);
-  ansbuf[21] = nb_to_char(player->y, 1);
+    ansbuf[19] = nb_to_char(player->y, 100);
+    ansbuf[20] = nb_to_char(player->y, 10);
+    ansbuf[21] = nb_to_char(player->y, 1);
+  }
+  else {
+    ansbuf[15] = nb_to_char(player->y, 100);
+    ansbuf[16] = nb_to_char(player->y, 10);
+    ansbuf[17] = nb_to_char(player->y, 1);
+
+    ansbuf[19] = nb_to_char(player->x, 100);
+    ansbuf[20] = nb_to_char(player->x, 10);
+    ansbuf[21] = nb_to_char(player->x, 1);
+  }
 
   // sending [POSIT username xxx yyy***]
   if (!send_msg(player->fd, ansbuf, 25))

@@ -43,6 +43,7 @@ int very_verbose;
 int print_mazes;
 int easy_mazes;
 int ghost_delay;
+int not_inverse_xy;
 const char* multicast_ip_address;
 
 gameList_t* gameList;
@@ -60,6 +61,8 @@ void print_help(const char* progName) {
     "    -V\n"
     "        Very verbose mode. Prints all incoming and outcoming\n"
     "        network messages.\n\n"
+    "    -i\n"
+    "        Does not inverse X and Y pos when sending / receiving messages\n\n"
     "    -m\n"
     "        Prints generated mazes.\n\n"
     "    -s\n"
@@ -84,11 +87,12 @@ int main(int argc, char* argv[]) {
   print_mazes = 0;
   easy_mazes = 0;
   ghost_delay = 5;
+  not_inverse_xy = 0;
 
   srandom(time(0));
 
   int opt;
-  while ((opt = getopt(argc, argv, "Vvhsemt:p:")) != -1) {
+  while ((opt = getopt(argc, argv, "Vvhsiemt:p:")) != -1) {
     switch (opt) {
       case 'v':
         verbose = 1;
@@ -98,6 +102,9 @@ int main(int argc, char* argv[]) {
         break;
       case 'm':
         print_mazes = 1;
+        break;
+      case 'i':
+        not_inverse_xy = 1;
         break;
       case 'p':
         accept_port = atoi(optarg);
@@ -556,8 +563,14 @@ void* interact_with_client(void* arg) {
         size = 21;
         mv_num4toBuf(ansbuf, 14, player->score);
       }
-      mv_num3toBuf(ansbuf, 6, player->x);
-      mv_num3toBuf(ansbuf, 10, player->y);
+      if(not_inverse_xy) {
+        mv_num3toBuf(ansbuf, 6, player->x);
+        mv_num3toBuf(ansbuf, 10, player->y);
+      } else {
+        mv_num3toBuf(ansbuf, 6, player->y);
+        mv_num3toBuf(ansbuf, 10, player->x);
+      }
+      
 
       // sends [MOVE! x y***] or [MOVEF x y p***]
       send_and_check_error(cli_fd, ansbuf, size);

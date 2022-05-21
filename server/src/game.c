@@ -43,8 +43,14 @@ void randomise_ghosts_pos(game_t* game, int informPlayers) {
     } while (in_a_wall2(game, game->ghosts[i]) ||
       playerList_inAPlayer(game->playerList, game->ghosts[i].x, game->ghosts[i].y));
     if (informPlayers) {
-      mv_num3toBuf(buf, 6, game->ghosts[i].x);
-      mv_num3toBuf(buf, 10, game->ghosts[i].y);
+      if (not_inverse_xy) {
+        mv_num3toBuf(buf, 6, game->ghosts[i].x);
+        mv_num3toBuf(buf, 10, game->ghosts[i].y);
+      }
+      else {
+        mv_num3toBuf(buf, 6, game->ghosts[i].y);
+        mv_num3toBuf(buf, 10, game->ghosts[i].x);
+      }
       // sends [GHOST x y+++]
       send_msg_multicast(game, buf, 16);
     }
@@ -497,8 +503,14 @@ int game_movePlayer(game_t* game, player_t* player, int amount, int direction) {
         player->score++;
 
         mv_num4toBuf(buf, 15, player->score);
-        mv_num3toBuf(buf, 20, player->x);
-        mv_num3toBuf(buf, 24, player->y);
+        if (not_inverse_xy) {
+          mv_num3toBuf(buf, 20, player->x);
+          mv_num3toBuf(buf, 24, player->y);
+        }
+        else {
+          mv_num3toBuf(buf, 20, player->y);
+          mv_num3toBuf(buf, 24, player->x);
+        }
         send_msg_multicast(game, buf, 30);
       }
     }

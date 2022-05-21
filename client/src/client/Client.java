@@ -4,7 +4,6 @@ import model.PlayerModel;
 
 public class Client {
 
-    // private ClientTcp ClientTcp;
     private ClientUdp cliUdp = null;
     private String serverIp;
     private int tcpPort;
@@ -88,7 +87,7 @@ public class Client {
         ClientTcp.sendToServer("MALL? " + mi + "***");
     }
 
-    public void askPlayers(){
+    public void askPlayers() {
         ClientTcp.sendToServer("GLIS?***");
     }
 
