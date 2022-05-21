@@ -3,6 +3,8 @@
 Le projet se compile entièrement (serveur et client) en lançant l'exécutable `./build.sh` à la racine du dépôt.
 Il faut rendre le scripte executable avec `chmod u+x build.sh`.
 
+`./build.sh -C` permet de supprimer les fichiers compilés.
+
 ### Lancement du serveur
 
 Le serveur se démarre en lançant l'exécutable `server.out` à la racine du dépôt.
