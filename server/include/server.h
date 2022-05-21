@@ -17,6 +17,9 @@
 #include "game.h"
 #include "communication.h"
 
+#define MIN(a, b) (a<b?a:b)
+#define MAX(a, b) (a>b?a:b)
+
 #define nb_to_char(nb, factor) ((nb / factor) % 10) + '0'
 
 #define mv_num3toBuf(buf, ind, num)\
@@ -34,6 +37,7 @@ extern int verbose;
 extern int very_verbose;
 extern int print_mazes;
 extern int easy_mazes;
+extern int ghost_delay;
 
 extern const char* multicast_ip_address;
 

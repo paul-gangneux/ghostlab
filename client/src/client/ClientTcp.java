@@ -233,7 +233,7 @@ public class ClientTcp {
             String keyword = getKeyword(buf);
 
             if (Launcher.isVeryVerbose()) {
-                System.out.println(new String(buf, 0, size, StandardCharsets.UTF_8));
+                System.out.println("<- "+new String(buf, 0, size, StandardCharsets.UTF_8));
             }
 
             switch (keyword) {
@@ -442,6 +442,9 @@ public class ClientTcp {
     public static boolean sendToServer(byte[] data) {
         try {
             server.getOutputStream().write(data);
+            if (Launcher.isVeryVerbose()) {
+                System.out.println("-> "+new String(data, 0, data.length, StandardCharsets.UTF_8));
+            }
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -453,6 +456,9 @@ public class ClientTcp {
     public static boolean sendToServer(String s) {
         try {
             server.getOutputStream().write(s.getBytes());
+            if (Launcher.isVeryVerbose()) {
+                System.out.println("-> "+s);
+            }
             return true;
         } catch (IOException e) {
             e.printStackTrace();

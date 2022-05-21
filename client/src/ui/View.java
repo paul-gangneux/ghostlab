@@ -23,6 +23,9 @@ public class View extends JFrame {
     private static int defaultWidth;
     private static int defaultHeight;
 
+    private static int fadeout = 2000;
+    private static int fadeoutMemory = 2000;
+
     JPanel mainPanel;
     LobbyPanel lobbyPanel;
     GamePanel gamePanel;
@@ -65,6 +68,14 @@ public class View extends JFrame {
         defaultWidth = width;
         if (view == null)
             view = new View();
+    }
+
+    public static void setFadeout(int millis) {
+        fadeout = millis;
+    }
+
+    public static void setFadeoutMem(int millis) {
+        fadeoutMemory = millis;
     }
 
     public static void initialize() {
@@ -192,10 +203,10 @@ public class View extends JFrame {
         LabyTile[][] grid = gamePanel.getLabyDisplayerPanel().getGrid();
         new Thread(() -> {
             grid[y][x].setTile(TileType.VISIBLE_GHOST, false);
-            sleep(2000);
+            sleep(fadeout);
             if (grid[y][x].getType() == TileType.VISIBLE_GHOST)
                 grid[y][x].setTile(TileType.MEMORY_GHOST, false);
-            sleep(1000);
+            sleep(fadeoutMemory);
             if (grid[y][x].getType() == TileType.MEMORY_GHOST)
                 grid[y][x].setTile(TileType.VISIBLE_EMPTY, false);
         }).start();
@@ -206,7 +217,7 @@ public class View extends JFrame {
             LabyTile[][] grid = gamePanel.getLabyDisplayerPanel().getGrid();
             new Thread(() -> {
                 grid[y][x].setTile(TileType.VISIBLE_ENEMY_PLAYER, false);
-                sleep(1000);
+                sleep(2000);
                 if (grid[y][x].getType() == TileType.VISIBLE_ENEMY_PLAYER)
                     grid[y][x].setTile(TileType.MEMORY_ENEMY_PLAYER, false);
                 sleep(1000);

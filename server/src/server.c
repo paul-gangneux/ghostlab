@@ -42,13 +42,14 @@ int verbose;
 int very_verbose;
 int print_mazes;
 int easy_mazes;
+int ghost_delay;
 const char* multicast_ip_address;
 
 gameList_t* gameList;
 
 void print_help(const char* progName) {
   printf(
-    "Usage: %s [-vVh] -p port\n\n"
+    "Usage: %s [-vVhmse] [-p port] [-t delay]\n\n"
     "options\n"
     "    -p port\n"
     "        Sets listening port to option argument.\n"
@@ -62,9 +63,12 @@ void print_help(const char* progName) {
     "    -m\n"
     "        Prints generated mazes.\n\n"
     "    -s\n"
-    "        Sixes seed for random calculations at 0.\n\n"
+    "        Fixes seed for random calculations at 0.\n\n"
     "    -e\n"
     "        Easy maze generation. Useful for tests.\n\n"
+    "    -t delay\n"
+    "        Time it takes (in seconds) for ghosts to change position.\n"
+    "        Default is 5, minimum is 1, maximum is 60.\n\n"
     "    -h\n"
     "        Displays help.\n"
     , progName);
@@ -79,11 +83,12 @@ int main(int argc, char* argv[]) {
   very_verbose = 0;
   print_mazes = 0;
   easy_mazes = 0;
+  ghost_delay = 5;
 
   srandom(time(0));
 
   int opt;
-  while ((opt = getopt(argc, argv, "Vvhsemp:")) != -1) {
+  while ((opt = getopt(argc, argv, "Vvhsemt:p:")) != -1) {
     switch (opt) {
       case 'v':
         verbose = 1;
@@ -106,6 +111,9 @@ int main(int argc, char* argv[]) {
         break;
       case 'e':
         easy_mazes = 1;
+        break;
+      case 't':
+        ghost_delay = atoi(optarg);
         break;
       case 'h':
         print_help(argv[0]);

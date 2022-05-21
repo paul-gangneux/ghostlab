@@ -1,8 +1,5 @@
 #include "communication.h"
 
-#define MIN(a, b) (a<b?a:b)
-// #define MAX(a, b) (a>b?a:b)
-
 #define write_stdout_and_check_error(buf, len)\
   if (write(STDOUT_FILENO, buf, len) < 0) perror("write")
 
@@ -181,6 +178,9 @@ int send_msg_to(player_t* player, char* buf, int len) {
     perror("sendto");
     return 0;
   }
+  if (very_verbose) {
+    print_out_msg(buf, len);
+  }
   return 1;
 }
 
@@ -194,6 +194,9 @@ int send_msg_multicast(game_t* game, char* buf, int len) {
   if (n == -1) {
     perror("sendto");
     return 0;
+  }
+  if (very_verbose) {
+    print_out_msg(buf, len);
   }
   return 1;
 }

@@ -387,8 +387,12 @@ void* gameThread(void* arg) {
 
   struct pollfd pollfd = { .fd = game->pipe1[0], .events = POLLIN };
 
+  int timeout = MIN(60, ghost_delay);
+  timeout = MAX(1, timeout);
+  timeout *= 1000; // milliseconds
+
   while (1) {
-    poll(&pollfd, 1, 5000);
+    poll(&pollfd, 1, timeout);
 
     if (pollfd.revents & POLLIN) {
       char buf[3] = { 0, 0, 0 };

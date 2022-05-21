@@ -5,6 +5,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
+import launcher.Launcher;
 import model.ChatScope;
 import model.MessageInfo;
 import ui.View;
@@ -65,6 +66,9 @@ public class ClientUdp extends Thread {
 
     @Override
     public void run() {
+        if (Launcher.isVerbose()) {
+            System.out.println("Multicast: starts listening");
+        }
 
         byte[] data = new byte[218];
 
@@ -81,6 +85,10 @@ public class ClientUdp extends Thread {
 
             data = paquet.getData();
             String keyword = getKeyword(data);
+
+            if (Launcher.isVeryVerbose()) {
+                System.out.println("<- "+new String(data, 0, paquet.getLength(), StandardCharsets.UTF_8));
+            }
 
             if (keyword.equals("MESSP")) {
 

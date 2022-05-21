@@ -76,8 +76,9 @@ public class ClientMulticast {
 	}
 
 	private static void listens() {
-		if (Launcher.isVerbose())
+		if (Launcher.isVerbose()) {
 			System.out.println("Multicast: starts listening");
+		}
 
 		byte[] data = new byte[218];
 		DatagramPacket paquet = new DatagramPacket(data, data.length);
@@ -91,8 +92,12 @@ public class ClientMulticast {
 				}
 				break;
 			}
+
+			if (Launcher.isVeryVerbose()) {
+				System.out.println("<- " + new String(data, 0, paquet.getLength(), StandardCharsets.UTF_8));
+			}
+
 			String keyword = new String(paquet.getData(), 0, 5, StandardCharsets.UTF_8);
-			// System.out.println(new String(paquet.getData(), 0, paquet.getLength()));
 
 			switch (keyword) {
 				case "GHOST": { // [GHOST xxx yyy+++]
