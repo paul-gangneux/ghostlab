@@ -6,8 +6,11 @@
 #include <stdio.h>
 #include <string.h> 
 #include "server.h"
+#ifdef DEBUG_FLAG
+#include "debug.h"
+#endif
 
-// generate and return the mazernth
+// generates and returns the maze
 // sets w and h appropriately
 // memory is allocated here, can be 
 // freed with a free()

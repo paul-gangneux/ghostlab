@@ -14,12 +14,18 @@ struct playerList {
 
 player_t* newPlayer(int fd, struct sockaddr_in addrinfo) {
   player_t* p = malloc(sizeof(player_t));
+#ifdef DEBUG_FLAG
+  debug_nb_malloc_increase_player();
+#endif
   memset(p, 0, sizeof(player_t));
   p->fd = fd;
   int n = pipe(p->pipe);
   if (n < 0) {
     perror("pipe");
     free(p);
+#ifdef DEBUG_FLAG
+    debug_nb_free_increase_player();
+#endif
     return NULL;
   }
   p->name[0] = 0;
@@ -34,6 +40,9 @@ player_t* newPlayer(int fd, struct sockaddr_in addrinfo) {
 
 playerCell_t* newPlayerCell(player_t* player) {
   playerCell_t* pc = malloc(sizeof(playerCell_t));
+#ifdef DEBUG_FLAG
+  debug_nb_malloc_increase_playercell();
+#endif
   pc->player = player;
   pc->next = NULL;
   return pc;
@@ -41,6 +50,9 @@ playerCell_t* newPlayerCell(player_t* player) {
 
 playerList_t* newPlayerList() {
   playerList_t* pl = malloc(sizeof(playerList_t));
+#ifdef DEBUG_FLAG
+  debug_nb_malloc_increase_playerlist();
+#endif
   pl->length = 0;
   pl->first = NULL;
   return pl;
@@ -52,6 +64,9 @@ void freePlayer(player_t* player) {
   close(player->pipe[0]);
   close(player->pipe[1]);
   free(player);
+#ifdef DEBUG_FLAG
+  debug_nb_free_increase_player();
+#endif
   player = NULL;
 }
 
@@ -71,6 +86,9 @@ void freePlayerCell(playerCell_t* pc, int endThread) {
   if (endThread)
     player_endThread(pc->player);
   free(pc);
+#ifdef DEBUG_FLAG
+  debug_nb_free_increase_playercell();
+#endif
   pc = NULL;
 }
 
@@ -78,6 +96,9 @@ void freePlayerList(playerList_t* pl) {
   if (pl == NULL) return;
   freePlayerCell(pl->first, END_THREAD);
   free(pl);
+#ifdef DEBUG_FLAG
+  debug_nb_free_increase_playerlist();
+#endif
   pl = NULL;
 }
 

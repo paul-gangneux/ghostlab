@@ -27,7 +27,12 @@ if [ $SERVER == true ]
       then
         make clean;
       else 
-        make;
+        if [ $DEBUG == true ] 
+          then
+            make debug;
+          else
+            make;
+        fi
     fi
     cd ..;
 fi

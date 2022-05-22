@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 
 #define MAX_NAME 8
 
@@ -29,6 +28,9 @@ struct player {
 
 #include "server.h"
 #include "communication.h"
+#ifdef DEBUG_FLAG
+#include "debug.h"
+#endif
 
 // allocate memory for player. free with freePlayer()
 // needs infos recieved from accept() as parameter

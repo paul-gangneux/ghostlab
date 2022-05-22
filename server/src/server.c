@@ -155,7 +155,10 @@ int main(int argc, char* argv[]) {
       player_t* player = newPlayer(cli_fd, caller);
 
       pthread_t thread;
-      pthread_create(&thread, NULL, interact_with_client, (void*) player);
+      pthread_attr_t attr;
+      pthread_attr_init(&attr);
+      pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+      pthread_create(&thread, &attr, interact_with_client, (void*) player);
     }
   }
 }
@@ -507,6 +510,9 @@ void* interact_with_client(void* arg) {
     else if (comp_keyword(reqbuf, "MALL?") && len >= 10) {
       int newlen = len + 9;
       char* messbuf = (char*) malloc(newlen);
+#ifdef DEBUG_FLAG
+      debug_nb_malloc_increase_mallbuffer();
+#endif
 
       memmove(messbuf, "MESSA ", 6);
       memmove(messbuf + 6, player->name, MAX_NAME);
@@ -519,6 +525,9 @@ void* interact_with_client(void* arg) {
       // sends [MESSA username mess+++] to all players
       send_msg_multicast(game, messbuf, newlen);
       free(messbuf);
+#ifdef DEBUG_FLAG
+      debug_nb_free_increase_mallbuffer();
+#endif
       send_str_and_check_error(cli_fd, "MALL!***");
     }
     // expecting [SEND? username mess***]
@@ -563,14 +572,15 @@ void* interact_with_client(void* arg) {
         size = 21;
         mv_num4toBuf(ansbuf, 14, player->score);
       }
-      if(not_inverse_xy) {
+      if (not_inverse_xy) {
         mv_num3toBuf(ansbuf, 6, player->x);
         mv_num3toBuf(ansbuf, 10, player->y);
-      } else {
+      }
+      else {
         mv_num3toBuf(ansbuf, 6, player->y);
         mv_num3toBuf(ansbuf, 10, player->x);
       }
-      
+
 
       // sends [MOVE! x y***] or [MOVEF x y p***]
       send_and_check_error(cli_fd, ansbuf, size);
@@ -627,5 +637,8 @@ void* interact_with_client(void* arg) {
     gameList_remove(gameList, game, RM_NOPLAYERS);
   }
   freePlayer(player);
+#ifdef DEBUG_FLAG
+  debug_print_memory_usage();
+#endif
   return NULL;
 }
