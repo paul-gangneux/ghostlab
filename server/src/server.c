@@ -77,6 +77,7 @@ void print_help(const char* progName) {
     , progName);
 }
 
+// main function
 int main(int argc, char* argv[]) {
 
   multicast_ip_address = "225.100.100.100";
@@ -175,13 +176,13 @@ int main(int argc, char* argv[]) {
     }
     // case stdin have something to read
     else if (pollfd[1].revents & POLLIN) {
-      
+
       int n = read(STDIN_FILENO, inbuf, 127);
       inbuf[n] = 0;
 
       if (strcmp(inbuf, "quit\n") == 0) {
         goto main_end;
-      } 
+      }
     }
     else {
       printf("something weird happened at main poll\n");
@@ -189,10 +190,14 @@ int main(int argc, char* argv[]) {
   }
 
   main_end:
+  // end of program
 
   printf("-- exiting program --\n");
   freeGameList(gameList);
   close(sock);
+#ifdef DEBUG_FLAG
+  debug_print_memory_usage();
+#endif
   return 0;
 }
 
