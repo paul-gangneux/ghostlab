@@ -16,9 +16,6 @@
 #include "player.h"
 #include "game.h"
 #include "communication.h"
-#ifdef DEBUG_FLAG
-#include "debug.h"
-#endif
 
 #define MIN(a, b) (a<b?a:b)
 #define MAX(a, b) (a>b?a:b)

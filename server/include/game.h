@@ -29,9 +29,6 @@ typedef struct ghost ghost_t;
 #include "player.h"
 #include "server.h"
 #include "maze.h"
-#ifdef DEBUG_FLAG
-#include "debug.h"
-#endif
 
 struct game {
   pthread_mutex_t mutex;

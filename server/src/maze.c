@@ -18,9 +18,6 @@ struct cell {
 
 cell* initCells(int w, int h) {
   cell* cells = (cell*) malloc(sizeof(cell) * h * w);
-#ifdef DEBUG_FLAG
-  debug_nb_malloc_increase_cell();
-#endif
   cell* c;
 
   for (int i = 0; i < w; i++) {
@@ -140,9 +137,6 @@ char* maze_generate(u_int16_t* str_w, u_int16_t* str_h) {
     *str_w = 5;
     *str_h = 7;
     char* easy_lab = (char*) malloc((*str_w) * (*str_h) * sizeof(char));
-#ifdef DEBUG_FLAG
-    debug_nb_malloc_increase_maze();
-#endif
     memset(easy_lab, '0', (*str_w) * (*str_h) * sizeof(char));
     return easy_lab;
   }
@@ -159,9 +153,6 @@ char* maze_generate(u_int16_t* str_w, u_int16_t* str_h) {
   *str_h = sh;
 
   char* lab = (char*) malloc(sw * sh * sizeof(char));
-#ifdef DEBUG_FLAG
-  debug_nb_malloc_increase_maze();
-#endif
   memset(lab, '1', sw * sh * sizeof(char));
 
   for (int i = 0; i < w; i++) {
@@ -175,9 +166,6 @@ char* maze_generate(u_int16_t* str_w, u_int16_t* str_h) {
   }
 
   free(cells);
-#ifdef DEBUG_FLAG  
-  debug_nb_free_increase_cell();
-#endif
 
   int n = (sw * sh) / 5;
   for (int i = 0; i < n; i++) {

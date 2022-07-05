@@ -57,16 +57,10 @@ void randomise_ghosts_pos(game_t* game, int informPlayers) {
 // does not set id and port to their correct values
 game_t* newGame() {
   game_t* g = (game_t*) malloc(sizeof(game_t));
-#ifdef DEBUG_FLAG
-  debug_nb_malloc_increase_game();
-#endif
   int n = pipe(g->pipe1);
   if (n < 0) {
     perror("pipe");
     free(g);
-#ifdef DEBUG_FLAG
-    debug_nb_free_increase_game();
-#endif
     return NULL;
   }
   n = pipe(g->pipe2);
@@ -75,9 +69,6 @@ game_t* newGame() {
     close(g->pipe1[0]);
     close(g->pipe1[1]);
     free(g);
-#ifdef DEBUG_FLAG
-    debug_nb_free_increase_game();
-#endif
     return NULL;
   }
   pthread_mutex_init(&g->mutex, NULL);
@@ -95,9 +86,6 @@ game_t* newGame() {
   g->maze = maze_generate(&g->w, &g->h);
   g->playerList = newPlayerList();
   g->ghosts = (ghost_t*) malloc(sizeof(ghost_t) * g->nb_ghosts);
-#ifdef DEBUG_FLAG
-  debug_nb_malloc_increase_ghost();
-#endif
   randomise_ghosts_pos(g, 0);
   memset(&g->multicast_addr, 0, sizeof(g->multicast_addr));
   return g;
@@ -106,9 +94,6 @@ game_t* newGame() {
 // allocate memory for a game list. free with freeGameList()
 gameList_t* newGameList() {
   gameList_t* gl = (gameList_t*) malloc(sizeof(gameList_t));
-#ifdef DEBUG_FLAG
-  debug_nb_malloc_increase_gamelist();
-#endif
   pthread_mutex_init(&gl->mutex, NULL);
   gl->length = 0;
   gl->first = NULL;
@@ -118,9 +103,6 @@ gameList_t* newGameList() {
 // allocate memory for a game cell. free with freeGameCell()
 gameCell_t* newGameCell(game_t* g) {
   gameCell_t* gc = (gameCell_t*) malloc(sizeof(gameCell_t));
-#ifdef DEBUG_FLAG
-  debug_nb_malloc_increase_gamecell();
-#endif
   gc->game = g;
   gc->next = NULL;
   return gc;
@@ -149,13 +131,7 @@ void freeGame(game_t* game) {
   }
   pthread_mutex_destroy(&game->mutex);
   free(game->maze);
-#ifdef DEBUG_FLAG
-  debug_nb_free_increase_maze();
-#endif
   free(game->ghosts);
-#ifdef DEBUG_FLAG
-  debug_nb_free_increase_ghost();
-#endif
   close(game->pipe1[0]);
   close(game->pipe1[1]);
   close(game->pipe2[0]);
@@ -164,9 +140,6 @@ void freeGame(game_t* game) {
     printf("game %d deleted\n", game->id);
   }
   free(game);
-#ifdef DEBUG_FLAG
-  debug_nb_free_increase_game();
-#endif
   game = NULL;
 }
 
@@ -175,9 +148,6 @@ void freeGameCell(gameCell_t* gameCell) {
     freeGameCell(gameCell->next);
   freeGame(gameCell->game);
   free(gameCell);
-#ifdef DEBUG_FLAG
-  debug_nb_free_increase_gamecell();
-#endif
   gameCell = NULL;
 }
 
@@ -187,9 +157,6 @@ void freeGameList(gameList_t* gameList) {
     freeGameCell(gameList->first);
   }
   free(gameList);
-#ifdef DEBUG_FLAG
-  debug_nb_free_increase_gamelist();
-#endif
   gameList = NULL;
 }
 

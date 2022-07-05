@@ -195,9 +195,6 @@ int main(int argc, char* argv[]) {
   printf("-- exiting program --\n");
   freeGameList(gameList);
   close(sock);
-#ifdef DEBUG_FLAG
-  debug_print_memory_usage();
-#endif
   return 0;
 }
 
@@ -548,9 +545,6 @@ void* interact_with_client(void* arg) {
     else if (comp_keyword(reqbuf, "MALL?") && len >= 10) {
       int newlen = len + 9;
       char* messbuf = (char*) malloc(newlen);
-#ifdef DEBUG_FLAG
-      debug_nb_malloc_increase_mallbuffer();
-#endif
 
       memmove(messbuf, "MESSA ", 6);
       memmove(messbuf + 6, player->name, MAX_NAME);
@@ -563,9 +557,6 @@ void* interact_with_client(void* arg) {
       // sends [MESSA username mess+++] to all players
       send_msg_multicast(game, messbuf, newlen);
       free(messbuf);
-#ifdef DEBUG_FLAG
-      debug_nb_free_increase_mallbuffer();
-#endif
       send_str_and_check_error(cli_fd, "MALL!***");
     }
     // expecting [SEND? username mess***]
@@ -675,8 +666,5 @@ void* interact_with_client(void* arg) {
     gameList_remove(gameList, game, RM_NOPLAYERS);
   }
   freePlayer(player);
-#ifdef DEBUG_FLAG
-  debug_print_memory_usage();
-#endif
   return NULL;
 }

@@ -6,9 +6,6 @@
 #include <stdio.h>
 #include <string.h> 
 #include "server.h"
-#ifdef DEBUG_FLAG
-#include "debug.h"
-#endif
 
 // generates and returns the maze
 // sets w and h appropriately
