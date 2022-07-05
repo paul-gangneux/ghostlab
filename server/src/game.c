@@ -1,10 +1,5 @@
 #include "game.h"
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-
 #define lock(x) pthread_mutex_lock(&x->mutex)
 #define unlock(x) pthread_mutex_unlock(&x->mutex)
 
@@ -440,7 +435,10 @@ void game_startIfAllReady(game_t* game) {
       printf("game %d: all players ready\n", game->id);
     }
     pthread_t thread;
-    pthread_create(&thread, NULL, gameThread, (void*) game);
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_create(&thread, &attr, gameThread, (void*) game);
     playerList_forAll(game->playerList, send_begin_message);
   }
   unlock(game);

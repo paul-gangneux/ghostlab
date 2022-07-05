@@ -7,7 +7,7 @@
 #include <string.h> 
 #include "server.h"
 
-// generate and return the mazernth
+// generates and returns the maze
 // sets w and h appropriately
 // memory is allocated here, can be 
 // freed with a free()

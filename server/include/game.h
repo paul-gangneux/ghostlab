@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <pthread.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 // #define GAME_DESC_SIZE 12
 

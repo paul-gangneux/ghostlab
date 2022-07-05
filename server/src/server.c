@@ -77,6 +77,7 @@ void print_help(const char* progName) {
     , progName);
 }
 
+// main function
 int main(int argc, char* argv[]) {
 
   multicast_ip_address = "225.100.100.100";
@@ -143,21 +144,58 @@ int main(int argc, char* argv[]) {
   gameList = newGameList();
   socklen_t socklen = sizeof(struct sockaddr_in);
 
+  struct pollfd pollfd[2] = {
+      {.fd = sock, .events = POLLIN},
+      {.fd = STDIN_FILENO, .events = POLLIN}
+  };
+
+  char inbuf[128];
+  inbuf[127] = 0;
+
+  // main loop
   while (1) {
-    struct sockaddr_in caller;
-    int cli_fd = accept(sock, (struct sockaddr*) &caller, &socklen);
-    if (cli_fd == -1) {
-      // no need to stop the server
-      perror("accept error");
+    poll(pollfd, 2, -1);
+    // case socket awaits connection
+    if (pollfd[0].revents & POLLIN) {
+      struct sockaddr_in caller;
+      int cli_fd = accept(sock, (struct sockaddr*) &caller, &socklen);
+      if (cli_fd == -1) {
+        // no need to stop the server
+        perror("accept error");
+      }
+      else {
+        // memory is allocated here
+        player_t* player = newPlayer(cli_fd, caller);
+
+        pthread_t thread;
+        pthread_attr_t attr;
+        pthread_attr_init(&attr);
+        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+        pthread_create(&thread, &attr, interact_with_client, (void*) player);
+      }
+    }
+    // case stdin have something to read
+    else if (pollfd[1].revents & POLLIN) {
+
+      int n = read(STDIN_FILENO, inbuf, 127);
+      inbuf[n] = 0;
+
+      if (strcmp(inbuf, "quit\n") == 0) {
+        goto main_end;
+      }
     }
     else {
-      // memory is allocated here
-      player_t* player = newPlayer(cli_fd, caller);
-
-      pthread_t thread;
-      pthread_create(&thread, NULL, interact_with_client, (void*) player);
+      printf("something weird happened at main poll\n");
     }
   }
+
+  main_end:
+  // end of program
+
+  printf("-- exiting program --\n");
+  freeGameList(gameList);
+  close(sock);
+  return 0;
 }
 
 // returns fd or newly created TCP socket
@@ -563,14 +601,15 @@ void* interact_with_client(void* arg) {
         size = 21;
         mv_num4toBuf(ansbuf, 14, player->score);
       }
-      if(not_inverse_xy) {
+      if (not_inverse_xy) {
         mv_num3toBuf(ansbuf, 6, player->x);
         mv_num3toBuf(ansbuf, 10, player->y);
-      } else {
+      }
+      else {
         mv_num3toBuf(ansbuf, 6, player->y);
         mv_num3toBuf(ansbuf, 10, player->x);
       }
-      
+
 
       // sends [MOVE! x y***] or [MOVEF x y p***]
       send_and_check_error(cli_fd, ansbuf, size);

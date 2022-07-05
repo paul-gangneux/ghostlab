@@ -1,6 +1,8 @@
 OBJECTS := server game player communication maze
+
 OBJECTS := $(addprefix obj/, $(OBJECTS))
 OBJECTS := $(addsuffix .o, $(OBJECTS))
+
 CFLAGS := -Wall -Wextra -pedantic -O2
 LIBS := -pthread
 
