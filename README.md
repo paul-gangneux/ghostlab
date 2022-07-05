@@ -29,7 +29,7 @@ L'option `-h` détaille les options disponibles.
 
 ### Utilisation
 
-Une fois le serveur lancé, il tourne jusqu'à ce qu'il reçoit la `quit\n` sur son entrée standard, ou son interruption par un signal.
+Une fois le serveur lancé, il tourne jusqu'à ce qu'il reçoit `quit\n` sur son entrée standard, ou son interruption par un signal.
 
 Le client doit être lancé après le serveur. une fois le client lancé, les interactions se font avec la souris, sauf pour entrer du texte dans des champs.
 
