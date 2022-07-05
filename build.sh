@@ -1,14 +1,12 @@
 CLEAN=false;
 SERVER=false;
 CLIENT=false;
-DEBUG=false;
 
 while true; do
   case "$1" in
     -C | --clean ) CLEAN=true; shift ;;
     -s | --server ) SERVER=true; shift ;;
     -c | --client ) CLIENT=true; shift ;;
-    -d | --debug ) DEBUG=true; shift ;;
     ?* ) echo $1 "not a valid option"; shift ;;
     * ) break;;
   esac
@@ -27,12 +25,7 @@ if [ $SERVER == true ]
       then
         make clean;
       else 
-        if [ $DEBUG == true ] 
-          then
-            make debug;
-          else
-            make;
-        fi
+        make;
     fi
     cd ..;
 fi
